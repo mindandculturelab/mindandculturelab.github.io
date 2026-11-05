@@ -1,0 +1,13 @@
+---
+description: Commit and push project changes after each request
+alwaysApply: true
+---
+
+# Commit and push
+
+After finishing a request that changes files in this project, commit those changes and push them to `origin`.
+
+- Commit only when the request changed files. Skip an empty commit when nothing changed.
+- Do not commit secrets (`.env`, credentials, tokens).
+- Do not update git config, skip hooks, or force-push.
+- Push the current branch to `origin`. Do not push to a different remote.

@@ -1,8 +1,19 @@
 (function () {
   var SVG = "http://www.w3.org/2000/svg";
   var trials = [];
+  var sortKey = "group";
+  var sortDir = 1;
   var summary = document.getElementById("summary");
   var views = document.getElementById("views");
+  var columns = [
+    ["group", "Group"],
+    ["age", "Age"],
+    ["size", "Group size"],
+    ["location", "Location"],
+    ["familiarity", "Familiarity"],
+    ["trial", "Trial"],
+    ["success", "Success"]
+  ];
 
   function svgEl(name, attrs) {
     var node = document.createElementNS(SVG, name);
@@ -379,7 +390,6 @@
       block.appendChild(span);
       stats.appendChild(block);
     });
-    drawDots(groups);
     var rateItems = cells(rows);
     drawBars("rates", "rates-table", rateItems, function (item) {
       return [ageLabel(item.age), sizeLabel(item.size)];
@@ -392,25 +402,82 @@
         return [ageLabel(item.age), sizeLabel(item.size), String(item.successes), String(item.trials), percent(item.successes, item.trials)];
       })
     ));
-    var trialItems = [1, 2, 3, 4].map(function (trial) {
-      var matching = rows.filter(function (row) { return row.trial === trial; });
-      return {
-        trial: trial,
-        successes: matching.reduce(function (sum, row) { return sum + row.success; }, 0),
-        trials: matching.length
-      };
-    }).filter(function (item) { return item.trials > 0; });
-    drawBars("trials", "trials-table", trialItems, function (item) {
-      return ["Trial " + item.trial, item.trial === 4 ? "Generalization" : "Test"];
-    }, function (item) {
-      return item.trial === 4 ? "#ee871f" : "#5aa276";
+    var generalRows = rows.filter(function (row) { return row.trial === 4; });
+    var generalItems = cells(generalRows);
+    drawBars("general", "general-table", generalItems, function (item) {
+      return [ageLabel(item.age), sizeLabel(item.size)];
+    }, function () {
+      return "#ee871f";
     });
-    document.getElementById("trials-table").appendChild(table(
-      ["Trial", "Kind", "Successful trials", "Trials", "Percent"],
-      trialItems.map(function (item) {
-        return [String(item.trial), item.trial === 4 ? "Generalization" : "Test", String(item.successes), String(item.trials), percent(item.successes, item.trials)];
+    document.getElementById("general-table").appendChild(table(
+      ["Age", "Group size", "Successful groups", "Groups", "Percent"],
+      generalItems.map(function (item) {
+        return [ageLabel(item.age), sizeLabel(item.size), String(item.successes), String(item.trials), percent(item.successes, item.trials)];
       })
     ));
+    drawSheet(rows);
+  }
+
+  function cellValue(row, key) {
+    if (key === "group") {
+      return String(row.group + 1);
+    }
+    return String(row[key]);
+  }
+
+  function drawSheet(rows) {
+    var host = document.getElementById("sheet");
+    clear(host);
+    var sorted = rows.slice().sort(function (a, b) {
+      var av = a[sortKey];
+      var bv = b[sortKey];
+      if (typeof av === "string") {
+        av = av.toLowerCase();
+        bv = String(bv).toLowerCase();
+      }
+      if (av < bv) return -sortDir;
+      if (av > bv) return sortDir;
+      if (a.group !== b.group) return a.group - b.group;
+      return a.trial - b.trial;
+    });
+    var sheet = document.createElement("table");
+    var head = document.createElement("thead");
+    var headRow = document.createElement("tr");
+    var indexHead = document.createElement("th");
+    indexHead.scope = "col";
+    indexHead.textContent = "#";
+    headRow.appendChild(indexHead);
+    columns.forEach(function (column) {
+      var cell = document.createElement("th");
+      cell.scope = "col";
+      var button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("data-sort", column[0]);
+      button.textContent = column[1];
+      if (sortKey === column[0]) {
+        cell.setAttribute("aria-sort", sortDir === 1 ? "ascending" : "descending");
+        button.textContent = column[1] + (sortDir === 1 ? " ↑" : " ↓");
+      }
+      cell.appendChild(button);
+      headRow.appendChild(cell);
+    });
+    head.appendChild(headRow);
+    sheet.appendChild(head);
+    var body = document.createElement("tbody");
+    sorted.forEach(function (row, index) {
+      var line = document.createElement("tr");
+      var indexCell = document.createElement("td");
+      indexCell.textContent = String(index + 1);
+      line.appendChild(indexCell);
+      columns.forEach(function (column) {
+        var cell = document.createElement("td");
+        cell.textContent = cellValue(row, column[0]);
+        line.appendChild(cell);
+      });
+      body.appendChild(line);
+    });
+    sheet.appendChild(body);
+    host.appendChild(sheet);
   }
 
   function update() {
@@ -425,6 +492,20 @@
   }
 
   document.getElementById("filters").addEventListener("change", update);
+  document.getElementById("sheet").addEventListener("click", function (event) {
+    var button = event.target.closest("button[data-sort]");
+    if (!button) {
+      return;
+    }
+    var key = button.getAttribute("data-sort");
+    if (sortKey === key) {
+      sortDir = -sortDir;
+    } else {
+      sortKey = key;
+      sortDir = 1;
+    }
+    update();
+  });
   fetch("trials.json")
     .then(function (response) {
       if (!response.ok) throw new Error("missing");

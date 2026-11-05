@@ -191,6 +191,7 @@ h1 {
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.75rem;
   margin: 1.2rem 0 0;
 }
@@ -211,6 +212,11 @@ h1 {
 .button:hover {
   background: #24553a;
   color: #fff;
+}
+
+.button-large {
+  padding: 1.25rem 2rem;
+  font-size: 1.55rem;
 }
 
 .button-secondary {
@@ -254,6 +260,29 @@ h2 {
 .facts {
   color: var(--ink) !important;
   font-weight: 600;
+}
+
+.questions {
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.questions li {
+  margin-top: 0.85rem;
+}
+
+.questions a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.questions strong {
+  color: var(--ink);
+}
+
+.questions a:hover strong {
+  color: var(--sage-ink);
 }
 
 .cards {
@@ -308,31 +337,31 @@ h2 {
 
 .people {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
   gap: 1rem;
 }
 
 .person-card {
-  display: grid;
-  grid-template-columns: 7rem 1fr;
-  gap: 0.4rem 1.1rem;
-  align-items: start;
-  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.6rem 1.15rem 1.3rem;
   border-radius: var(--radius);
   background: var(--paper);
   box-shadow: var(--shadow);
 }
 
 .person-card h2 {
-  margin: 0;
-  font-size: 1.45rem;
+  margin: 0.9rem 0 0;
+  font-size: 1.35rem;
 }
 
 .portrait,
 .initial {
-  width: 7rem;
-  height: 7rem;
-  border-radius: 14px;
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: 50%;
 }
 
 .portrait {
@@ -352,7 +381,8 @@ h2 {
 }
 
 .person-card ul {
-  margin: 0.45rem 0 0;
+  width: 100%;
+  margin: 0.7rem 0 0;
   padding: 0;
   list-style: none;
 }
@@ -753,6 +783,55 @@ h2 {
   text-transform: uppercase;
 }
 
+.data-view {
+  max-height: 28rem;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.data-view table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-view th,
+.data-view td {
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-view th {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  color: var(--sage-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.data-view button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.data-view tr:hover td {
+  background: var(--sage-soft);
+}
+
 .study .graphs {
   margin-top: 0.75rem;
   font-weight: 700;
@@ -789,7 +868,6 @@ h2 {
   .filters-search,
   .stat-row,
   .choices,
-  .people,
   .studies,
   .researchers {
     grid-template-columns: 1fr;
