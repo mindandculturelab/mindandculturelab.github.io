@@ -4,15 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Data — Mind &amp; Culture Lab</title>
-    <meta
-      name="description"
-      content="An introduction to the words behind the lab's data, and a directory of the studies and researchers connected to them."
-    />
+    <meta name="description" content="Find Mind &amp; Culture Lab data by researcher, topic, or study." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://mindandculturelab.github.io/data/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Data — Mind &amp; Culture Lab" />
-    <meta property="og:description" content="Choose a word to see the studies connected to it, or browse the full directory." />
+    <meta property="og:description" content="Choose a researcher, a topic, or a study." />
     <meta property="og:url" content="https://mindandculturelab.github.io/data/" />
     <meta property="og:image" content="https://mindandculturelab.github.io/assets/images/og-image.svg" />
     <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml" />
@@ -22,6 +19,11 @@
     <link rel="stylesheet" href="../assets/css/styles.css" />
     <script src="../site-config.js"></script>
     <script src="../assets/js/apply-site-url.js"></script>
+    <script>
+      if (location.hash) {
+        location.replace("topics/" + location.hash);
+      }
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -34,7 +36,6 @@
         <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
         <nav id="site-nav" class="site-nav" data-nav aria-label="Primary">
           <a href="../index.html#about">About</a>
-          <a href="../studies/">Studies</a>
           <a href="./" aria-current="page">Data</a>
           <a href="../index.html#contact">Contact</a>
         </nav>
@@ -48,75 +49,30 @@
           <p class="eyebrow">Open data</p>
           <h1>Data</h1>
         </div>
-        <p class="lede">These words name the questions behind the studies. Choose one to see the data connected to it.</p>
+        <p class="lede">Choose how you want to look through the studies.</p>
       </section>
 
-      <section class="wrap section" aria-label="Study directory">
-        <ul class="keywords">
+      <section class="wrap section" aria-label="Ways to look">
+        <ul class="choices">
           <li>
-            <a class="keyword" href="#exploration" data-keyword="exploration">
-              <strong>Exploration</strong>
-              <span>How people search for something new, try an option they have not tried, or make something of their own.</span>
+            <a class="card" href="researchers/">
+              <h2>Researcher</h2>
+              <p>Find the studies led by each person.</p>
             </a>
           </li>
           <li>
-            <a class="keyword" href="#morality" data-keyword="morality">
-              <strong>Morality</strong>
-              <span>How children and adults judge what is right or wrong, and whether a person has changed.</span>
+            <a class="card" href="topics/">
+              <h2>Topic</h2>
+              <p>Choose a word, such as exploration or cooperation, and see the studies connected to it.</p>
             </a>
           </li>
           <li>
-            <a class="keyword" href="#decision-making" data-keyword="decision-making">
-              <strong>Decision making</strong>
-              <span>How people choose what to do, including when someone else's choice changes the outcome.</span>
-            </a>
-          </li>
-          <li>
-            <a class="keyword" href="#generosity" data-keyword="generosity">
-              <strong>Generosity</strong>
-              <span>How people decide to give, share, or keep something for themselves.</span>
-            </a>
-          </li>
-          <li>
-            <a class="keyword" href="#cooperation" data-keyword="cooperation">
-              <strong>Cooperation</strong>
-              <span>How people coordinate with someone else so a shared choice can succeed.</span>
+            <a class="card" href="../studies/">
+              <h2>Study</h2>
+              <p>Look up a study by its name.</p>
             </a>
           </li>
         </ul>
-
-        <div class="view-toggle" role="group" aria-label="Directory view">
-          <button type="button" data-view="studies" aria-pressed="true">Studies</button>
-          <button type="button" data-view="researchers" aria-pressed="false">Researchers</button>
-        </div>
-
-        <form class="filters" data-filters>
-          <label>
-            Search
-            <input type="search" name="q" data-search placeholder="Name, topic, or researcher" />
-          </label>
-          <label>
-            Topic
-            <select name="topic" data-topic>
-              <option value="">All topics</option>
-            </select>
-          </label>
-          <label>
-            Age
-            <select name="age" data-age>
-              <option value="">All ages</option>
-            </select>
-          </label>
-          <label>
-            Researcher
-            <select name="lead" data-lead>
-              <option value="">All researchers</option>
-            </select>
-          </label>
-        </form>
-
-        <p class="result-count" data-count aria-live="polite"></p>
-        <div data-results></div>
       </section>
     </main>
 
@@ -127,6 +83,5 @@
       </div>
     </footer>
     <script src="../assets/js/main.js"></script>
-    <script src="directory.js"></script>
   </body>
 </html>

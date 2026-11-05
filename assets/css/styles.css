@@ -277,6 +277,95 @@ h2 {
   border-top-color: var(--sage);
 }
 
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.choices .card {
+  height: 100%;
+}
+
+.choices li:nth-child(2) .card {
+  border-top-color: var(--sage);
+}
+
+.choices li:nth-child(3) .card {
+  border-top-color: var(--terracotta-deep);
+}
+
+.choices .card h2 {
+  font-size: 1.7rem;
+}
+
+.filters-search {
+  grid-template-columns: minmax(0, 28rem);
+}
+
+.people {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.person-card {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.4rem 1.1rem;
+  align-items: start;
+  padding: 1.15rem;
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.person-card h2 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.portrait,
+.initial {
+  width: 7rem;
+  height: 7rem;
+  border-radius: 14px;
+}
+
+.portrait {
+  display: block;
+  object-fit: cover;
+}
+
+.initial {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  background: var(--sage-soft);
+  color: var(--sage-ink);
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.person-card ul {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.person-card li {
+  margin-top: 0.35rem;
+}
+
+.person-card li a {
+  color: var(--sage-ink);
+  font-weight: 600;
+}
+
 .card h3,
 .study h3,
 .study h3 a,
@@ -697,7 +786,10 @@ h2 {
   .keywords,
   .filters,
   .filters-even,
+  .filters-search,
   .stat-row,
+  .choices,
+  .people,
   .studies,
   .researchers {
     grid-template-columns: 1fr;

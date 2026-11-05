@@ -167,7 +167,7 @@
       item.id = study.id;
       var heading = document.createElement("h3");
       var link = document.createElement("a");
-      link.href = "../studies/" + study.id + "/";
+      link.href = "../../studies/" + study.id + "/";
       link.textContent = study.name;
       heading.appendChild(link);
       item.appendChild(heading);
@@ -177,7 +177,7 @@
         var graphs = document.createElement("p");
         graphs.className = "graphs";
         var graphsLink = document.createElement("a");
-        graphsLink.href = "../studies/" + study.id + "/" + study.explorer;
+        graphsLink.href = "../../studies/" + study.id + "/" + study.explorer;
         graphsLink.textContent = "Look at the data";
         graphs.appendChild(graphsLink);
         item.appendChild(graphs);
@@ -223,7 +223,7 @@
         }
         var li = document.createElement("li");
         var studyLink = document.createElement("a");
-        studyLink.href = "../studies/" + study.id + "/";
+        studyLink.href = "../../studies/" + study.id + "/";
         studyLink.textContent = study.name + " · " + study.ageLabel;
         li.appendChild(studyLink);
         ul.appendChild(li);
@@ -314,7 +314,7 @@
     showPerson(button.getAttribute("data-person"));
   });
 
-  fetch("studies.json")
+  fetch("../studies.json")
     .then(function (response) {
       if (!response.ok) {
         throw new Error("Could not load studies");
