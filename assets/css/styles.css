@@ -228,37 +228,14 @@ h1 {
 }
 
 .button-huge {
-  padding: 0.85rem 1.35rem 0.95rem;
-  font-size: clamp(2.4rem, 6.5vw, 4.4rem);
+  padding: 3.1rem 3.8rem 3.25rem;
+  font-size: clamp(2.8rem, 6.4vw, 5.2rem);
   line-height: 1.02;
   letter-spacing: -0.045em;
 }
 
 .fill-screen {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.fill-screen > .section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 2.5rem;
-}
-
-.fill-screen .choices {
-  flex: 1;
-  grid-auto-rows: 1fr;
-}
-
-.fill-screen .choices li {
-  display: flex;
-}
-
-.fill-screen .card {
-  flex: 1;
-  min-height: 18rem;
 }
 
 .button-secondary {
@@ -919,6 +896,11 @@ h2 {
 }
 
 @media (max-width: 720px) {
+  .button-huge {
+    padding: 1.65rem 1.15rem 1.8rem;
+    font-size: 2.35rem;
+  }
+
   .nav-toggle {
     display: inline-flex;
   }
