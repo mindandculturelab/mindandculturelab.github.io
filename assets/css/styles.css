@@ -414,10 +414,10 @@ h2 {
   border-bottom-color: var(--sage-ink);
 }
 
-/* Homepage Frameless Hero Artwork */
+/* Homepage Hero Globe */
 .hero-art {
   position: relative;
-  width: min(100%, 32rem);
+  width: min(100%, 34rem);
   aspect-ratio: 1 / 1;
   margin-inline: auto;
   display: grid;
@@ -427,11 +427,61 @@ h2 {
   box-shadow: none;
 }
 
-.hero-art-canvas {
+.hero-globe {
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.hero-globe:active {
+  cursor: grabbing;
+}
+
+.hero-globe.is-hovering-object {
+  cursor: pointer;
+}
+
+.hero-globe canvas {
   display: block;
   width: 100%;
   height: 100%;
-  cursor: crosshair;
+}
+
+.hero-globe-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(250, 248, 243, 0.88);
+  border: 1px solid rgba(47, 107, 74, 0.18);
+  color: var(--sage-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.hero-globe-link {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(47, 107, 74, 0.94);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(28, 40, 28, 0.16);
+}
+
+.hero-globe-link:hover {
+  background: #245539;
+  color: #fff;
 }
 
 /* Homepage Sections */
