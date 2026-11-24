@@ -165,7 +165,9 @@ const chipButtons = {};
 
 let userAzimuth = 0.55;
 let userPolar = 0.18;
-let userZoom = 1;
+const BASE_DIST = 4.15;
+const CAM_FOV = 42;
+let userZoom = 1.12;
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let autoSpin = reduceMotion ? 0 : 0.08;
 let dragging = false;
@@ -470,14 +472,26 @@ stage.addEventListener("pointercancel", function () {
   dragging = false;
 });
 
+function minZoomToFitEarth() {
+  // Camera distance must keep the full Earth (plus a little pin margin)
+  // inside both axes of the stage — never zoom in until the sphere clips.
+  const aspect = Math.max(camera.aspect || 1, 0.01);
+  const vHalf = Math.tan((CAM_FOV * Math.PI) / 360);
+  const need = GLOBE_R * 1.14;
+  const minDist = Math.max(need / vHalf, need / (aspect * vHalf));
+  return minDist / BASE_DIST;
+}
+
+function clampZoom(z) {
+  return Math.max(minZoomToFitEarth(), Math.min(1.65, z));
+}
+
 stage.addEventListener(
   "wheel",
   function (event) {
     event.preventDefault();
     autoSpin = 0;
-    // Keep a floor on camera distance so the globe never grows large enough
-    // to collide with the Testing sites panel beside it.
-    userZoom = Math.max(1.0, Math.min(1.55, userZoom + event.deltaY * 0.0009));
+    userZoom = clampZoom(userZoom + event.deltaY * 0.0009);
     if (reduceMotion) {
       renderOnce();
     }
@@ -491,6 +505,7 @@ function resize() {
   renderer.setSize(w, h, false);
   camera.aspect = w / Math.max(h, 1);
   camera.updateProjectionMatrix();
+  userZoom = clampZoom(userZoom);
 }
 
 window.addEventListener("resize", resize);
@@ -507,7 +522,7 @@ function frame(ms) {
     userAzimuth += autoSpin * 0.012;
   }
 
-  const radius = 4.15 * userZoom;
+  const radius = BASE_DIST * userZoom;
   camOffset.setFromSphericalCoords(radius, Math.PI / 2 - userPolar, userAzimuth);
   camera.position.copy(camOffset);
   camera.lookAt(lookAt);
