@@ -11,8 +11,9 @@ import {
 } from "./scene-kit.js";
 
 /**
- * Volcano Escape Game — child-facing explore–exploit tablet task
- * Task code: https://github.com/alissarivero/SEARCH (E_Experiment Cordova app)
+ * Volcano Escape Game — SEARCH-App tablet task
+ * https://github.com/alissarivero/SEARCH-App
+ * Conditions (counterbalanced): volcano_escape | bigger_reward
  */
 export function buildSearchProcedure() {
   const root = new THREE.Group();
@@ -39,7 +40,7 @@ export function buildSearchProcedure() {
   childSeat.add(makeChair(0.95), child);
   root.add(childSeat);
 
-  // Tablet running Volcano Escape (8×8 spatially correlated reward grid)
+  // Tablet with 8×8 search map (rocks reveal on click)
   const tablet = new THREE.Group();
   tablet.position.set(0, 0.625, -0.02);
   const bezel = new THREE.Mesh(
@@ -70,7 +71,6 @@ export function buildSearchProcedure() {
     return Math.min(1, peak * 0.95 + ridge);
   }
   function heatColor(t) {
-    // Volcano Escape palette: cool ash → warm lava
     const stops = [0xe8e0d4, 0xf4a261, 0xe76f51, 0xc1121f, 0x6a040f];
     const idx = Math.min(stops.length - 2, Math.floor(t * (stops.length - 1)));
     const local = t * (stops.length - 1) - idx;
@@ -116,14 +116,50 @@ export function buildSearchProcedure() {
   tablet.add(hud);
   root.add(tablet);
 
-  const goalCard = new THREE.Mesh(
-    new THREE.BoxGeometry(0.34, 0.008, 0.22),
-    new THREE.MeshStandardMaterial({ color: 0xfaf6ef, roughness: 0.65 })
-  );
-  goalCard.position.set(0.52, 0.625, 0.12);
-  root.add(goalCard);
+  // Side panel: volcano + escape-path rocks (volcano_escape) or stacked prize rocks (bigger_reward)
+  const sidePanel = new THREE.Group();
+  sidePanel.position.set(0.52, 0.625, 0.02);
 
-  let goal = "maximize";
+  const volcano = new THREE.Mesh(
+    new THREE.ConeGeometry(0.09, 0.14, 8),
+    new THREE.MeshStandardMaterial({ color: 0x6e6e6e, roughness: 0.85 })
+  );
+  volcano.position.set(0, 0.09, -0.08);
+  sidePanel.add(volcano);
+  const crater = new THREE.Mesh(
+    new THREE.SphereGeometry(0.035, 12, 8),
+    new THREE.MeshStandardMaterial({ color: 0xc1121f, roughness: 0.55, emissive: 0x4a0808, emissiveIntensity: 0.35 })
+  );
+  crater.position.set(0, 0.155, -0.08);
+  sidePanel.add(crater);
+
+  const escapeRocks = [];
+  for (let i = 0; i < 5; i += 1) {
+    const rock = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(0.028 + i * 0.004, 0),
+      new THREE.MeshStandardMaterial({ color: 0x8a8074, roughness: 0.9 })
+    );
+    rock.position.set(0, 0.02 + i * 0.038, 0.06);
+    rock.visible = false;
+    sidePanel.add(rock);
+    escapeRocks.push(rock);
+  }
+
+  const prizeStack = new THREE.Group();
+  prizeStack.position.set(0, 0.02, 0.06);
+  prizeStack.visible = false;
+  for (let i = 0; i < 4; i += 1) {
+    const rock = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(0.04 - i * 0.004, 0),
+      new THREE.MeshStandardMaterial({ color: 0x9a9084, roughness: 0.88 })
+    );
+    rock.position.y = i * 0.045;
+    prizeStack.add(rock);
+  }
+  sidePanel.add(prizeStack);
+  root.add(sidePanel);
+
+  let condition = "volcano_escape";
   let stepIndex = 0;
   let animStart = -1;
   const revealOrder = [10, 18, 19, 27, 28, 36, 35, 43, 44, 45];
@@ -138,16 +174,30 @@ export function buildSearchProcedure() {
       paintTile(tile, false);
     });
     paintTile(tiles[18], true);
+    escapeRocks.forEach(function (rock) {
+      rock.visible = false;
+    });
+  }
+
+  function applyConditionVisual() {
+    const escape = condition === "volcano_escape";
+    volcano.visible = escape;
+    crater.visible = escape;
+    prizeStack.visible = !escape;
+    escapeRocks.forEach(function (rock) {
+      rock.visible = false;
+    });
   }
 
   resetBoard();
+  applyConditionVisual();
 
   inspectables.push(
     tagInspectable(
       tablet,
       "volcano-escape-board",
-      "Volcano Escape Game board",
-      "Children play Volcano Escape on a tablet: an 8×8 board of 64 squares with spatially correlated point values. Darker / warmer tiles pay more, nearby tiles tend to share similar rewards, and each board allows 25 clicks to explore new squares or re-click known ones.",
+      "Volcano Escape search map",
+      "Children click an 8×8 map of 64 squares. Each click reveals a rock whose size tracks the square's point value. Nearby squares tend to share similar rewards, and each map allows 25 clicks to explore new tiles or re-click known ones.",
       [0.05, 1.12, 0.52],
       [0, 0.66, -0.02],
       function (nowSec) {
@@ -155,39 +205,39 @@ export function buildSearchProcedure() {
       }
     ),
     tagInspectable(
-      goalCard,
-      "goal-cue",
-      "Goal framing",
-      "Instructions shape whether children treat Volcano Escape as a points-maximizing exploit problem or an information-gathering explore problem—the core manipulation behind Goals Shape Children's Explore-Exploit Tendencies.",
+      sidePanel,
+      "condition-panel",
+      "Volcano Escape vs Bigger Reward",
+      "SEARCH-App counterbalances two framings of the same map: Volcano Escape (rocks build a path away from the volcano) and Bigger Reward (rocks stack toward a sized prize). Toggle the condition above to switch panels.",
       [0.42, 1.12, 0.48],
-      [0.5, 0.66, 0.1]
+      [0.5, 0.7, 0.05]
     )
   );
 
   const steps = [
     {
-      short: "1. Escape Board",
-      title: "Volcano Escape Game on the tablet",
-      badge: "64 tiles · 25 clicks per board · ages 4–9",
-      body: "Children play Volcano Escape: each click reveals a point value on the volcanic grid, warmer tiles pay more, and high values tend to sit next to other high values. One square starts revealed; 25 clicks remain to explore new tiles or re-click known ones.",
+      short: "1. Search Map",
+      title: "8×8 rock map on the tablet",
+      badge: "64 tiles · 25 clicks per map · ages 4–9",
+      body: "In SEARCH-App, children play Volcano Escape: each click on the map reveals a rock. Bigger rocks mean higher point values, high values tend to cluster together, and one square starts revealed with 25 clicks to go.",
       why: "Spatial correlation makes pure random search inefficient—children can generalize from local evidence when deciding whether to explore or exploit.",
       camera: childPov.overview
     },
     {
       short: "2. Explore vs Exploit",
-      title: "Click new tiles or re-click known rewards",
-      badge: "Horizon = 25 clicks per board",
-      body: "Each click is a choice: open a covered square to learn its value (explore), or return to a revealed square to collect points again (exploit). Click 'Watch an escape path' to see a typical trajectory moving toward a high-value cluster.",
-      why: "A fixed horizon forces the classic explore–exploit tradeoff inside a single Volcano Escape board rather than across infinite trials.",
+      title: "New squares or known rocks again",
+      badge: "Horizon = 25 clicks per map",
+      body: "Each click is a choice: uncover a new square to learn its rock size (explore), or re-click a revealed square to collect another rock of about the same size (exploit). Click 'Watch a rock path' to see a typical trajectory.",
+      why: "A fixed horizon forces the classic explore–exploit tradeoff inside a single map.",
       camera: childPov.close,
       autoPlay: true
     },
     {
-      short: "3. Goal Framing",
-      title: "Goals reshape explore–exploit tendencies",
-      badge: "Toggle Maximize Points vs Learn the Board",
-      body: "The same Volcano Escape board supports different goals. When told to collect as many points as possible, children should exploit high tiles sooner; when the goal emphasizes learning the board, broader exploration becomes rational—matching the paper's claim that goals shape children's explore–exploit tendencies.",
-      why: "Holding the game apparatus fixed while varying the instructed goal isolates motivation from ability to search.",
+      short: "3. Two Framings",
+      title: "Volcano Escape vs Bigger Reward",
+      badge: "Toggle condition above · counterbalanced in the app",
+      body: "The same map supports two goals from SEARCH-App. In Volcano Escape, collected rocks build a path away from the volcano ('how far you'll get away'). In Bigger Reward, rocks stack toward a sized prize ('what sized prize you'll get'). Goals Shape Children's Explore-Exploit Tendencies tests how that framing reshapes search.",
+      why: "Holding the map fixed while varying the instructed goal isolates motivation from ability to search.",
       camera: childPov.right
     }
   ];
@@ -201,25 +251,27 @@ export function buildSearchProcedure() {
     studyHref: "../studies/search/",
     dataHref: "../studies/search/",
     paperHref: null,
-    repoHref: "https://github.com/alissarivero/SEARCH",
-    condLabel: "Instructed goal",
+    repoHref: "https://github.com/alissarivero/SEARCH-App",
+    condLabel: "UX condition (SEARCH-App)",
     conditions: [
-      { value: "maximize", label: "Maximize points (exploit)" },
-      { value: "learn", label: "Learn the board (explore)" }
+      { value: "volcano_escape", label: "Volcano Escape" },
+      { value: "bigger_reward", label: "Bigger Reward" }
     ],
-    defaultCondition: "maximize",
-    playLabel: "Watch an escape path",
-    clickTip: "Click the Volcano Escape board or goal card to inspect",
+    defaultCondition: "volcano_escape",
+    playLabel: "Watch a rock path",
+    clickTip: "Click the map or volcano panel to inspect",
     steps: steps,
     root: root,
     inspectables: inspectables,
     setCondition: function (val) {
-      goal = val;
+      condition = val;
+      applyConditionVisual();
     },
     setStep: function (idx, nowSec) {
       stepIndex = idx;
       animStart = -1;
       resetBoard();
+      applyConditionVisual();
       if (steps[idx].autoPlay) animStart = nowSec;
     },
     playAction: function (nowSec) {
@@ -228,12 +280,13 @@ export function buildSearchProcedure() {
     resetAction: function () {
       animStart = -1;
       resetBoard();
+      applyConditionVisual();
     },
     update: function (t) {
       if (animStart < 0) return;
       const e = t - animStart;
       const path =
-        goal === "learn"
+        condition === "bigger_reward"
           ? [10, 11, 19, 27, 26, 34, 42, 43, 35, 36, 44, 45, 37, 29, 21]
           : revealOrder;
       const count = Math.min(path.length, Math.floor(e / 0.35) + 1);
@@ -244,9 +297,16 @@ export function buildSearchProcedure() {
       for (let k = 0; k < count; k += 1) {
         paintTile(tiles[path[k]], true);
       }
+      if (condition === "volcano_escape") {
+        const shown = Math.min(escapeRocks.length, Math.floor(count / 2));
+        escapeRocks.forEach(function (rock, i) {
+          rock.visible = i < shown;
+        });
+      }
       if (e > path.length * 0.35 + 1.2) {
         animStart = -1;
         resetBoard();
+        applyConditionVisual();
       }
     }
   };
