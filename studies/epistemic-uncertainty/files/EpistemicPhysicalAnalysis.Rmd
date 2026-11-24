@@ -1,0 +1,327 @@
+---
+title: "Dice Task XC All Countries Analysis"
+author: "Dorsa Amir"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  word_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+
+packages <- c("tidyverse", "needs")
+lapply(packages, library, character.only = TRUE)
+
+prioritize(dplyr)
+
+theme_set(theme_classic(base_size = 16))
+options(scipen=999)
+```
+
+
+```{r data entry}
+
+x <- read.csv("EpistemicPhysicalDeid.csv", na = "")
+
+x$country <- factor(x$country,
+                    levels = c("USA", "Iran", "Bolivia"))
+
+
+x$practice1_match <- factor(x$practice1_match)
+x$practice2_match <- factor(x$practice2_match)
+```
+
+
+
+# Descriptive Tables
+
+```{r ages}
+
+x %>% 
+  tally()
+
+# Ages in general
+x %>% 
+  summarise(tibble(mean.age= mean(age, na.rm = T), sd.age = sd(age, na.rm = T)))
+  
+x %>%
+  group_by(age) %>% 
+  tally()
+
+x %>%
+  group_by(age, sex) %>% 
+  tally()
+
+
+x %>%
+  group_by(sex) %>% 
+  tally()
+
+agedensity <- 
+  ggplot(x, aes(x=age), 
+         y=..scaled..) + 
+  geom_density(aes(fill=country), linewidth=0.1, alpha=0.4) +
+  xlab("\n Age") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19, family="Helvetica"))  +
+  xlim(5,20) +
+  ggtitle("Dice Task Age Distribution")
+agedensity
+
+
+```
+
+
+
+```{r data viz}
+## Some basic data viz
+
+choice.density <- 
+  ggplot(x, aes(x=age), 
+         y=..scaled..) + 
+  geom_density(aes(fill=gamechoice), size=0.1, alpha=0.4) +
+  xlab("\n Age") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19, family="Helvetica")) 
+choice.density
+
+ageperc <- x %>%
+  select(age, gamechoice) 
+
+counttbl <- ageperc %>%
+  count(age, gamechoice)
+
+wide <-  pivot_wider(counttbl, names_from = gamechoice, values_from = n)
+
+wide <- wide %>%
+  mutate(total = `guess then roll` + `roll then guess`) %>%
+  mutate(`Percent Choosing Guess then Roll` = `guess then roll`/total*100) %>%
+  mutate(Age = age)
+
+wide <- wide %>%
+  mutate(total = `guess then roll` + `roll then guess`) %>%
+  mutate(`Percent Choosing Roll then Guess` = `roll then guess`/total*100) %>%
+  mutate(Age = age)
+
+
+#No age effect 
+wide %>%
+  ggplot(aes(Age, `Percent Choosing Roll then Guess`)) +
+  geom_smooth() +
+  ylim(0, 100) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20)) +
+  geom_hline(yintercept = 50, linetype = "dotted") +
+  annotate("text", x = 17, y = 53, size = 4, label="50%")
+
+wide %>%
+  ggplot(aes(Age, `Percent Choosing Guess then Roll`)) +
+  geom_col()
+
+
+choice.density.country <- 
+  ggplot(x, aes(x=age), 
+         y=..scaled..) + 
+  geom_density(aes(fill=gamechoice), size=0.1, alpha=0.4) +
+  xlab("\n Age") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19, family="Helvetica")) +
+  facet_grid(~country)
+choice.density.country
+
+```
+
+
+```{r models - game choice}
+## model prep
+
+x$gamechoice.f <- factor(x$gamechoice)
+x$gamechoice.guessthenroll0 <- x$gamechoice.f
+x$gamechoice.guessthenroll0 <- gsub("guess then roll", "0", x$gamechoice.guessthenroll0)
+x$gamechoice.guessthenroll0 <- gsub("roll then guess", "1", x$gamechoice.guessthenroll0)
+x$gamechoice.guessthenroll0 <- as.numeric(x$gamechoice.guessthenroll0)
+str(x$gamechoice.guessthenroll0)
+
+#just to look into whether either game is preferred, overall
+prop.table(table(x$gamechoice))
+prop.test(60.47619, 210)
+
+x %>%
+  ggplot(aes(gamechoice)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), width = .5) +
+  scale_y_continuous(labels = scales::percent) +
+  ylab("Percent Choosing")+
+  xlab("Game") +
+  geom_hline(yintercept = .5, linetype = "dotted") +
+  annotate("text", x = 2.54, y = .52, size = 4.5, label="50%")
+
+table(x$country)
+
+
+#make dataset to show percent by country
+Iran <- x %>%
+  filter(country == "Iran")
+IranTab <- as.data.frame(prop.table(table(Iran$gamechoice))*100) 
+IranTab$Country <- "Iran"
+
+Bolivia <- x %>%
+  filter(country == "Bolivia")
+BoliTab <- as.data.frame(prop.table(table(Bolivia$gamechoice))*100) 
+BoliTab$Country <- "Bolivia"
+
+USA <- x %>%
+  filter(country == "USA")
+USATab <- as.data.frame(prop.table(table(USA$gamechoice))*100) 
+USATab$Country <- "USA"
+
+
+PercSet <- bind_rows(USATab, BoliTab, IranTab)
+
+PercSet <- PercSet %>%
+  mutate(sd = sqrt((Freq/100)(1-(Freq/100))))
+
+PercSet %>%
+  ggplot(aes(Country, Freq, fill = Var1)) +
+  geom_bar(stat = "summary", position = "dodge", width = .7) +
+  geom_errorbar() +
+  geom_hline(yintercept = 50, linetype = "dotted") +
+  annotate("text", x = 3.49, y = 52, size = 4, label="50%") +
+  ylab("Percent Choosing") +
+  scale_fill_discrete(name = "Game") +
+  theme(legend.text = element_text(size = 12)) 
+
+
+
+```
+
+```{r country spec models}
+## country specific models
+x %>% 
+  filter(country == "Iran") %>% 
+  lm(gamechoice.guessthenroll0 ~ age , data = .) %>% 
+  summary()
+
+x %>% 
+  filter(country == "USA") %>% 
+  lm(gamechoice.guessthenroll0 ~ age , data = .) %>% 
+  summary()
+
+x %>% 
+  filter(country == "Bolivia") %>% 
+  lm(gamechoice.guessthenroll0 ~ age , data = .) %>% 
+  summary()
+
+
+#just for Iran, did people choose roll then guess more? 
+prop.table(table(Iran$gamechoice))
+prop.test(56, 100)
+
+
+#Bolivia
+prop.table(table(Bolivia$gamechoice))
+prop.test(0.6481481, 100)
+
+#USA
+prop.table(table(USA$gamechoice))
+prop.test(0.6428571, 100)
+
+
+
+```
+
+
+```{r all together models}
+## All together
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ age , data = .) %>% 
+  summary()
+# No age related changes in game choice
+
+
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ age + country + seendice1, data = .) %>% 
+  summary()
+# no country-level differences in game choice (compared to US as baseline)
+
+#country as the only predictor
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ country, data = .) %>% 
+  summary()
+
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ age + country + seendice1, data = .) %>% 
+  summary()
+# doesn't matter if they've seen dice before or not
+
+```
+
+```{r practice trial matches}
+#Condition A: Practice1 is RTG, Practice2 is GTR
+#Condition B: Practice1 is GTR, Practice2 is RTG
+
+
+minimatchA <- x %>%
+  filter(condition == "A") %>%
+  select(gamechoice.guessthenroll0, gamechoice, practice1_match, practice2_match)
+
+minimatchA <- minimatchA %>%
+  rename("RTG_match" = practice1_match,
+         "GTR_match" = practice2_match)
+
+minimatchB <- x %>%
+  filter(condition == "B") %>%
+  select(gamechoice.guessthenroll0, gamechoice, practice1_match, practice2_match)
+
+minimatchB <- minimatchB %>%
+  rename("RTG_match" = practice2_match,
+         "GTR_match" = practice1_match)
+
+match <- bind_rows(minimatchA, minimatchB)
+
+match$RTG_Bi <- recode(match$RTG_match, "no match" = 0, "match" = 1)
+match$GTR_Bi <- recode(match$GTR_match, "no match" = 0, "match" = 1)
+
+match <- match %>%
+  mutate(NumMatch = RTG_Bi + GTR_Bi)
+
+match <- match %>%
+  mutate(pracmatch = ifelse(NumMatch = 0, "neither", ifelse(NumMatch = 2, "both"), 1))
+
+
+#define match types
+match1 <- match %>%
+  filter(NumMatch == 1)
+
+match0 <- match %>%
+  filter(NumMatch == 0)
+
+match2 <- match %>%
+  filter(NumMatch == 2)
+
+match2$matchtype <- "both"
+match0$matchtype <- "neither"
+
+match1 <- match1 %>%
+  mutate(matchtype = ifelse(RTG_match == "match", "RTG", "GTR"))
+
+match <- bind_rows(match0, match1, match2)
+
+table(match$matchtype)
+
+match$matchtype <- factor(match$matchtype, levels = c("neither", "RTG", "GTR", "both"))
+
+#model predicting choice by match type
+match %>% 
+  lm(gamechoice.guessthenroll0 ~ matchtype, data = .) %>% 
+  summary()
+```
+
+
+
+

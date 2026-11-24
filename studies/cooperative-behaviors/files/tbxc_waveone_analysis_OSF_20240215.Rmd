@@ -1,0 +1,5029 @@
+---
+title: "TBXC Wave One Analysis"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+# clear the environment
+rm(list = ls())
+
+# Check if pacman is installed; install if not
+if (!("pacman" %in% rownames(installed.packages()))) {
+    install.packages("pacman")
+}
+
+
+pacman::p_load(effects, lme4, Rmisc, psych, needs, gridExtra, MASS, ggridges, corrplot, reshape2, lfe, lmerTest, texreg, patchwork, knitr, ggcorrplot, lmtest, NbClust, factoextra, plotrix, scales, mgcv, tidyverse)
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+prioritize(dplyr)
+
+theme_set(theme_classic(base_size = 16))
+options(scipen=999)
+```
+
+# ------- RQ1: HOW DOES CHILDREN'S BEHAVIOR VARY BY AGE & COUNTRY?
+
+```{r data entry, include = FALSE}
+x <- read_csv("tbxc_finaldata_oct15.csv", na = "")
+```
+
+
+```{r new variables, include = F}
+x$country <- factor(x$country, 
+                               levels = c("Ecuador", "Peru", 
+                                          "Uganda", "Canada", "USA"))
+
+
+x$age.integer <- factor(x$age.year)
+x$is.honest <- x$honesty.numreturned
+x$is.honest[x$honesty.numreturned>0] <- 1
+x$is.honest[x$honesty.numreturned==0] <- 0
+
+legendtitle <- "Country"
+
+
+## Setting colors & color palette
+colorpalette <- c("#3B40B8", "#61C76D", "#C74726", "#E6B89F", "#81B7BD")
+
+color.Ecuador <- "#3B40B8"
+color.Peru <- "#61C76D"
+color.Uganda <- "#C74726"
+color.USA <- "#81B7BD"
+color.Canada <- "#E6B89F"
+  
+x$order <- as.factor(x$order)
+```
+
+
+## Descriptives & Overview
+
+```{r descriptives}
+
+# Total sample
+x %>% 
+  tally()
+
+# Total sample, gender
+x %>% 
+  group_by(gender) %>% 
+  tally()
+
+
+# Sample sizes by country
+x %>% 
+  group_by(country) %>% 
+  tally()
+
+
+x %>% 
+  group_by(country, age.group) %>% 
+  tally()
+
+x %>% 
+  group_by(country, count.sixtokens, age.year) %>% 
+  tally()
+
+# Gender by country
+x %>% 
+  group_by(country, gender) %>% 
+  tally()
+
+# Ages by country
+x %>% 
+  group_by(country) %>% 
+  summarise(tibble(mean.age= mean(age.year), sd.age = sd(age.year)))
+
+# Ages in general
+x %>% 
+  summarise(tibble(mean.age= mean(age.year), sd.age = sd(age.year)))
+```
+
+
+
+
+## TASK BATTERY - HONESTY
+
+### Honesty Data Viz
+```{r honesty density, echo = F}
+
+plot.honesty.density <- 
+  ggplot(x, aes(x=honesty.numreturned, y = country)) + 
+     geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  xlab("\n Total Starbursts Returned") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19))  +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), 
+                     guide = "none") +  theme(legend.position = "none") +
+   scale_x_continuous(breaks=c(0,1,2,3))
+plot.honesty.density
+
+```
+
+
+```{r honesty by age & country, echo = F}
+
+plot.honesty.agexc <- ggplot(x, aes(x=age.year, y=honesty.numreturned, fill = country)) + 
+  geom_smooth(alpha = 0.2, aes(colour=country), method = "lm") +
+  geom_line(stat = "smooth", method = "lm", aes(colour=country), 
+            size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Resources Returned \n") + theme_gray() + 
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-.3,3)  +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) 
+plot.honesty.agexc
+
+```
+
+### HONESTY: Models
+
+```{r honesty models lm}
+## PRE-REGISTERED MODEL FOR HONESTY 
+honesty.mod.intxn.lm <-  lm(honesty.numreturned ~ age.year*country,
+                            data = x)
+summary(honesty.mod.intxn.lm)
+
+honesty.mod.maineff.lm <- lm(honesty.numreturned ~ age.year + country, 
+                             data = x)
+summary(honesty.mod.maineff.lm)
+
+anova(honesty.mod.intxn.lm, honesty.mod.maineff.lm, test = "Chisq")
+# Significant two-way interaction between country * age.
+## But issues with linear separability of Ecuador
+
+## Better to use linear probability model
+plot(honesty.mod.intxn.lm)
+
+## LPM for honesty is a better fit for the data, which is clearly bimodal
+## Now using a binary variable "is.honest", reported in ms as deviating from pre-reg
+## ------------------FINAL MODEL FOR HONESTY  ------------------------
+honesty.mod.intxn.lpm <-  lm(is.honest ~ age.year*country,
+                             data = x)
+summary(honesty.mod.intxn.lpm)
+
+honesty.mod.maineff.lpm <-  lm(is.honest ~ age.year + country,
+                               data = x)
+summary(honesty.mod.maineff.lpm)
+
+
+## Honesty Order Effects
+honesty.mod.maineff.lpm.oe <-  lm(is.honest ~ age.year + country +
+                                 order, data = x)
+summary(honesty.mod.maineff.lpm.oe)
+## No order effects
+
+anova(honesty.mod.maineff.lpm, honesty.mod.intxn.lpm,test = "Chisq")
+## Trending two-way interaction
+
+honesty.mod.intxn.lpm.justage <-  lm(is.honest ~ age.year,data = x)
+summary(honesty.mod.intxn.lpm.justage)
+
+```
+
+
+
+
+## TASK BATTERY - TRUST
+
+### Trust Data Viz
+```{r trust density, echo = F}
+
+plot.trust.density <- 
+  ggplot(x, aes(x=trust.numshared, y = country)) + 
+  geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), 
+                     guide = "none") +
+  xlab("\n Number of Starbursts Shared with Trustor") + ylab("Country \n") +
+  geom_hline(yintercept=0, colour="white", size=1)  +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(text = element_text(size=15))  + 
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(0,1,2,3,4,5, 6))
+plot.trust.density
+
+```
+
+
+```{r trust by age & country, echo = F}
+plot.trust.agexc <- 
+  ggplot(x, aes(x=age.year, y=trust.numshared, fill = country)) + 
+  geom_smooth(alpha=0.2, aes(colour=country), method = "lm") +
+  geom_line(stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Resources Shared \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,6) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+plot.trust.agexc
+```
+
+```{r trust within ecuador, echo = F}
+
+ecutrust <- x %>% 
+  filter(country == "Ecuador") %>% 
+  as_tibble()
+
+ecutrustsum <- summarySE(data = ecutrust, na.rm = TRUE,
+                           measurevar = "trust.numshared",
+                           groupvars = c("location"))
+
+t.test(trust.numshared ~ location, data = ecutrust)
+# p = 0.033
+
+x$location.plot <- factor(x$location.plot,
+                          levels = c("Yamanunka", "San Pablo", "Peru",
+                                     "Uganda","Canada","USA" ))
+
+plot.trust.byregion <- ggplot(x, aes(x=trust.numshared, y = location.plot)) + 
+  geom_density_ridges(aes(fill= location.plot, color = location.plot, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+ scale_fill_manual(legendtitle, 
+                    values = c(color.Uganda,  "#C39345", "gray", "gray", "gray", "gray" )) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black", "black"), guide = "none") +
+  xlab("\n Number of Starbursts Shared with Trustor") + ylab("Region \n") +
+  geom_hline(yintercept=0, colour="white", size=1)  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(text = element_text(size=15))  + theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(0,1,2,3,4,5, 6))
+plot.trust.byregion
+##ggsave("allregions.png", plot = plot.trust.byregion, width = 8, height = 5)
+```
+
+
+### TRUST: Models
+
+```{r trust models}
+## ------------------ FINAL MODEL FOR TRUST ------------------------
+trust.mod.intx <-  lm(trust.numshared ~ age.year*country, data = x)
+summary(trust.mod.intx)
+
+trust.mod.maineff <- lm(trust.numshared ~ age.year + country, data = x)
+summary(trust.mod.maineff)
+
+anova(trust.mod.maineff, trust.mod.intx, test = "Chisq")
+# Significant two-way interaction between country * age.
+
+broom::tidy(trust.mod.intx, conf.int=TRUE) %>% 
+  mutate_if(is.numeric, round, 9)
+
+trust.mod.maineff.justage <- lm(trust.numshared ~ age.year , data = x)
+summary(trust.mod.maineff.justage)
+
+
+## Order effects for trust
+
+trust.mod.maineff.oe <- lm(trust.numshared ~ age.year + country +
+                          order, data = x)
+summary(trust.mod.maineff.oe)
+```
+
+
+
+## TASK BATTERY - FORGIVENESS
+
+### Forgiveness Data Viz
+```{r forgiveness density, echo = F}
+
+plot.forgiveness.density <- 
+  ggplot(x, aes(x=forg.givenback, y = country)) + 
+     geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  xlab("\n Number of Sheets Returned") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19))  +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), 
+                     guide = "none") +  theme(legend.position = "none") +
+   scale_x_continuous(breaks=c(0,1,2,3,4,5))
+plot.forgiveness.density
+
+
+plot.forgiveness.agexc <- 
+  ggplot(x, aes(x=age.year, y=forg.givenback, fill = country)) + 
+  geom_smooth(alpha=0.2, aes(colour=country), method = "lm") +
+  geom_line(stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Sheets Returned \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5.2) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+plot.forgiveness.agexc
+
+```
+
+
+
+### FORGIVENESS: Models
+
+```{r forgiveness models}
+
+### ----------------FINAL MODEL FOR FORGIVENESS --------------------
+forg.mod.intx <-  lm(forg.givenback ~ age.year*country, data = x)
+summary(forg.mod.intx)
+
+forg.mod.maineff <- lm(forg.givenback ~ age.year + country, data = x)
+summary(forg.mod.maineff)
+
+anova(forg.mod.maineff, forg.mod.intx, test = "Chisq")
+# Significant two-way interaction between country * age.
+
+plot(forg.mod.intx)
+
+broom::tidy(forg.mod.intx, conf.int=TRUE) %>% 
+  mutate_if(is.numeric, round, 9)
+
+
+forg.mod.maineff.justage <- lm(forg.givenback ~ age.year, data = x)
+summary(forg.mod.maineff.justage)
+
+## Order effects for forgiveness
+
+forg.mod.maineff.oe <- lm(forg.givenback ~ age.year + country + order, data = x)
+summary(forg.mod.maineff.oe)
+
+```
+
+
+
+## TASK BATTERY - FAIRNESS & INEQUITY AVERSION
+
+### Fairness Data Viz
+### EXTREME ADVANTAGEOUS INEQUITY (4-0)
+
+```{r extreme ai means, echo = F}
+
+x$tt7.rejects <- x$tt7.response
+x$tt7.rejects <- gsub("Reject", "1", x$tt7.rejects)
+x$tt7.rejects <- gsub("Accept", "0", x$tt7.rejects)
+x$tt7.rejects <- as.numeric(x$tt7.rejects)
+
+xai.summary <- summarySE(data = x, na.rm = TRUE,
+                             measurevar = "tt7.rejects",
+                         groupvars = c("country"))
+
+plot.xai.final <- 
+  ggplot(xai.summary, aes(x=country, y=tt7.rejects, fill=country)) + 
+  geom_errorbar(aes(ymin=tt7.rejects-se, ymax=tt7.rejects+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity", alpha = 0.8) + 
+  xlab("\n Country") +
+  ylab("Proportion Rejecting Extreme AI \n") + theme_gray() +
+  guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette)
+plot.xai.final
+
+
+##ggsave("xaimeans.png", plot = xai.means, width = 8, height = 5)
+
+plot.xai.density <- 
+  ggplot(x, aes(x=tt7.rejects, y = country)) + 
+  geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), 
+                     guide = "none") +
+  xlab("\n Rejections of Extreme AI") + ylab("Country \n") +
+  geom_hline(yintercept=0, colour="white", size=1)  +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(text = element_text(size=15))  + 
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(0,1))
+plot.xai.density
+```
+
+
+
+```{r extreme ai by age & country, echo = F}
+
+plot.xai.agexc <- ggplot(x, aes(x=age.year, y=tt7.rejects, fill = country)) + 
+  geom_smooth(alpha=0.1, aes(colour=country), method = "lm") +
+  geom_line(stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting Extreme AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+plot.xai.agexc
+
+##ggsave("xaibyagexc.png", plot = xai.agexc2, width = 8, height = 5)
+```
+
+
+### EXTREME ADVANTAGEOUS INEQUITY (4-0): Exploratory Model
+
+
+```{r extreme AI model linear regression, likely the best fit}
+## ------------------ FINAL MODELS FOR XAI ------------------------ (Supplement)
+xai.mod.intx.3 <-  lm(tt7.rejects ~ age.year*country, data = x)
+summary(xai.mod.intx.3)
+
+xai.mod.maineff.3 <- lm(tt7.rejects ~ age.year + country, data = x)
+summary(xai.mod.maineff.3)
+
+anova( xai.mod.maineff.3, xai.mod.intx.3, test = "Chisq")
+## sig two way interaction
+
+broom::tidy(xai.mod.intx.3, conf.int=TRUE) %>% 
+  mutate_if(is.numeric, round, 9)
+```
+
+
+
+## STANDARD ADVANTAGEOUS INEQUITY (4-1)
+
+```{r data cleaning for standard ai, echo = F}
+
+x.long.dist <- melt(data = x, measure.vars = c("tt1.trialtype",
+                                                 "tt2.trialtype",
+                                                 "tt3.trialtype",
+                                                 "tt4.trialtype",
+                                                 "tt5.trialtype",
+                                                 "tt6.trialtype"),
+                     variable.name = "test.trial.number",
+                     value.name = "dist")
+
+
+x.long.dec <- melt(data = x, measure.vars = c("tt1.response",
+                                                "tt2.response",
+                                                "tt3.response",
+                                                "tt4.response",
+                                                "tt5.response",
+                                                "tt6.response"),
+                    variable.name = "trial.dec",
+                    value.name = "dec")
+
+x.long <- x.long.dist
+x.long$dec <- x.long.dec$dec
+
+table(x.long$dist, x.long$dec)
+
+x.long$dec <- gsub("Reject", "1", x.long$dec)
+x.long$dec <- gsub("Accept", "0", x.long$dec)
+x.long$dec <- as.numeric(x.long$dec)
+
+```
+
+```{r standard ai data cleanup, echo = F}
+
+ai.summary <- summarySE(data = x.long, na.rm = TRUE,
+                         measurevar = "dec",
+                         groupvars = c("country", "dist", "age.year"))
+
+ai.summary <- ai.summary[rowSums(is.na(ai.summary)) == 0,]
+ai.summary 
+ai.summary$dist <- factor(ai.summary$dist)
+
+ai.only <- ai.summary[ai.summary$dist=="AI",]
+eq.only <- ai.summary[ai.summary$dist=="EQ",]
+
+
+ai.summary.noage <- summarySE(data = x.long, na.rm = TRUE,
+                         measurevar = "dec",
+                         groupvars = c("country", "dist"))
+
+ai.summary.noage <- ai.summary.noage[rowSums(is.na(ai.summary.noage)) == 0,]
+ai.summary.noage
+ai.summary.noage$dist <- factor(ai.summary.noage$dist)
+ai.summary.noage.aionly <- ai.summary.noage[ai.summary.noage$dist=="AI",]
+
+
+x.long.ai <- x.long[x.long$dist=="AI",]
+
+```
+
+```{r ai means}
+
+plot.ai.bars <- 
+  ggplot(ai.summary.noage.aionly, aes(x=country, y=dec, fill=country)) + 
+  geom_errorbar(aes(ymin=dec-se, ymax=dec+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity", alpha = 0.8) + 
+  xlab("\n Country") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) +
+  scale_fill_manual(legendtitle, 
+                    values = c("#9A5D48", "#5B7A66","black" , "#DDD7D1", color.USA  ))
+plot.ai.bars
+
+
+
+plot.ai.agexc <- ggplot(ai.only, aes(x=age.year, y=dec, fill = country)) + 
+  geom_smooth(alpha=0.1, aes(colour=country), method = "lm") +
+  geom_line(stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.13,1) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+plot.ai.agexc
+```
+
+```{r equal trials by age and country, echo = F}
+
+plot.eq.agexc <- ggplot(eq.only, aes(x=age.year, y=dec, fill = country)) + 
+  geom_smooth(alpha=0.1, aes(colour=country), method = "lm") +
+  geom_line(stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting Equality \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.13,1) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+plot.eq.agexc
+```
+
+
+
+```{r}
+
+plot.ai.density <- 
+  ggplot(ai.only, aes(x=dec, y = country)) + 
+  geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), 
+                     guide = "none") +
+  xlab("\n Rejections of  AI") + ylab("Country \n") +
+  geom_hline(yintercept=0, colour="white", size=1)  +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))+
+  theme(text = element_text(size=15))  + 
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(0,1))
+plot.ai.density
+```
+
+
+
+
+### STANDARD (4-1) ADVANTAGEOUS INEQUITY:  Model
+
+
+```{r standard AI models}
+## Binomial regression a la Blake 2015, but LPR (below) preferred analysis
+fair.mod.intx.binom <-  glmer(dec ~ age.year*country + dist + (1|pid),
+                      data = x.long,
+                      glmerControl(optimizer="bobyqa", 
+                                   optCtrl = list(maxfun = 100000)),
+                      family = binomial(link = "logit"))
+
+summary(fair.mod.intx.binom)
+
+fair.mod.maineff.binom <-  glmer(dec ~ age.year + country + dist + (1|pid),
+                      data = x.long,
+                      glmerControl(optimizer="bobyqa", 
+                                   optCtrl = list(maxfun = 100000)),
+                      family = binomial(link = "logit"))
+
+summary(fair.mod.maineff.binom)
+
+anova(fair.mod.intx.binom, fair.mod.maineff.binom, test = "Chisq")
+# Significant two-way interaction between country * age
+
+```
+
+
+```{r non-logistic regression standard ai}
+
+## Linear probability model better model, as argued by Gomila 2021, described in ms
+## ------------------ FINAL MODEL FOR AI ------------------------
+fair.mod.intx <-  lmer(dec ~ age.year*country + dist + (1|pid),
+                      data = x.long)
+
+summary(fair.mod.intx)
+
+fair.mod.maineff <-  lmer(dec ~ age.year + country + dist + (1|pid),
+                      data = x.long)
+
+summary(fair.mod.maineff)
+anova(fair.mod.intx, fair.mod.maineff, test = "Chisq")
+# Significant two-way interaction between country * age
+```
+
+```{r}
+fair.mod.maineff.xai <-  lmer(dec ~  tt7.rejects + (1|pid),
+                      data = x.long)
+summary(fair.mod.maineff.xai)
+```
+
+
+
+```{r}
+## Ecuadorean kids accept AI more with increasing age
+ecukidsaccept <- x.long %>% 
+  filter(country == "Ecuador", dist == "AI") %>% 
+  lmer(dec ~ age.year + (1|pid), data = .) %>% 
+  summary()
+ecukidsaccept
+
+
+```
+
+
+```{r}
+# outputting to table
+ # htmlreg(
+ #   list(ecukidsaccept), # list of models to include
+ #   file = "Ecuadoreans Accept AI with Age.doc",  # output filename
+ #   stars = c(0.001, 0.01, 0.05),
+ #   center = TRUE,                     # center on page
+ #   digits = 2,                        # digits for coefs and standard errors
+ #   naive = TRUE,
+ #   single.row = FALSE,                # standard errors below coefs or on same line
+ #   leading.zero = TRUE,
+ #   custom.model.names = c("Model 1"), # model names
+ #   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+ # )
+```
+
+
+```{r}
+x.long %>% 
+  mutate(age.center = age.year - mean(age.year)) %>% 
+  filter(dist == "AI") %>% 
+  lmer(dec ~ age.center + (1|pid),
+                      data = .) %>% 
+  summary()
+
+
+x.long %>% 
+  mutate(age.center = age.year - mean(age.year)) %>% 
+  filter(dist == "EQ") %>% 
+  lmer(dec ~ age.center + (1|pid),
+                      data = .) %>% 
+  summary()
+
+
+youngkidsaccept.mod <- x.long %>% 
+  mutate(age.center = age.year - mean(age.year)) %>% 
+  lmer(dec ~ age.center*dist + (1|pid),
+                      data = .) #%>% 
+ # summary()
+```
+
+
+```{r}
+# outputting to table
+ # htmlreg(
+ #   list(youngkidsaccept.mod), # list of models to include
+ #   file = "Young Kids Accept.doc",  # output filename
+ #   stars = c(0.001, 0.01, 0.05),
+ #   center = TRUE,                     # center on page
+ #   digits = 2,                        # digits for coefs and standard errors
+ #   naive = TRUE,
+ #   single.row = FALSE,                # standard errors below coefs or on same line
+ #   leading.zero = TRUE,
+ #   custom.model.names = c("Model 1"), # model names
+ #   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+ # )
+```
+
+
+```{r}
+fair.mod.maineff.justage <-  lmer(dec ~ age.year + dist + (1|pid),
+                      data = x.long)
+summary(fair.mod.maineff.justage)
+
+## Order effects for AI
+
+fair.mod.maineff.oe <-  lmer(dec ~ age.year + country + dist + 
+                               order + (1|pid),
+                      data = x.long)
+summary(fair.mod.maineff.oe)
+```
+
+
+### Saving Plots
+```{r}
+p1 <- plot.ai.agexc + ggtitle("Fairness") + theme(legend.position = "none") + theme(axis.title.x = element_blank())
+p2 <- plot.honesty.agexc + ggtitle("Honesty") + theme(legend.position = "none") 
+p3 <- plot.trust.agexc + ggtitle("Trustworthiness") + theme(axis.title.x = element_blank()) 
+p4 <- plot.forgiveness.agexc + ggtitle("Forgiveness") + theme(legend.position = "none")
+
+
+
+## FINAL PLOT FOR MANUSCRIPT
+combo.plot.behavior <- p1 + p3 + p4 + p2
+combo.plot.behavior
+#ggsave("combo.plot.behavior.png", plot = combo.plot.behavior, width = 12, height = 9)
+
+```
+
+
+
+
+```{r}
+# Counting
+table(x$count.onetoken, x$country)
+table(x$count.sixtokens, x$country)
+```
+
+
+
+# ------- RQ2: HOW DO CHILDREN'S BEHAVIORS IN THE TASKS CORRELATE WITH EACH OTHER?
+## VIRTUE CORRELATIONS / FACTOR ANALYSIS
+
+#### Factor Analysis
+This is the intuitive approach: factor analyze behaviors across tasks. Theoretically, though, this doesn't capture what we care about, as we want to know how many types of strategies (e.g., regular combinations of behaviors across tasks) there are, not how many different types of tasks there are. In addition, practically, we don't have the sample to do country level factor analysis.
+
+```{r}
+## data prep
+
+sum.inequity.score <- x.long %>% 
+  group_by(pid, dist) %>% 
+  summarise(reject.sum = sum(dec, na.rm = TRUE)) %>% 
+  pivot_wider(id_cols = pid,
+              names_from = dist,
+              values_from = reject.sum) %>% 
+  select(-`NA`)
+
+sum.inequity.score
+
+x.for.cor <- right_join(sum.inequity.score, x, by = c("pid"))
+
+x.for.cor <- x.for.cor %>% 
+  rename(., Forgiveness = forg.givenback, 
+         Trustworthiness = trust.numshared,
+         Honesty = is.honest,
+         `Extreme AI` = tt7.rejects)
+
+df.for.factor <- x.for.cor %>% 
+  ungroup() %>% 
+  select(AI, Forgiveness, Trustworthiness, Honesty, `Extreme AI`) %>%
+  filter(complete.cases(.)) %>% # trimming to kids with all five data points
+  scale(.) %>% 
+  as_tibble()
+
+```
+
+
+```{r}
+KMO_test <- KMO(df.for.factor)
+print(KMO_test)
+
+bartlett_test <- cortest.bartlett(df.for.factor)
+print(bartlett_test)
+
+fa <- fa.parallel(df.for.factor, fa = "fa", n.iter = 100)
+### suggests one factor
+
+factor.all <-   factanal(df.for.factor, factors = 1,  n.obs = nrow(.),
+                         scores = "regression")
+print(factor.all)
+
+
+factor.plot <- x.for.cor %>% 
+  ungroup() %>% 
+  select(country, AI, Forgiveness, Trustworthiness, Honesty, `Extreme AI`) %>%
+  filter(complete.cases(.)) %>% # trimming to kids with all five data points %>% 
+  bind_cols(factor.score = factor.all$scores) %>% 
+  group_by(country) %>% 
+  summarise(mean = mean(factor.score), se = std.error(factor.score)) %>% 
+  ggplot(aes(x = country, y = mean, ymin = mean-1.96*se, ymax = mean+1.96*se,
+             color = country)) +
+  geom_point(size = 4, shape = 18) + 
+  geom_errorbar(width = 0.1) +
+  labs(x = "Country", y = "Factor Score") +
+  scale_color_manual(legendtitle, values = colorpalette) +
+  theme(legend.position = "none")
+
+```
+
+Here we visualize the correlation. 
+
+```{r}
+
+df.for.spearman <- x.for.cor %>% 
+  ungroup() %>% 
+  select(AI, Forgiveness, Trustworthiness, Honesty, `Extreme AI`) %>%
+  filter(complete.cases(.)) %>% 
+  scale(.) %>% 
+  cor(method = "spearman") 
+
+## ggplot for all countries, spearman
+corrplot.all <- df.for.spearman %>% 
+  ggcorrplot(show.diag = F, type="lower", lab=TRUE, lab_size=4)+
+  ggtitle("All Countries")
+corrplot.all
+
+
+```
+
+
+## Cluster individuals by behavior
+Because we want to know how many types of strategies (e.g., regular combinations of behaviors across tasks) there are, not how many different types of tasks there are, we want to use cluster analysis to group individuals by their behavior. 
+
+```{r}
+# create a scaled tibble with all behaviors plus country
+x.for.cor.country <- x.for.cor %>% 
+  ungroup() %>% 
+  select(country, AI, Forgiveness, Trustworthiness, Honesty, `Extreme AI`) %>%
+  filter(complete.cases(.)) %>% # trimming to kids with all five data points %>%  
+  mutate(across(-country, ~(.x-mean(.x))/sd(.x))) %>% 
+  as_tibble() 
+
+# cluster the observations and use the optimal cluster solution
+opt_clust <- NbClust(data = df.for.factor,
+                     distance = "euclidean",
+                     method = "ward.D2",
+                     min.nc = 2,
+                     max.nc = 8,
+                     index = "all")
+
+clust_data <- bind_cols(x.for.cor.country, cluster.assignment = opt_clust$Best.partition)
+                        
+(clust_country <- clust_data %>% 
+  group_by(country, cluster.assignment) %>% 
+  count() %>% 
+  group_by(country) %>% 
+  mutate(prop = n/sum(n),
+         cluster.assignment = factor(cluster.assignment,
+                                     labels = c("Maximization",
+                                                "Generic Cooperation",
+                                                "Partner-Contingent Cooperation"))) %>% 
+  ggplot(aes(x = country, y = prop, color = cluster.assignment, fill = cluster.assignment)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  theme_classic() +
+  scale_color_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "Set1") +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = NULL, y = "Percentage of Population", color = NULL, fill = NULL) +
+  theme(legend.position = "bottom"))
+
+```
+
+
+
+### Map clusters to behavior
+Now that we have clusters, we can look at the behaviors that characterize those clusters.
+
+```{r}
+clust_map <- x.for.cor %>% 
+  select(pid,
+         age.year,
+         country,
+         AI,
+         `Extreme AI`,
+         Forgiveness,
+         Trustworthiness,
+         Honesty) %>% 
+  drop_na() %>% 
+  bind_cols(cluster_assignment = clust_data$cluster.assignment) %>% 
+  mutate(cluster_assignment = factor(cluster_assignment,
+                                     levels = c(1:3),
+                                     labels = c("Maximization",
+                                                "Generic Cooperation",
+                                                "Partner-Contingent Cooperation")))
+
+
+clust_summary <- clust_map %>% 
+  pivot_longer(cols = AI:Honesty,
+               names_to = "Task",
+               values_to = "Behavior") %>% 
+  group_by(cluster_assignment, Task) %>% 
+  summarise(mean = mean(Behavior),
+            se = std.error(Behavior),
+            median = median(Behavior))
+
+clust_mean <- ggplot(clust_summary, aes(x = Task, y = mean, color = cluster_assignment, ymin = mean-1.96*se, ymax = mean+1.96*se)) +
+  geom_point(position = position_dodge(.9)) +
+  geom_errorbar(alpha = .4, position = position_dodge(.9), width = .2, show.legend = FALSE) +
+  labs(color = NULL, x = NULL, y = NULL, title = "Mean Behavior") +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  facet_wrap(~Task,
+             scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+clust_med <- ggplot(clust_summary, aes(x = Task, y = median, color = cluster_assignment)) +
+  geom_point(position = position_dodge(.9)) +
+  labs(color = NULL, x = NULL, y = NULL, title = "Median Behavior") +
+  theme_classic() +
+  theme(legend.position = c(.85, .2),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  facet_wrap(~Task,
+             scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+
+clust_mean / clust_med
+  
+```
+
+We can also visualize the same data by faceting on cluster and putting task on the x-axis.
+
+```{r}
+
+task_mean <- ggplot(clust_summary, aes(x = Task, y = mean, color = Task, ymin = mean-1.96*se, ymax = mean+1.96*se)) +
+  geom_point(position = position_dodge(.9)) +
+  geom_errorbar(alpha = .4, position = position_dodge(.9), width = .2, show.legend = FALSE) +
+  labs(color = NULL, x = NULL, y = NULL, title = "Mean Behavior") +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_wrap(~cluster_assignment,
+             scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+task_med <- ggplot(clust_summary, aes(x = Task, y = median, color = Task)) +
+  geom_point(position = position_dodge(.9)) +
+  labs(color = NULL, x = NULL, y = NULL, title = "Median Behavior") +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_wrap(~cluster_assignment,
+             scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+
+task_mean + task_med + guide_area() + plot_layout(guides = 'collect')
+```
+
+
+## Cluster proportions across age
+Now we want to use our cluster assignments to see how strategies change throughout devoplment. These are plausibly quite non-linear age patterns, so we'll use GAMs.
+
+```{r}
+clust_long <- clust_map %>% 
+  select(age.year, cluster_assignment) %>% 
+  pivot_wider(names_from = cluster_assignment,
+              values_from = cluster_assignment,
+              values_fn = length,
+              values_fill = 0) %>% 
+  ungroup() %>% 
+  pivot_longer(cols = Maximization:`Partner-Contingent Cooperation`,
+               names_to = "cluster",
+               values_to = "prop") %>% 
+  mutate(cluster = factor(cluster,
+                          levels = c("Maximization",
+                                     "Generic Cooperation",
+                                     "Partner-Contingent Cooperation"),
+                          labels = c("Maximization",
+                                     "Generic Cooperation",
+                                     "Partner-Contingent Cooperation"))) %>%
+  left_join(clust_map %>%
+              select(pid, country)) %>% 
+  unite("cluster_country", c(country, cluster), remove = FALSE) %>% 
+  mutate(cluster_country = factor(cluster_country),
+         pid = factor(pid))
+
+
+# fit a gamm
+gam_clust <- gamm(prop ~ s(age.year, by = cluster, bs = "fs", k = 9) + cluster,
+          # model assignment to a cluster using smoothed age for each cluster, cluster intercepts
+          data = clust_long,
+          random = list(pid = ~1), # subject level random effects for pooling and SEs
+          method = "ML",
+          family = binomial(link = "logit"))
+
+
+gam.check(gam_clust$gam)
+concurvity(gam_clust$gam, full = T)
+
+# predict fit and get CIs
+gam_pred <- predict(gam_clust$gam, newdata = clust_long, se.fit = TRUE, type = "response")
+
+# tibble for plot
+gam_plot <- tibble(
+  age = clust_long$age.year,
+  prop = clust_long$prop, 
+  cluster = clust_long$cluster,
+  fit = gam_pred$fit,
+  ci_upper = gam_pred$fit + 1.96 * gam_pred$se.fit,
+  ci_lower = gam_pred$fit - 1.96 * gam_pred$se.fit
+)
+
+clust_dev <- ggplot(gam_plot, aes(x = age, y = prop, group = cluster, color = cluster)) +
+  geom_ribbon(aes(ymin = ci_lower,
+                  ymax = ci_upper),
+              alpha = 0.2,
+              fill = "grey",
+              color = NA) +
+  geom_line(aes(y = fit)) +
+  scale_x_continuous(n.breaks = 9) +
+  scale_y_continuous(labels = percent_format()) +
+  scale_color_brewer(palette = "Set1") +
+  theme_classic() +
+  labs(y = "Percentage in cluster", x = "Age", color = NULL) +
+  theme(legend.position = c(.55, .85),
+        legend.background = element_blank())
+  
+
+clust_country
+clust_dev
+
+```
+
+## Cluster proportions across age and country
+Of course, age trends might vary across societies, so we'll look at how the prevalence of each strategy changes across development for each of our societies.
+
+
+```{r}
+# fit gam with country interaction
+gam_age_country <- gamm(prop ~ s(age.year, by = cluster_country, k = 9) + cluster_country,
+          data = clust_long,
+          random = list(pid = ~1),
+          method = "ML",
+          family = binomial(link = "logit"))
+
+summary(gam_age_country$gam)
+
+gam.check(gam_age_country$gam)
+concurvity(gam_age_country$gam, full = T)
+
+# predict fit and get CIs
+gam_age_country_pred <- predict(gam_age_country$gam, newdata = clust_long, se.fit = TRUE, type = "response")
+
+# tibble for country x age plot
+gam_plot2 <- tibble(
+  pid = clust_long$pid,
+  country = clust_long$country,
+  age = clust_long$age.year,
+  prop = clust_long$prop, 
+  cluster = clust_long$cluster,
+  fit = gam_age_country_pred$fit,
+  ci_upper = gam_age_country_pred$fit + 1.96 * gam_age_country_pred$se.fit,
+  ci_lower = gam_age_country_pred$fit - 1.96 * gam_age_country_pred$se.fit
+) 
+
+clust_dev_country <- ggplot(gam_plot2, aes(x = age, y = prop, group = cluster, color = cluster)) +
+  geom_ribbon(aes(ymin = ci_lower,
+                  ymax = ci_upper),
+              alpha = 0.2,
+              fill = "grey",
+              color = NA) +
+  geom_line(aes(y = fit)) +
+  scale_x_continuous(n.breaks = 9) +
+  scale_color_brewer(palette = "Set1") +
+  scale_y_continuous(labels = percent_format()) +
+  theme_classic() +
+  labs(y = "Percentage in cluster", x = "Age", color = NULL) +
+  theme(legend.position = "none") +
+  facet_wrap(~country)
+
+clust_dev / clust_dev_country + plot_annotation(tag_levels = "A")
+```
+
+## Additional Cluster Solution
+
+```{r}
+clust_map_2 <- clust_map %>% 
+  select(-`Extreme AI`)
+
+# cluster the observations and use the optimal cluster solution
+opt_clust <- NbClust(data = df.for.factor %>% select(-`Extreme AI`),
+                     distance = "euclidean",
+                     method = "ward.D2",
+                     min.nc = 2,
+                     max.nc = 8,
+                     index = "all")
+
+clust_data_2 <- bind_cols(x.for.cor.country %>% select(-`Extreme AI`),
+                          cluster.assignment = opt_clust$Best.partition)
+                        
+(clust_country_2 <- clust_data_2 %>% 
+  group_by(country, cluster.assignment) %>% 
+  count() %>% 
+  group_by(country) %>% 
+  mutate(prop = n/sum(n),
+         cluster.assignment = factor(cluster.assignment,
+                                     labels = c("Cluster 1",
+                                                "Cluster 2",
+                                                "Cluster 3",
+                                                "Cluster 4"))) %>% 
+  ggplot(aes(x = country, y = prop, color = cluster.assignment, fill = cluster.assignment)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  theme_classic() +
+  scale_color_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "Set1") +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = NULL, y = "Percentage of Population", color = NULL, fill = NULL) +
+  theme(legend.position = "bottom"))
+
+clust_map_2 <- x.for.cor %>% 
+  select(pid,
+         age.year,
+         country,
+         AI,
+         Forgiveness,
+         Trustworthiness,
+         Honesty) %>% 
+  drop_na() %>% 
+  bind_cols(cluster_assignment = clust_data_2$cluster.assignment) %>% 
+  mutate(cluster_assignment = factor(cluster_assignment,
+                                     levels = c(1:4),
+                                     labels = c("Cluster 1",
+                                                "Cluster 2",
+                                                "Cluster 3",
+                                                "Cluster 4")))
+
+
+clust_summary_2 <- clust_map_2 %>% 
+  pivot_longer(cols = AI:Honesty,
+               names_to = "Task",
+               values_to = "Behavior") %>% 
+  group_by(cluster_assignment, Task) %>% 
+  summarise(mean = mean(Behavior),
+            se = std.error(Behavior),
+            median = median(Behavior))
+
+clust_mean_2 <- ggplot(clust_summary_2, aes(x = Task, y = mean, color = cluster_assignment, ymin = mean-1.96*se, ymax = mean+1.96*se)) +
+  geom_point(position = position_dodge(.9)) +
+  geom_errorbar(alpha = .4, position = position_dodge(.9), width = .2, show.legend = FALSE) +
+  labs(color = NULL, x = NULL, y = NULL, title = "Mean Behavior") +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  facet_wrap(~Task,
+             scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+clust_med_2 <- ggplot(clust_summary_2, aes(x = Task, y = median, color = cluster_assignment)) +
+  geom_point(position = position_dodge(.9)) +
+  labs(color = NULL, x = NULL, y = NULL, title = "Median Behavior") +
+  theme_classic() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  facet_wrap(~Task,
+             scales = "free") +
+  scale_color_brewer(palette = "Set1")
+
+
+clust_mean_2 / clust_med_2
+```
+
+
+```{r}
+clust_long_2 <- clust_map_2 %>% 
+  select(age.year, cluster_assignment) %>% 
+  pivot_wider(names_from = cluster_assignment,
+              values_from = cluster_assignment,
+              values_fn = length,
+              values_fill = 0) %>% 
+  ungroup() %>% 
+  pivot_longer(cols = `Cluster 1`:`Cluster 4`,
+               names_to = "cluster",
+               values_to = "prop") %>%
+  mutate(cluster = factor(cluster)) %>%
+  left_join(clust_map_2 %>%
+              select(pid, country)) %>% 
+  unite("cluster_country", c(country, cluster), remove = FALSE) %>% 
+  mutate(cluster_country = factor(cluster_country),
+         pid = factor(pid))
+
+
+# fit a gamm
+gam_clust_2 <- gamm(prop ~ s(age.year, by = cluster, bs = "fs", k = 9) + cluster,
+          # model assignment to a cluster using smoothed age for each cluster, cluster intercepts
+          data = clust_long_2,
+          random = list(pid = ~1), # subject level random effects for pooling and SEs
+          method = "ML",
+          family = binomial(link = "logit"))
+
+
+gam.check(gam_clust_2$gam)
+concurvity(gam_clust_2$gam, full = T)
+
+# predict fit and get CIs
+gam_pred_2 <- predict(gam_clust_2$gam, newdata = clust_long_2, se.fit = TRUE, type = "response")
+
+# tibble for plot
+gam_plot_2 <- tibble(
+  age = clust_long_2$age.year,
+  prop = clust_long_2$prop, 
+  cluster = clust_long_2$cluster,
+  fit = gam_pred_2$fit,
+  ci_upper = gam_pred_2$fit + 1.96 * gam_pred_2$se.fit,
+  ci_lower = gam_pred_2$fit - 1.96 * gam_pred_2$se.fit
+)
+
+clust_dev_2 <- ggplot(gam_plot_2, aes(x = age, y = prop, group = cluster, color = cluster)) +
+  geom_ribbon(aes(ymin = ci_lower,
+                  ymax = ci_upper),
+              alpha = 0.2,
+              fill = "grey",
+              color = NA) +
+  geom_line(aes(y = fit)) +
+  scale_x_continuous(n.breaks = 9) +
+  scale_y_continuous(labels = percent_format()) +
+  scale_color_brewer(palette = "Set1") +
+  theme_classic() +
+  labs(y = "Percentage in cluster", x = "Age", color = NULL) +
+  theme(legend.position = "bottom",
+        legend.background = element_blank())
+  
+
+clust_country_2
+clust_dev_2
+
+```
+
+```{r}
+# fit gam with country interaction
+gam_age_country_2 <- gamm(prop ~ s(age.year, by = cluster_country, k = 9) + cluster_country,
+          data = clust_long_2,
+          random = list(pid = ~1),
+          method = "ML",
+          family = binomial(link = "logit"))
+
+summary(gam_age_country_2$gam)
+
+gam.check(gam_age_country_2$gam)
+concurvity(gam_age_country_2$gam, full = T)
+
+# predict fit and get CIs
+gam_age_country_pred_2 <- predict(gam_age_country_2$gam, newdata = clust_long_2, se.fit = TRUE, type = "response")
+
+# tibble for country x age plot
+gam_plot_2 <- tibble(
+  pid = clust_long_2$pid,
+  country = clust_long_2$country,
+  age = clust_long_2$age.year,
+  prop = clust_long_2$prop, 
+  cluster = clust_long_2$cluster,
+  fit = gam_age_country_pred_2$fit,
+  ci_upper = gam_age_country_pred_2$fit + 1.96 * gam_age_country_pred_2$se.fit,
+  ci_lower = gam_age_country_pred_2$fit - 1.96 * gam_age_country_pred_2$se.fit
+) 
+
+clust_dev_country_2 <- ggplot(gam_plot_2, aes(x = age, y = prop, group = cluster, color = cluster)) +
+  geom_ribbon(aes(ymin = ci_lower,
+                  ymax = ci_upper),
+              alpha = 0.2,
+              fill = "grey",
+              color = NA) +
+  geom_line(aes(y = fit)) +
+  scale_x_continuous(n.breaks = 9) +
+  scale_color_brewer(palette = "Set1") +
+  scale_y_continuous(labels = percent_format()) +
+  theme_classic() +
+  labs(y = "Percentage in cluster", x = "Age", color = NULL) +
+  theme(legend.position = "none") +
+  facet_wrap(~country)
+
+clust_dev_2 / clust_dev_country_2 + plot_annotation(tag_levels = "A")
+```
+
+# ------- RQ3: DO ADULT NORMS PREDICT CHILDREN'S BEHAVIOR BY AGE?
+
+## ADULT NORMS
+## Descriptives & Overview
+
+```{r loading adult data}
+adultnorms <-  read_csv("adultnorms_mar12.csv", na = "") 
+
+#adultnorms %>% 
+ # select(70:115) %>% 
+ # mutate(location = tolower(location))
+
+```
+
+
+
+```{r descriptives}
+# Sample sizes by country
+adultnorms %>% 
+ # group_by(country) %>% 
+  tally()
+
+# Gender by country 
+adultnorms %>% 
+  group_by(gender) %>% 
+  tally()
+
+
+adultnorms %>% 
+ # group_by(country) %>% 
+  summarise(tibble(mean.age= mean(age.year), sd.age = sd(age.year)))
+
+adultnorms %>% 
+  group_by(audio) %>% 
+  tally()
+
+str(adultnorms$country)
+adultnorms$country <- factor(adultnorms$country, 
+                               levels = c("Ecuador", "Peru", "Uganda", "Canada", "USA"))
+
+```
+
+
+
+Variables of interest: (all for adult recipient & actor)
+
+* inequity_1v1 = should actor accept a split of 1 vs 1 (y/n) (equal)
+* inequity_2v1 = should actor accept a split of 2 vs 1 (y/n)
+* inequity_3v1 = should actor accept a split of 3 vs 1 (y/n)
+* inequity_4v1 = should actor accept a split of 4 vs 1 (y/n) (standard AI)
+* inequity_4v0 = should actor accept a split of 4 vs 0 (y/n) (extreme AI)
+* inequity_1v4_di = should actor accept a split of 1 vs 4 (y/n) (standard DI)
+* fairness.norm = how should actor split 4 candies? (numeric)
+* trust.norm = how should actor split 6 fruits? (numeric)
+* forgiveness.norm = how many sheets should actor give back? (numeric)
+* honesty.norm = how many gifts should the actor keep? (numeric)
+* honesty.num
+
+
+
+## XAI Variation in adults
+
+```{r}
+
+
+str(adultnorms$inequity_4v0)
+table(adultnorms$inequity_4v0)
+
+adultnorms$inequity_4v0 <- gsub("Y", "0", adultnorms$inequity_4v0)
+adultnorms$inequity_4v0 <- gsub("N", "1", adultnorms$inequity_4v0)
+adultnorms$inequity_4v0 <- as.numeric(adultnorms$inequity_4v0)
+
+inequity.summary.4v0.adult <- summarySE(data = adultnorms,
+                         measurevar = "inequity_4v0",
+                         groupvars = c("country"),
+                         na.rm = T)
+inequity.summary.4v0.adult
+
+summary(xai.adult.norm.mod <- lm(inequity_4v0 ~ country, data = adultnorms))
+## Ecuador adult norms significantly different than others
+```
+
+
+## Calculating Difference Scores — Child Behavior & Adult Norms
+
+```{r}
+
+## Appending adult norm values to the dataset
+### TRUST
+x$adultnorm.trust.mean <- NA
+x$adultnorm.trust.mean <- ifelse(x$country=="USA", 2.75, NA)
+x$adultnorm.trust.mean <- ifelse(x$country=="Canada", 2.31, x$adultnorm.trust.mean)
+x$adultnorm.trust.mean <- ifelse(x$country=="Uganda", 3.27, x$adultnorm.trust.mean)
+x$adultnorm.trust.mean <- ifelse(x$country=="Peru", 3.22, x$adultnorm.trust.mean)
+x$adultnorm.trust.mean <- ifelse(x$country=="Ecuador", 3.46, x$adultnorm.trust.mean)
+
+
+x$adultnorm.forgiveness.mean <- NA
+x$adultnorm.forgiveness.mean <- ifelse(x$country=="USA", 4.6, NA)
+x$adultnorm.forgiveness.mean <- ifelse(x$country=="Canada", 4.77, x$adultnorm.forgiveness.mean)
+x$adultnorm.forgiveness.mean <- ifelse(x$country=="Uganda", 3.59, x$adultnorm.forgiveness.mean)
+x$adultnorm.forgiveness.mean <- ifelse(x$country=="Peru", 3.78, x$adultnorm.forgiveness.mean)
+x$adultnorm.forgiveness.mean <- ifelse(x$country=="Ecuador", 3.77, x$adultnorm.forgiveness.mean)
+
+
+## These are "number you should return".
+x$adultnorm.honesty.mean <- NA
+x$adultnorm.honesty.mean <- ifelse(x$country=="USA", 2.6, NA)
+x$adultnorm.honesty.mean <- ifelse(x$country=="Canada", 2.38, x$adultnorm.honesty.mean)
+x$adultnorm.honesty.mean <- ifelse(x$country=="Uganda", 2.45, x$adultnorm.honesty.mean)
+x$adultnorm.honesty.mean <- ifelse(x$country=="Peru", 2.39, x$adultnorm.honesty.mean)
+x$adultnorm.honesty.mean <- ifelse(x$country=="Ecuador", 1.15, x$adultnorm.honesty.mean)
+
+
+## Proportion of adults saying you should reject Standard AI
+x.long$adultnorm.inequityAI4v1.mean <- NA
+x.long$adultnorm.inequityAI4v1.mean <- ifelse(x.long$country=="USA", .75, NA)
+x.long$adultnorm.inequityAI4v1.mean <- ifelse(x.long$country=="Canada", 1.0, x.long$adultnorm.inequityAI4v1.mean)
+x.long$adultnorm.inequityAI4v1.mean <- ifelse(x.long$country=="Uganda", 0.68, x.long$adultnorm.inequityAI4v1.mean)
+x.long$adultnorm.inequityAI4v1.mean <- ifelse(x.long$country=="Peru", 0.83, x.long$adultnorm.inequityAI4v1.mean)
+x.long$adultnorm.inequityAI4v1.mean <- ifelse(x.long$country=="Ecuador", 0.38, x.long$adultnorm.inequityAI4v1.mean)
+
+
+
+## Proportion of adults saying you should reject Extreme AI
+adultnorms %>% 
+  group_by(country) %>% 
+  summarise(tibble(extreme_ai_adult_mean= mean(inequity_4v0), extreme_ai_adult_sd = sd(inequity_4v0)))
+
+
+x$adultnorm.inequityextremeAI.mean <- NA
+x$adultnorm.inequityextremeAI.mean  <- ifelse(x$country=="USA", .9, NA)
+x$adultnorm.inequityextremeAI.mean  <- ifelse(x$country=="Canada", .923, x$adultnorm.inequityextremeAI.mean )
+x$adultnorm.inequityextremeAI.mean  <- ifelse(x$country=="Uganda", 0.818, x$adultnorm.inequityextremeAI.mean )
+x$adultnorm.inequityextremeAI.mean  <- ifelse(x$country=="Peru", 0.889, x$adultnorm.inequityextremeAI.mean )
+x$adultnorm.inequityextremeAI.mean  <- ifelse(x$country=="Ecuador", 0.385, x$adultnorm.inequityextremeAI.mean )
+
+```
+
+
+
+```{r}
+## Creating Difference Scores
+x$trust.diff.score <- abs(x$adultnorm.trust.mean - x$trust.numshared)
+x$honesty.diff.score <- abs(x$adultnorm.honesty.mean - x$honesty.numreturned)
+## both reciprocal, "number you should return", all good
+
+x$forgive.diff.score <- abs(x$adultnorm.forgiveness.mean - x$forg.givenback)
+
+x$xai.diff.score <- abs(x$adultnorm.inequityextremeAI.mean - x$tt7.rejects)
+
+x.long.2 <- x.long %>% 
+  group_by(pid) %>% 
+  dplyr::filter(dist == "AI") %>% 
+  mutate(pid2 = pid) %>% 
+  mutate(ai.average.choice = mean(dec)) %>% 
+   mutate(ai.diff.score = abs(adultnorm.inequityAI4v1.mean - ai.average.choice))
+
+ 
+
+## So now we have trust.diff.score, honesty.diff.score, forgive.diff.score, ai.diff.score, and xai.diff.score
+```
+
+## Difference Score Model: TRUST ADULT NORM | CHILD BEHAVIOR
+```{r}
+## TRUST
+
+trust.diff.mod <-  
+  lm(trust.diff.score ~  age.year*country, data = x)
+summary(trust.diff.mod)
+
+trust.diff.mod2 <-  
+  lm(trust.diff.score ~  age.year + country, data = x)
+summary(trust.diff.mod2)
+
+anova(trust.diff.mod, trust.diff.mod2, test = "Chisq")
+## sig. two way interaction between age and country
+
+```
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(trust.diff.mod, trust.diff.mod2), # list of models to include
+#   file = "Adult Norm, Child Behavior, Trust.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+## Difference Score Model: HONESTY ADULT NORM | CHILD BEHAVIOR
+```{r}
+## HONESTY
+
+honesty.diff.mod <-  
+  lm(honesty.diff.score ~  age.year*country, data = x)
+summary(honesty.diff.mod)
+
+honesty.diff.mod2 <-  
+  lm(honesty.diff.score ~  age.year+country, data = x)
+summary(honesty.diff.mod2)
+
+anova(honesty.diff.mod, honesty.diff.mod2, test = "Chisq")
+```
+
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(honesty.diff.mod, honesty.diff.mod2), # list of models to include
+#   file = "Adult Norm, Child Behavior, Honesty",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+## Difference Score Model: FORGIVENESS ADULT NORM | CHILD BEHAVIOR
+```{r}
+## FORGIVENESS
+
+forgive.diff.mod <-  
+  lm(forgive.diff.score ~  age.year*country, data = x)
+summary(forgive.diff.mod)
+
+forgive.diff.mod2 <-  
+  lm(forgive.diff.score ~  age.year+country, data = x)
+summary(forgive.diff.mod2)
+
+anova(forgive.diff.mod, forgive.diff.mod2, test = "Chisq")
+
+
+```
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(forgive.diff.mod, forgive.diff.mod2), # list of models to include
+#   file = "Adult Norm, Child Behavior, Forgiveness",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+## Difference Score Model: ADVANTAGEOUS INEQUITY ADULT NORM | CHILD BEHAVIOR
+```{r}
+## AI
+
+ai.diff.mod.main <- lm(ai.diff.score ~ age.year + country,
+                        data = x.long.2 %>%  distinct())
+summary(ai.diff.mod.main)
+
+
+ai.diff.mod.intxn <- lm(ai.diff.score ~ age.year*country,
+                        data = x.long.2 %>%  distinct())
+summary(ai.diff.mod.intxn)
+
+
+anova(ai.diff.mod.main, ai.diff.mod.intxn, test = "Chisq")
+                  
+
+
+## Just Canada
+
+
+ai.diff.mod.main.canada <- lm(ai.diff.score ~ age.year ,
+                        data = x.long.2 %>%  
+                          filter(country == "Canada") %>% 
+                          distinct())
+summary(ai.diff.mod.main.canada)
+```
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(ai.diff.mod.main, ai.diff.mod.intxn), # list of models to include
+#   file = "Adult Norm, Child Behavior, AI.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE, 
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+
+## Difference Score Model: EXTREME ADVANTAGEOUS INEQUITY ADULT NORM | CHILD BEHAVIOR
+```{r}
+## FORGIVENESS
+
+xai.diff.mod <-  lm(xai.diff.score ~  age.year*country, data = x)
+summary(xai.diff.mod)
+
+xai.diff.mod2 <-  lm(xai.diff.score ~  age.year+country, data = x)
+summary(xai.diff.mod2)
+
+anova(xai.diff.mod, xai.diff.mod2, test = "Chisq")
+## Sig. two way interaction
+```
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(xai.diff.mod, xai.diff.mod2), # list of models to include
+#   file = "Adult Norm, Child Behavior, Extreme AI.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+## HONESTY - ADULT NORMS
+
+```{r}
+
+str(adultnorms$honesty.norm)
+table(adultnorms$honesty.norm)
+
+honesty.summary.adult <- summarySE(data = adultnorms,
+                         measurevar = "honesty.norm",
+                         groupvars = c("country"),
+                         na.rm = T)
+honesty.summary.adult
+# Norm for number of gifts you should keep out of four
+
+
+
+## creating reciprocal
+adultnorms$honesty.numreturned <- 4 -  adultnorms$honesty.norm
+
+honesty.summary.adult.numreturned <- summarySE(data = adultnorms,
+                         measurevar = "honesty.numreturned",
+                         groupvars = c("country"),
+                         na.rm = T)
+honesty.summary.adult.numreturned
+## Norm for number of gifts you should give back
+
+## HONESTY NUMBER YOU SHOULD RETURN
+honesty.means.adult.numreturned <- ggplot(honesty.summary.adult.numreturned, aes(x=country, y=honesty.numreturned, fill=country)) + 
+  geom_errorbar(aes(ymin=honesty.numreturned-se, ymax=honesty.numreturned+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity",
+           alpha = 0.6) + 
+  xlab("\n Country") +
+  ylab("Number You Should Return \n") + theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,4) #+ 
+#gtitle("Honesty, Adult Norms")
+honesty.means.adult.numreturned
+
+```
+
+
+
+## TRUST - ADULT NORMS
+
+```{r}
+str(adultnorms$trust.norm)
+table(adultnorms$trust.norm)
+
+trust.summary.adult <- summarySE(data = adultnorms,
+                         measurevar = "trust.norm",
+                         groupvars = c("country"),
+                         na.rm = T)
+trust.summary.adult
+
+
+trust.means.adult <- ggplot(trust.summary.adult, aes(x=country, y=trust.norm, fill=country)) + 
+  geom_errorbar(aes(ymin=trust.norm-se, ymax=trust.norm+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity",
+            alpha = 0.6) + 
+  xlab("\n Country") +
+  ylab("Number You Should Share \n") + theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,6) #+ 
+  #ggtitle("Trust, Adult Norms")
+trust.means.adult
+
+
+
+trustdensity.adultnorms <- ggplot(adultnorms, aes(x=trust.norm, y = country)) + 
+  geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  scale_fill_manual(legendtitle, 
+                    values = c(color.USA , "#DDD7D1",  "black","#5B7A66","#9A5D48" )) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), guide = "none") +
+  xlab("Number of Fruits You Should Share \n") + ylab("Country \n") +
+  geom_hline(yintercept=0, colour="white", size=1)  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(text = element_text(size=15))  + theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(0,1,2,3,4,5, 6))
+trustdensity.adultnorms
+
+
+#ggsave("trustdensityadultnorms.png", plot = trustdensity.adultnorms, width = 8, height = 5)
+
+```
+
+
+
+
+## FORGIVENESS  - ADULT NORMS
+
+```{r}
+str(adultnorms$forgiveness.norm)
+table(adultnorms$forgiveness.norm)
+
+forgiveness.summary.adult <- summarySE(data = adultnorms,
+                         measurevar = "forgiveness.norm",
+                         groupvars = c("country"),
+                         na.rm = T)
+forgiveness.summary.adult
+
+forgiveness.means.adult <- ggplot(forgiveness.summary.adult, 
+                                  aes(x=country, y=forgiveness.norm, fill=country)) + 
+  geom_errorbar(aes(ymin=forgiveness.norm-se, ymax=forgiveness.norm+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity",
+            alpha = 0.6) + 
+  xlab("\n Country") +
+  ylab("Number You Should Return \n") + theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5.1) #+ 
+  #ggtitle("Forgiveness, Adult Norms")
+forgiveness.means.adult
+
+
+```
+
+
+
+
+## FAIRNESS - ADULT NORMS
+
+```{r}
+str(adultnorms$fairness.norm)
+table(adultnorms$fairness.norm)
+
+fairness.summary.adult <- summarySE(data = adultnorms,
+                         measurevar = "fairness.norm",
+                         groupvars = c("country"),
+                         na.rm = T)
+fairness.summary.adult
+
+
+fairness.means.adult <- ggplot(fairness.summary.adult, aes(x=country, y=fairness.norm, fill=country)) + 
+  geom_errorbar(aes(ymin=fairness.norm-se, ymax=fairness.norm+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Number of Candies You Should Keep (+/- SE) \n") + theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5.1) + 
+  ggtitle("Fairness (Split 4), Adult Norms")
+fairness.means.adult
+
+```
+
+
+
+
+## INEQUITY  - ADULT NORMS
+
+### 1 vs. 1 (Equal) - ADULT NORMS
+```{r} 
+str(adultnorms$inequity_1v1)
+table(adultnorms$inequity_1v1)
+
+adultnorms$inequity_1v1 <- gsub("Y", "0", adultnorms$inequity_1v1)
+adultnorms$inequity_1v1 <- gsub("N", "1", adultnorms$inequity_1v1)
+adultnorms$inequity_1v1 <- as.numeric(adultnorms$inequity_1v1)
+
+inequity.summary.1v1.adult <- summarySE(data = adultnorms,
+                         measurevar = "inequity_1v1",
+                         groupvars = c("country"),
+                         na.rm = T)
+inequity.summary.1v1.adult
+
+
+inequity.1v1.means.adult <- ggplot(inequity.summary.1v1.adult, aes(x=country, y=inequity_1v1, fill=country)) + 
+  geom_errorbar(aes(ymin=inequity_1v1-se, ymax=inequity_1v1+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Precent Endorsing Rejection (+/- SE) \n") + theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.05,1) + 
+  ggtitle("Inequity (1v1), Adult Norms")
+inequity.1v1.means.adult
+
+```
+
+
+
+### 4 vs. 1 (Standard AI) - ADULT NORMS
+```{r} 
+str(adultnorms$inequity_4v1)
+table(adultnorms$inequity_4v1)
+
+adultnorms$inequity_4v1 <- gsub("Y", "0", adultnorms$inequity_4v1)
+adultnorms$inequity_4v1 <- gsub("N", "1", adultnorms$inequity_4v1)
+adultnorms$inequity_4v1 <- as.numeric(adultnorms$inequity_4v1)
+
+inequity.summary.4v1.adult <- summarySE(data = adultnorms,
+                         measurevar = "inequity_4v1",
+                         groupvars = c("country"),
+                         na.rm = T)
+inequity.summary.4v1.adult
+
+inequity.summary.4v1.adult$country <-
+  factor(inequity.summary.4v1.adult$country,
+        levels = c("USA", "Canada", "Uganda", "Peru", "Ecuador"))
+
+inequity.4v1.means.adult <- ggplot(inequity.summary.4v1.adult, 
+                                   aes(x=country, 
+                                       y=inequity_4v1, 
+                                       fill=country)) + 
+  geom_errorbar(aes(ymin=inequity_4v1-se, ymax=inequity_4v1+se), 
+                width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity",
+           alpha = 0.6) + 
+  xlab("\n Country") +
+  ylab("Precent Endorsing Rejection \n") + 
+  theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + 
+  theme(text = element_text(size=19)) + 
+  ylim(0,1) #+
+   # scale_fill_manual(legendtitle, 
+              #      values = colorpalette) 
+ # ggtitle("Inequity (4v1, AI), Adult Norms") 
+inequity.4v1.means.adult
+
+
+summary(adultainorm.mod <- lm(inequity_4v1 ~ country, data = adultnorms))
+
+adultnorms.can.baseline <- adultnorms 
+
+adultnorms.can.baseline$country <-  factor(adultnorms.can.baseline$country, 
+                                           levels = c("Canada", "USA",
+                                                     "Ecuador", "Uganda",
+                                                     "Peru"))
+
+
+summary(adultainorm.mod <- lm(inequity_4v1 ~ country, data = adultnorms.can.baseline))
+
+
+```
+
+
+
+
+### 4 vs. 0 (Extreme AI) - ADULT NORMS
+```{r} 
+str(adultnorms$inequity_4v0)
+table(adultnorms$inequity_4v0)
+
+adultnorms$inequity_4v0 <- gsub("Y", "0", adultnorms$inequity_4v0)
+adultnorms$inequity_4v0 <- gsub("N", "1", adultnorms$inequity_4v0)
+adultnorms$inequity_4v0 <- as.numeric(adultnorms$inequity_4v0)
+
+inequity.summary.4v0.adult <- summarySE(data = adultnorms,
+                         measurevar = "inequity_4v0",
+                         groupvars = c("country"),
+                         na.rm = T)
+inequity.summary.4v0.adult
+
+
+inequity.4v0.means.adult <- ggplot(inequity.summary.4v0.adult, aes(x=country, y=inequity_4v0, fill=country)) + 
+  geom_errorbar(aes(ymin=inequity_4v0-se, ymax=inequity_4v0+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Precent Endorsing Rejection (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) #+ 
+  #ggtitle("Inequity (4v0, Extreme AI), Adult Norms")
+inequity.4v0.means.adult
+
+```
+
+
+
+### 1 vs. 4 (Standard DI) - ADULT NORMS
+```{r} 
+str(adultnorms$inequity_1v4_DI)
+table(adultnorms$inequity_1v4_DI)
+
+adultnorms$inequity_1v4_DI <- gsub("Y", "0", adultnorms$inequity_1v4_DI)
+adultnorms$inequity_1v4_DI <- gsub("N", "1",adultnorms$inequity_1v4_DI)
+adultnorms$inequity_1v4_DI <- as.numeric(adultnorms$inequity_1v4_DI)
+
+inequity.summary.1v4.adult <- summarySE(data = adultnorms,
+                         measurevar = "inequity_1v4_DI",
+                         groupvars = c("country"),
+                         na.rm = T)
+inequity.summary.1v4.adult
+
+
+inequity.1v4.means.adult <- ggplot(inequity.summary.1v4.adult, aes(x=country, y=inequity_1v4_DI, fill=country)) + 
+  geom_errorbar(aes(ymin=inequity_1v4_DI-se, ymax=inequity_1v4_DI+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Precent Endorsing Rejection (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) + 
+  ggtitle("Inequity (1v4, Standard DI), Adult Norms")
+inequity.1v4.means.adult
+
+```
+
+### Data Viz - ADULT NORMS
+```{r}
+
+p5 <- inequity.4v1.means.adult + ggtitle("Fairness") + 
+  theme(legend.position = "none") + 
+  theme(axis.title.x = element_blank(),
+        text = element_text(size=19)) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) 
+
+p6 <- honesty.means.adult.numreturned +  ggtitle("Honesty") + 
+  theme(text = element_text(size=19)) + scale_fill_manual(legendtitle, 
+                                                          values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) 
+
+p7 <- trust.means.adult + ggtitle("Trustworthiness") + 
+  theme(legend.position = "none",
+        text = element_text(size=19),
+        axis.title.x = element_blank()) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) 
+
+p8 <- forgiveness.means.adult + ggtitle("Forgiveness") + 
+  theme(legend.position = "none",
+        text = element_text(size=19)) + scale_fill_manual(legendtitle, 
+                                                          values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) 
+
+
+## FINAL PLOT FOR MANUSCRIPT
+combo.plot.adultnorms <- p5 + p7 + p8 + p6
+combo.plot.adultnorms
+#ggsave("combo.plot.adultnorms.png", plot = combo.plot.adultnorms, width = 12, height = 9)
+```
+
+
+
+## SUPERIMPOSING ADULT NORMS ON CHILD BEHAVIOR
+
+```{r}
+## Matching the figures included in the manuscript
+## SUPERIMPOSED FINAL PLOTS, BEHAVIOR & NORMS
+
+## Adding another layer from the adult data, superimposed on the kids' behaviors
+
+
+## INEQUITY (FAIRNESS)
+
+ai.only$country
+
+p1.fair <- ggplot(data = ai.only, aes(x=age.year, y=dec, fill = country)) + 
+  geom_smooth(data = ai.only, alpha=0.1, aes(colour=country), method = "lm") +
+  geom_line(data=ai.only, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.13,1) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette) + ggtitle("Fairness") + theme(axis.title.x = element_blank())
+  
+p1.fair
+
+inequity.summary.4v1.adult2 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult2$age.year <- 14
+inequity.summary.4v1.adult2 <- rename(inequity.summary.4v1.adult2, dec = inequity_4v1)
+
+g1 <- p1.fair + 
+  geom_pointrange(data=inequity.summary.4v1.adult2, aes(ymin=dec-se, ymax=dec+se),
+                  position=position_dodge(width=1),
+                 color = colorpalette, 
+                  size = 1.3) + theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+g1
+
+
+
+## TRUST
+trust.summary.adult2 <- trust.summary.adult
+trust.summary.adult2$age.year <- 14
+trust.summary.adult2 <- rename(trust.summary.adult2, trust.numshared = trust.norm)
+
+
+p1.trust <- 
+  ggplot(data = x, aes(x=age.year, y=trust.numshared, fill = country,
+                       color = colorpalette)) + 
+  geom_smooth(data = x, alpha=0.2, aes(colour=country), method = "lm") +
+  geom_line(data = x, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Resources Shared \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,6) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette) 
+
+g2 <- p1.trust +
+  geom_pointrange(data=trust.summary.adult2, 
+                  aes(ymin=trust.numshared-se, ymax=trust.numshared+se,
+                      color = colorpalette),
+                  position=position_dodge(width=1),
+                  color = colorpalette,
+                  fill = colorpalette, 
+                  size = 1.3)   +  ggtitle("Trustworthiness") +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+g2
+
+
+### FORGIVENESS
+
+p1.forgive <- 
+  ggplot(data=x, aes(x=age.year, y=forg.givenback, fill = country)) + 
+  geom_smooth(data=x, alpha=0.2, aes(colour=country), method = "lm") +
+  geom_line(data=x, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Sheets Returned \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5.2) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+
+
+forgiveness.summary.adult2 <- forgiveness.summary.adult
+forgiveness.summary.adult2$age.year <- 14
+forgiveness.summary.adult2 <- rename(forgiveness.summary.adult2, 
+                                     forg.givenback = forgiveness.norm)
+
+
+g3 <- p1.forgive +  
+  geom_pointrange(data=forgiveness.summary.adult2, 
+                  aes(ymin=forg.givenback-se, ymax=forg.givenback+se),
+                  position=position_dodge(width=1),
+                  color = colorpalette, 
+                  size = 1.3) + theme(legend.position = "none")  +
+  ggtitle("Forgiveness") +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+
+g3
+
+
+## HONESTY
+
+
+honesty.summary.adult.numreturned <- summarySE(data = adultnorms,
+                         measurevar = "honesty.numreturned",
+                         groupvars = c("country"),
+                         na.rm = T)
+honesty.summary.adult.numreturned
+
+
+
+
+p1.honesty <- ggplot(data = x, aes(x=age.year, y=honesty.numreturned, fill = country)) + 
+  geom_smooth(data = x, alpha = 0.2, aes(colour=country), method = "lm") +
+  geom_line(data = x, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Resources Returned \n") + theme_gray() + 
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-.3,3)  +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) 
+
+
+honesty.summary.adult.numreturned2 <- honesty.summary.adult.numreturned
+honesty.summary.adult.numreturned2$age.year <- 14
+
+
+g4 <- p1.honesty +  
+  geom_pointrange(data=honesty.summary.adult.numreturned2, 
+                  aes(ymin=honesty.numreturned-se, ymax=honesty.numreturned+se),
+                  position=position_dodge(width=1),
+                  color = colorpalette, 
+                  size = 1.3) + theme(legend.position = "none")  +
+  ggtitle("Honesty") +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+
+g4
+
+
+
+
+## FINAL PLOT FOR MANUSCRIPT
+## COMBO PLOT, ADULT NORMS & CHILD BEHAVIOR
+
+combo.plot.normsandbehavior <- g1 + g2 + g3 + g4
+combo.plot.normsandbehavior
+#ggsave("combo.plot.normsandbehavior.png", plot = combo.plot.normsandbehavior, width = 12, height = 9)
+
+```
+
+
+```{r}
+
+## Extreme AI
+xai.superimpose.1 <- 
+  ggplot(data=x, aes(x=age.year, y=tt7.rejects, fill = country)) + 
+  geom_smooth(data=x, alpha=0.2, aes(colour=country), method = "lm") +
+  geom_line(data=x, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejection Extreme AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) +
+   scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette)
+xai.superimpose.1 
+
+
+xai.summary.adult <- summarySE(data = adultnorms,
+                         measurevar = "inequity_4v0",
+                         groupvars = c("country"),
+                         na.rm = T)
+xai.summary.adult
+
+xai.summary.adult2 <- xai.summary.adult
+xai.summary.adult2$age.year <- 14
+xai.summary.adult2 <- rename(xai.summary.adult2, tt7.rejects= inequity_4v0)
+
+
+temp.xai <- xai.superimpose.1 +  
+  geom_pointrange(data=xai.summary.adult2, 
+                  aes(ymin=tt7.rejects-se, ymax=tt7.rejects+se),
+                  position=position_dodge(width=1),
+                  color = colorpalette, 
+                  fill = colorpalette,
+                  size = 1.3)  +
+  #ggtitle("Extreme AI: Kids' Norms & Adult Norms") +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+
+temp.xai
+
+```
+
+
+-------------------------------------------------------------------------------------------------
+
+
+# ------- RQ4: DO ADULT NORMS PREDICT CHILDREN'S NORMS?
+## CHILD NORM BATTERY
+
+
+```{r loading child norm battery  data}
+childnorms <- read_csv("childnorms_mar12.csv", na = "")
+# Tally
+childnorms %>% 
+  group_by(gender) %>% 
+  tally()
+
+childnorms %>% 
+  group_by(country, gender) %>% 
+  tally()
+
+childnorms %>% 
+  #group_by(country) %>% 
+  summarise(tibble(mean.age= mean(age.year), sd.age = sd(age.year)))
+
+
+```
+
+
+```{r child norm basics}
+table(childnorms$gender)
+childnorms$male0 <- childnorms$gender
+childnorms$male0 <- gsub("M", "0", childnorms$male0)
+childnorms$male0 <- gsub("m", "0", childnorms$male0)
+childnorms$male0 <- gsub("F", "1", childnorms$male0)
+childnorms$male0 <- gsub("f", "1", childnorms$male0)
+childnorms$male0 <- as.numeric(childnorms$male0)
+table(childnorms$male0)
+
+
+table(childnorms$country) 
+table(childnorms$age.year) 
+
+str(childnorms$country) 
+childnorms$country <- factor(childnorms$country,  
+                           levels = c("Ecuador", "Peru", "Uganda", "Canada", "USA" ))
+
+```
+
+
+
+
+## Calculating Difference Scores — Child Norms & Adult Norms
+
+```{r}
+
+## Appending adult norm values to the dataset
+### TRUST
+childnorms$adultnorm.trust.mean <- NA
+childnorms$adultnorm.trust.mean <- ifelse(childnorms$country=="USA", 2.75, NA)
+childnorms$adultnorm.trust.mean <- ifelse(childnorms$country=="Canada", 2.31, childnorms$adultnorm.trust.mean)
+childnorms$adultnorm.trust.mean <- ifelse(childnorms$country=="Uganda", 3.27, childnorms$adultnorm.trust.mean)
+childnorms$adultnorm.trust.mean <- ifelse(childnorms$country=="Peru", 3.22, childnorms$adultnorm.trust.mean)
+childnorms$adultnorm.trust.mean <- ifelse(childnorms$country=="Ecuador", 3.46, childnorms$adultnorm.trust.mean)
+
+
+childnorms$adultnorm.forgiveness.mean <- NA
+childnorms$adultnorm.forgiveness.mean <- ifelse(childnorms$country=="USA", 4.6, NA)
+childnorms$adultnorm.forgiveness.mean <- ifelse(childnorms$country=="Canada", 4.77, childnorms$adultnorm.forgiveness.mean)
+childnorms$adultnorm.forgiveness.mean <- ifelse(childnorms$country=="Uganda", 3.59, childnorms$adultnorm.forgiveness.mean)
+childnorms$adultnorm.forgiveness.mean <- ifelse(childnorms$country=="Peru", 3.78, childnorms$adultnorm.forgiveness.mean)
+childnorms$adultnorm.forgiveness.mean <- ifelse(childnorms$country=="Ecuador", 3.77, childnorms$adultnorm.forgiveness.mean)
+
+
+## Number you should RETURN
+childnorms$adultnorm.honesty.mean <- NA
+childnorms$adultnorm.honesty.mean <- ifelse(childnorms$country=="USA", 2.6, NA)
+childnorms$adultnorm.honesty.mean <- ifelse(childnorms$country=="Canada", 2.38, childnorms$adultnorm.honesty.mean)
+childnorms$adultnorm.honesty.mean <- ifelse(childnorms$country=="Uganda", 2.45, childnorms$adultnorm.honesty.mean)
+childnorms$adultnorm.honesty.mean <- ifelse(childnorms$country=="Peru", 2.39, childnorms$adultnorm.honesty.mean)
+childnorms$adultnorm.honesty.mean <- ifelse(childnorms$country=="Ecuador", 1.15, childnorms$adultnorm.honesty.mean)
+
+
+## Proportion of adults saying you should reject Standard AI
+childnorms$adultnorm.inequityAI4v1.mean <- NA
+childnorms$adultnorm.inequityAI4v1.mean <- ifelse(childnorms$country=="USA", .75, NA)
+childnorms$adultnorm.inequityAI4v1.mean <- ifelse(childnorms$country=="Canada", 1.0, childnorms$adultnorm.inequityAI4v1.mean)
+childnorms$adultnorm.inequityAI4v1.mean <- ifelse(childnorms$country=="Uganda", 0.68, childnorms$adultnorm.inequityAI4v1.mean)
+childnorms$adultnorm.inequityAI4v1.mean <- ifelse(childnorms$country=="Peru", 0.83, childnorms$adultnorm.inequityAI4v1.mean)
+childnorms$adultnorm.inequityAI4v1.mean <- ifelse(childnorms$country=="Ecuador", 0.38, childnorms$adultnorm.inequityAI4v1.mean)
+
+
+
+## Proportion of adults saying you should reject Extreme AI
+childnorms$adultnorm.inequityextremeAI.mean <- NA
+childnorms$adultnorm.inequityextremeAI.mean  <- ifelse(childnorms$country=="USA", .9, NA)
+childnorms$adultnorm.inequityextremeAI.mean  <- ifelse(childnorms$country=="Canada", .923, childnorms$adultnorm.inequityextremeAI.mean )
+childnorms$adultnorm.inequityextremeAI.mean  <- ifelse(childnorms$country=="Uganda", 0.818, childnorms$adultnorm.inequityextremeAI.mean )
+childnorms$adultnorm.inequityextremeAI.mean  <- ifelse(childnorms$country=="Peru", 0.889, childnorms$adultnorm.inequityextremeAI.mean )
+childnorms$adultnorm.inequityextremeAI.mean  <- ifelse(childnorms$country=="Ecuador", 0.385, childnorms$adultnorm.inequityextremeAI.mean )
+
+
+```
+
+
+
+```{r}
+## Creating Difference Scores
+childnorms$trust.diff.score <- abs(childnorms$adultnorm.trust.mean - childnorms$trust.norms)
+
+
+childnorms$honesty.number.returned <- 4 - childnorms$honesty.norms
+childnorms$honesty.diff.score <- abs(childnorms$adultnorm.honesty.mean - childnorms$honesty.number.returned)
+## Adults and children reciprocally coded as "number you should RETURN" (e.g. ECU ADULT = 1.15)
+
+childnorms$forgive.diff.score <- abs(childnorms$adultnorm.forgiveness.mean - childnorms$forgiveness.norms)
+
+
+## here, childnorms$ai_yesno is coded as saying "y" or "n" to the decision
+## So we need to recode and make it a numeric variable
+
+
+childnorms$ai_yesno <- gsub("Y", "0", childnorms$ai_yesno)
+childnorms$ai_yesno <- gsub("N", "1", childnorms$ai_yesno)
+childnorms$ai_yesno <- as.numeric(childnorms$ai_yesno)
+
+childnorms.ai_yesno.summary <- summarySE(data = childnorms,
+                         measurevar = "ai_yesno",
+                         groupvars = c("country"),
+                         na.rm = T)
+childnorms.ai_yesno.summary
+
+childnorms$ai.diff.score <- abs(childnorms$adultnorm.inequityAI4v1.mean - childnorms$ai_yesno)
+
+## same recording for xai
+childnorms$`4 v. 0` <- gsub("Y", "0", childnorms$`4 v. 0`)
+childnorms$`4 v. 0` <- gsub("y", "0", childnorms$`4 v. 0`)
+childnorms$`4 v. 0` <- gsub("N", "1", childnorms$`4 v. 0`)
+childnorms$`4 v. 0` <- gsub("n", "1", childnorms$`4 v. 0`)
+childnorms$`4 v. 0` <- as.numeric(childnorms$`4 v. 0`)
+childnorms$xai.diff.score <- abs(childnorms$adultnorm.inequityextremeAI.mean - 
+                                   childnorms$`4 v. 0`)
+```
+
+
+
+## Difference Score Model: TRUST ADULT NORM | CHILD NORMS
+```{r}
+## TRUST
+
+trust.diff.mod.childadultnorm <-  
+  lm(trust.diff.score ~  age.year*country, data = childnorms)
+summary(trust.diff.mod.childadultnorm)
+
+trust.diff.mod.childadultnorm2 <-  
+  lm(trust.diff.score ~  age.year + country, data = childnorms)
+summary(trust.diff.mod.childadultnorm2)
+
+anova(trust.diff.mod.childadultnorm, trust.diff.mod.childadultnorm2, test = "Chisq")
+
+```
+
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(trust.diff.mod.childadultnorm, trust.diff.mod.childadultnorm2), # list of models to include
+#   file = "Adult Norm, Child Norm, Trust.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+## Difference Score Model: HONESTY ADULT NORM | CHILD NORMS
+```{r}
+## HONESTY
+
+honesty.diff.mod.childadultnorm <-  
+  lm(honesty.diff.score ~  age.year*country, data = childnorms)
+summary(honesty.diff.mod.childadultnorm)
+
+honesty.diff.mod.childadultnorm2 <-  
+  lm(honesty.diff.score ~  age.year+country, data = childnorms)
+summary(honesty.diff.mod.childadultnorm2)
+
+anova(honesty.diff.mod.childadultnorm, honesty.diff.mod.childadultnorm2, test = "Chisq")
+```
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(honesty.diff.mod.childadultnorm, honesty.diff.mod.childadultnorm2), # list of models to include
+#   file = "Adult Norm, Child Norm, Honesty.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+
+## Difference Score Model: FORGIVENESS ADULT NORM | CHILD NORMS
+```{r}
+## FORGIVENESS
+
+forgive.diff.mod.childadultnorm <-  
+  lm(forgive.diff.score ~  age.year*country, data = childnorms)
+summary(forgive.diff.mod.childadultnorm)
+
+forgive.diff.mod.childadultnorm2 <-  
+  lm(forgive.diff.score ~  age.year+country, data = childnorms)
+summary(forgive.diff.mod.childadultnorm2)
+
+anova(forgive.diff.mod.childadultnorm, forgive.diff.mod.childadultnorm2, test = "Chisq")
+```
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(forgive.diff.mod.childadultnorm, forgive.diff.mod.childadultnorm2), # list of models to include
+#   file = "Adult Norm, Child Norm, Forgiveness.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+## Difference Score Model: ADVANTAGEOUS INEQUITY ADULT NORM | CHILD NORMS
+```{r}
+## AI
+
+ai.diff.mod.childadultnorm <-  
+  lm(ai.diff.score ~  age.year*country, data = childnorms)
+summary(ai.diff.mod.childadultnorm)
+
+ai.diff.mod.childadultnorm2 <-  
+  lm(ai.diff.score ~  age.year + country, data = childnorms)
+summary(ai.diff.mod.childadultnorm2)
+
+anova(ai.diff.mod.childadultnorm2, ai.diff.mod.childadultnorm,  test = "Chisq")
+# no 2-way
+```
+
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(ai.diff.mod.childadultnorm, ai.diff.mod.childadultnorm2), # list of models to include
+#   file = "Adult Norm, Child Norm, AI.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+## Difference Score Model: EXTREME ADVANTAGEOUS INEQUITY ADULT NORM | CHILD NORMS
+```{r}
+## AI
+
+xai.diff.mod.childadultnorm <-  
+  lm(xai.diff.score ~  age.year*country, data = childnorms)
+summary(xai.diff.mod.childadultnorm)
+
+xai.diff.mod.childadultnorm2 <-  
+  lm(xai.diff.score ~  age.year + country, data = childnorms)
+summary(xai.diff.mod.childadultnorm2)
+
+
+anova(xai.diff.mod.childadultnorm, xai.diff.mod.childadultnorm2, test = "Chisq")
+```
+
+
+
+```{r}
+# outputting to table
+# htmlreg(
+#   list(xai.diff.mod.childadultnorm, xai.diff.mod.childadultnorm2), # list of models to include
+#   file = "Adult Norm, Child Norm, Extreme AI.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Model 1", "Model 2"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+
+
+
+
+
+
+### HONESTY - CHILD NORMS
+
+```{r honesty child norms}
+## RECIPROCAL FOR HONESTY
+
+honest.summary.child2 <- summarySE(data = childnorms, na.rm = TRUE,
+                            measurevar = "honesty.number.returned",
+                            groupvars = c("country"))
+honest.summary.child2
+
+
+honest.means.child.numreturned <- ggplot(honest.summary.child2, aes(x=country, y=honesty.number.returned, fill=country)) + 
+  geom_errorbar(aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Number of Gifts You Should Return (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,4)
+honest.means.child.numreturned
+
+```
+
+
+### TRUST - CHILD NORMS
+
+```{r child norms trust}
+str(childnorms$trust.norms)
+table(childnorms$trust.norms)
+
+table(childnorms$trust.norms, childnorms$country)
+trust.summary.child <- summarySE(data = childnorms, na.rm = TRUE,
+                           measurevar = "trust.norms",
+                           groupvars = c("country"))
+trust.summary.child 
+
+trust.means.child <- ggplot(trust.summary.child, aes(x=country, y=trust.norms, fill=country)) + 
+  geom_errorbar(aes(ymin=trust.norms-se, ymax=trust.norms+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Number of Fruits You Should Share (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,6)
+trust.means.child
+
+
+trustdensity.childnorms <- ggplot(childnorms, aes(x=trust.norms, y = country)) + 
+  geom_density_ridges(aes(fill= country, color = country, alpha = 0.9),
+                      quantile_lines=TRUE,
+                      quantile_fun=function(x,...)mean(x)) +
+  scale_fill_manual(legendtitle, 
+                    values = c(color.USA , "#DDD7D1",  "black","#5B7A66","#9A5D48" )) + 
+  scale_color_manual(values = c("black", "black", "black", "black", "black"), guide = "none") +
+  xlab("\n Number of Fruits You Should Share") + ylab("Country \n") +
+  geom_hline(yintercept=0, colour="white", size=1)  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(text = element_text(size=15))  + theme(legend.position = "none") +
+  scale_x_continuous(breaks=c(0,1,2,3,4,5, 6))
+trustdensity.childnorms
+
+
+##ggsave("trustdensitychildnorms.png", plot = trustdensity.childnorms, width = 8, height = 5)
+
+
+### Trust: By country & age
+trust.agexc.child <- ggplot(childnorms, aes(x=age.year, y=trust.norms, fill = country)) + 
+  geom_smooth(aes(colour=country), method = "lm") +
+  xlab("\n Age") +
+  ylab("# of Fruits You Should Share (+/- SE) \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,6.7)
+trust.agexc.child
+
+## trust by gender
+trust.summary.gender.child <- summarySE(data = childnorms, na.rm = TRUE,
+                               measurevar = "trust.norms",
+                               groupvars = c("male0"))
+
+trustmeans.gender.child <- ggplot(trust.summary.gender.child, aes(x=male0, y=trust.norms, fill=male0)) + 
+  geom_errorbar(aes(ymin=trust.norms-se, ymax=trust.norms+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Gender") +
+  ylab("Number of Starbursts Shared (+/- SE) \n") + theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + 
+  theme(text = element_text(size=19)) + ylim(0,6) 
+trustmeans.gender.child
+## no difference between genders
+```
+
+
+
+### FORGIVENESS - CHILD NORMS
+
+```{r forgiveness child norms}
+str(childnorms$forgiveness.norms)
+table(childnorms$honesty.norms)
+
+table(childnorms$forgiveness.norms, childnorms$country)
+forgive.summary.child <- summarySE(data = childnorms, na.rm = TRUE,
+                            measurevar = "forgiveness.norms",
+                            groupvars = c("country"))
+forgive.summary.child
+
+
+forgive.means.child <- ggplot(forgive.summary.child, aes(x=country, y=forgiveness.norms, fill=country)) + 
+  geom_errorbar(aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Number of Sheets You Should Return (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5)
+forgive.means.child
+
+
+
+
+forgive.means.agexc.child <- ggplot(childnorms, aes(x=age.year, y=forgiveness.norms, fill = country)) + 
+  geom_smooth(aes(colour=country), method = "lm") +
+  xlab("\n Age") +
+  ylab("How Many of 5 Sheets Should You Return? (+/- SE) \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5)
+forgive.means.agexc.child
+
+
+forgivedensity.child <- 
+  ggplot(childnorms, aes(x=forgiveness.norms), 
+         y=..scaled.., fill = country) + 
+  geom_density(aes(group=country, fill=country), size=0.1, alpha=0.3) +
+  #scale_fill_manual(legendtitle, values = c("pink","deepskyblue2", "aquamarine3", "mediumpurple2")) +
+  xlab("\n Number of Sheets You Should Return") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) 
+forgivedensity.child
+```
+
+
+
+### FAIRNESS - CHILD NORMS
+
+```{r}
+
+## HOW TO SPLIT FOUR RESOURCES (not inequity aversion)
+str(childnorms$fairness.norms)
+table(childnorms$fairness.norms)
+
+table(childnorms$fairness.norms, childnorms$country)
+split4.summary.child <- summarySE(data = childnorms, na.rm = TRUE,
+                          measurevar = "fairness.norms",
+                          groupvars = c("country"))
+split4.summary.child
+
+split4means.child <- ggplot(split4.summary.child, aes(x=country, y=fairness.norms, fill=country)) + 
+  geom_errorbar(aes(ymin=fairness.norms-se, ymax=fairness.norms+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("How Many of 4 Should You Keep? \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,4)
+split4means.child
+
+split4means.agexc.child <- ggplot(childnorms, aes(x=age.year, y=fairness.norms, fill = country)) + 
+  geom_smooth(aes(colour=country), method = "lm") +
+  xlab("\n Age") +
+  ylab("How Many of 4 Should You Keep? (+/- SE) \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,4)
+split4means.agexc.child
+
+```
+
+
+
+### INEQUITY - CHILD NORMS
+
+
+```{r inequity child norms}
+
+table(childnorms$ai_decision)
+## 1 is accept, 0 is reject
+table(childnorms$ai_decision, childnorms$country)
+
+
+## ai_decision is for 4vs1 AI, 1 = accept
+
+childnorms$ai_decision_reject1 <- childnorms$ai_decision
+childnorms$ai_decision_reject1 <- recode(childnorms$ai_decision_reject1, "1"=0, "0"=1)
+## recoding so 1 is reject
+
+ai.summary.child <- summarySE(data = childnorms, na.rm = TRUE,
+                          measurevar = "ai_decision_reject1",
+                          groupvars = c("country"))
+ai.summary.child
+
+ai.summary.child.ecubase <- ai.summary.child
+ai.summary.child.ecubase$country <- factor(ai.summary.child.ecubase$country,
+                                           levels = c ("USA", "Peru", 
+                                                       "Uganda", "Canada",
+                                                       "Ecuador"))
+
+aimeans.child <- ggplot(ai.summary.child, aes(x=country, y=ai_decision_reject1, fill=country)) + 
+  geom_errorbar(aes(ymin=ai_decision_reject1-se, ymax=ai_decision_reject1+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("Percent Endorsing Rejection (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1)
+aimeans.child
+
+
+
+inequity.4v1.means.adult <- ggplot(inequity.summary.4v1.adult, 
+                                   aes(x=country, 
+                                       y=inequity_4v1, 
+                                       fill=country)) + 
+  geom_errorbar(aes(ymin=inequity_4v1-se, ymax=inequity_4v1+se), 
+                width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity",
+           alpha = 0.8) + 
+  xlab("\n Country") +
+  ylab("Precent Endorsing AI Rejection \n") + 
+  theme_gray() + guides(fill=FALSE) + 
+  theme(text = element_text(size=19)) + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + 
+  theme(text = element_text(size=19)) + 
+  ylim(0,1) +
+    scale_fill_manual(legendtitle, 
+                    values = colorpalette) 
+ # ggtitle("Inequity (4v1, AI), Adult Norms") 
+inequity.4v1.means.adult
+
+aimeans.child.ecubase <- ggplot(ai.summary.child.ecubase, 
+                                aes(x=country, y=ai_decision_reject1, fill=country)) + 
+  geom_errorbar(aes(ymin=ai_decision_reject1-se, ymax=ai_decision_reject1+se), 
+                width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity", alpha = 0.8) + 
+  xlab("\n Country") +
+  ylab("Percent Endorsing AI Rejection \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1) +
+    scale_fill_manual(legendtitle, 
+                    values = c("#81B7BD",  "#61C76D", "#C74726", "#E6B89F","#3B40B8" )) 
+aimeans.child.ecubase 
+
+
+childnorms$ai_yesno  <- gsub("Y", "0", childnorms$ai_yesno)
+childnorms$ai_yesno  <- gsub("N", "1", childnorms$ai_yesno)
+childnorms$ai_yesno <- as.numeric(childnorms$ai_yesno)
+
+ai.summary.2.child <- summarySE(data = childnorms, na.rm = TRUE,
+                        measurevar = "ai_yesno",
+                        groupvars = c("country", "age.year"))
+
+ai.agexc.child <- ggplot(ai.summary.2.child, aes(x=age.year, y=ai_yesno, fill = country)) + 
+  geom_smooth(aes(colour=country), method = "lm") +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.4,1.4)
+ai.agexc.child
+
+
+### EXTREME AI
+str(childnorms$extremeAI_decision)
+table(childnorms$extremeAI_decision)
+
+table(childnorms$extremeAI_decision, childnorms$country)
+
+
+xai.summary.child <- summarySE(data = childnorms, na.rm = TRUE,
+                           measurevar = "extremeAI_decision",
+                           groupvars = c("country"))
+xai.summary.child
+
+xai.means.child <- ggplot(xai.summary.child, aes(x=country, y=extremeAI_decision, fill=country)) + 
+  geom_errorbar(aes(ymin=extremeAI_decision-se, ymax=extremeAI_decision+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("You Should Accept Extreme AI (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1)
+xai.means.child
+
+
+### Extreme Inequity Aversion: By country & age
+xai.agexc.child <- ggplot(childnorms, aes(x=age.year, y=extremeAI_decision, fill = country)) + 
+  geom_smooth(aes(colour=country), method = "lm") +
+  xlab("\n Age") +
+  ylab("You Should Accept Extreme AI (+/- SE) \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1)
+xai.agexc.child
+
+
+
+## In xai_yesno, rejections are now coded as 1
+childnorms$xai_yesno  <- childnorms$`4 v. 0`
+childnorms$xai_yesno  <- toupper(childnorms$xai_yesno)
+childnorms$xai_yesno <- gsub("Y", "0", childnorms$xai_yesno)
+childnorms$xai_yesno  <- gsub("N", "1", childnorms$xai_yesno)
+childnorms$xai_yesno <- as.numeric(childnorms$xai_yesno)
+table(childnorms$xai_yesno, childnorms$country)
+
+
+
+### DI Child Norms
+
+
+childnorms$di.reject <- childnorms$`1 v. 4 dummy`
+
+
+table(childnorms$di.reject, childnorms$country)
+di.summary.child <- summarySE(data = childnorms, na.rm = TRUE,
+                           measurevar = "di.reject",
+                           groupvars = c("country"))
+di.summary.child
+
+di.means.child <- ggplot(di.summary.child, aes(x=country, y=di.reject, fill=country)) + 
+  geom_errorbar(aes(ymin=di.reject-se, ymax=di.reject+se), width=.2,
+                position=position_dodge(.9)) + 
+  geom_bar(stat = "identity") + 
+  xlab("\n Country") +
+  ylab("You Should Accept DI (+/- SE) \n") + theme_gray() + guides(fill=FALSE) +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,1)
+di.means.child
+
+
+```
+
+
+
+
+## SUPERIMPOSING ADULT NORMS ON CHILD NORMS
+
+```{r}
+## Matching the figures included in the manuscript
+## SUPERIMPOSED FINAL PLOTS, NORMS & NORMS
+
+## Adding another layer from the adult data, superimposed on the kids' norms
+
+
+
+## INEQUITY AVERSION
+p2.fair <- ggplot(data = ai.summary.2.child, aes(x=age.year, y=ai_yesno, fill = country)) + 
+  geom_smooth(data = ai.summary.2.child, aes(colour=country), method = "lm", alpha = 0.1) +
+  geom_line(data= ai.summary.2.child, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.4,1.4) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) + ggtitle("Fairness") + 
+  theme(axis.title.x = element_blank()) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+
+p2.fair
+
+
+inequity.summary.4v1.adult3 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult3$age.year <- 14
+inequity.summary.4v1.adult3 <- rename(inequity.summary.4v1.adult3, ai_yesno = inequity_4v1)
+
+
+a1 <- p2.fair + 
+  geom_pointrange(data=inequity.summary.4v1.adult3, aes(ymin=ai_yesno-se, ymax=ai_yesno+se),
+                  position=position_dodge(width=1),
+                  color = colorpalette, 
+                  size = 1.3) + theme(legend.position = "none") 
+a1
+
+
+
+
+## TRUST
+
+
+
+p2.trust <-  ggplot(data = childnorms, aes(x=age.year, y=trust.norms, fill = country)) + 
+  geom_smooth(data = childnorms, aes(colour=country), method = "lm", alpha=0.1) +
+  geom_line(data=childnorms, stat = "smooth", method = "lm", aes(colour=country), size = 1.5)  +
+  xlab("\n Age") +
+  ylab("Number of Resources Shared \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,6.7)+
+  scale_x_continuous(breaks=c(6, 8, 10, 12)) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+  scale_color_manual(legendtitle, 
+                     values = colorpalette)
+p2.trust
+
+
+trust.summary.adult3 <- trust.summary.adult
+trust.summary.adult3$age.year <- 14
+trust.summary.adult3 <- rename(trust.summary.adult3, trust.norms = trust.norm)
+
+
+a2 <- p2.trust +
+  geom_pointrange(data=trust.summary.adult3, 
+                  aes(ymin=trust.norms-se, ymax=trust.norms+se,
+                      color = colorpalette),
+                  position=position_dodge(width=1),
+                  color = colorpalette,
+                  fill = colorpalette, 
+                  size = 1.3)   +  ggtitle("Trustworthiness")
+a2
+
+
+### FORGIVENESS
+
+p2.forgive <- ggplot(data = childnorms, aes(x=age.year, y=forgiveness.norms, fill = country)) + 
+  geom_smooth(data = childnorms, alpha = 0.2, aes(colour=country), method = "lm") +
+   geom_line(data = childnorms,stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Sheets Returned \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(0,5) +
+     scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_color_manual(legendtitle, 
+                    values = colorpalette) +
+   scale_x_continuous(breaks=c(6, 8, 10, 12))
+p2.forgive
+
+
+
+forgiveness.summary.adult3 <- forgiveness.summary.adult
+forgiveness.summary.adult3$age.year <- 14
+forgiveness.summary.adult3 <- rename(forgiveness.summary.adult3, 
+                                     forgiveness.norms = forgiveness.norm)
+
+
+a3 <- p2.forgive +  
+  geom_pointrange(data=forgiveness.summary.adult3, 
+                  aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se),
+                  position=position_dodge(width=1),
+                  color = colorpalette, 
+                  size = 1.3) + theme(legend.position = "none")  +
+  ggtitle("Forgiveness")
+
+g3
+
+
+## HONESTY
+
+
+p2.honesty <- ggplot(data = childnorms, aes(x=age.year, y=honesty.number.returned, fill = country)) + 
+  geom_smooth(data = childnorms, alpha = 0.2, aes(colour=country), method = "lm") +
+  geom_line(data = childnorms, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Number of Resources Returned \n") + theme_gray() + 
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-.3,3)  +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) + 
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) +
+   scale_x_continuous(breaks=c(6, 8, 10, 12))
+p2.honesty
+
+
+honesty.summary.adult.numreturned3 <- honesty.summary.adult.numreturned
+honesty.summary.adult.numreturned3$age.year <- 14
+honesty.summary.adult.numreturned3 <- rename(honesty.summary.adult.numreturned3, 
+                                     honesty.number.returned  = honesty.numreturned )
+
+a4 <- p2.honesty +  
+  geom_pointrange(data=honesty.summary.adult.numreturned3, 
+                  aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se),
+                  position=position_dodge(width=1),
+                  color = colorpalette, 
+                  size = 1.3) + theme(legend.position = "none")  +
+  ggtitle("Honesty")
+
+a4
+
+
+
+## COMBO PLOT, ADULT NORMS & CHILD NORMS
+
+combo.plot.normsandnorms <- a1 + a2 + a3 + a4
+combo.plot.normsandnorms
+
+#ggsave("combo.plot.normsandnorms.png", plot = combo.plot.normsandnorms, width = 12, height = 9)
+```
+
+
+
+```{r}
+
+## EXTREME AI REJECTIONS - CHILD NORMS & ADULT NORMS
+
+xai.summary.child2 <- summarySE(data = childnorms, na.rm = TRUE,
+                           measurevar = "xai_yesno",
+                           groupvars = c("country", "age.year"))
+xai.summary.child2
+
+xai.temp2 <- ggplot(data = xai.summary.child2, aes(x=age.year, y=xai_yesno, fill = country)) + 
+  geom_smooth(data = xai.summary.child2, aes(colour=country), method = "lm", alpha = 0.1) +
+  geom_line(data= xai.summary.child2, stat = "smooth", method = "lm", aes(colour=country), size = 1.5) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting Extreme AI \n") + theme_gray() +
+  theme(text = element_text(size=19)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19)) + ylim(-0.4,1.4) +
+  scale_fill_manual(legendtitle, 
+                    values = colorpalette) +
+  scale_color_manual(legendtitle, 
+                     values = colorpalette) + 
+  theme(axis.title.x = element_blank()) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+
+xai.temp2
+
+
+
+xai.summary.adult3 <- xai.summary.adult2
+xai.summary.adult3  <- rename(xai.summary.adult3 , xai_yesno= tt7.rejects)
+
+
+
+
+xai.temp3 <- xai.temp2 +
+  geom_pointrange(data=xai.summary.adult3, aes(ymin=xai_yesno-se, ymax=xai_yesno+se),
+                  position=position_dodge(width=2),
+                  color = colorpalette, 
+                  fill = colorpalette,
+                  size = 1.3)  +
+  ggtitle("Extreme AI: Kids' Norms & Adult Norms")
+xai.temp3
+
+
+```
+
+
+
+### Occupations
+
+```{r}
+
+## Yamanunka vs. San Pablo Occupations
+legend.title.2 <- "Father's Occupation"
+legend.title.3 <- "Mother's Occupation"
+
+ecu.occupations.father <- x %>% 
+  select(location.plot, demofatheroccupation.primary, country) %>% 
+  filter(., country == "Ecuador") %>% 
+  ggplot(., aes(location.plot, fill=demofatheroccupation.primary)) +
+  geom_bar(position="fill") +
+  scale_fill_manual(legend.title.2,
+                    values = c("#445B6D", "#B67B5F", "#F6F4EE", "#8BA9A1", 
+                               "#D8BB8E","#BD9286", "#DCBCB4", 
+                               "#B0BCBC", "#EBD7BB" )) +
+  xlab("\n Location") + ylab("Count \n")
+ecu.occupations.father
+
+
+
+ecu.occupations.mother <- x %>% 
+  select(location.plot, demomotheroccupation.primary, country) %>% 
+  filter(., country == "Ecuador") %>% 
+  ggplot(., aes(location.plot, fill=demomotheroccupation.primary)) +
+  geom_bar(position="fill") +
+  scale_fill_manual(legend.title.3,
+                    values = c("#445B6D", "#B67B5F", "#F6F4EE", "#8BA9A1", 
+                               "#D8BB8E","#BD9286", "#DCBCB4", 
+                               "#B0BCBC", "#EBD7BB" )) +
+  xlab("\n Location") + ylab("Count \n")
+ecu.occupations.mother
+
+#ggsave("ecuoccupations.png", plot = ecu.occupations, width = 8, height = 5)
+```
+
+
+```{r}
+
+## Yamanunka vs. San Pablo Occupations
+
+## Father's occupation by country
+occupations.father <- x %>% 
+  select(country, demofatheroccupation.primary, country) %>% 
+  ggplot(., aes(country, fill=demofatheroccupation.primary)) +
+  geom_bar(position="fill") +
+  scale_fill_manual(legend.title.2,
+                    values = c("#445B6D", "#B67B5F", "#F6F4EE", "#8BA9A1", 
+                               "#D8BB8E","#BD9286", "#DCBCB4", 
+                               "#B0BCBC", "#EBD7BB" )) +
+  xlab("\n Location") + ylab("Count \n")
+occupations.father
+
+
+## Mother's occupations by country
+occupations.mother <- x %>% 
+  select(country, demomotheroccupation.primary, country) %>% 
+  ggplot(., aes(country, fill=demomotheroccupation.primary)) +
+  geom_bar(position="fill") +
+  scale_fill_manual(legend.title.3,
+                    values = c("#445B6D", "#B67B5F", "#F6F4EE", "#8BA9A1", 
+                               "#D8BB8E","#BD9286", "#DCBCB4", 
+                               "#B0BCBC", "#EBD7BB" )) +
+  xlab("\n Location") + ylab("Count \n")
+occupations.mother
+
+```
+
+
+
+```{r}
+# occupations 
+
+trust.mod.maineff.occ <- lm(trust.numshared ~ demomotheroccupation.primary, data = x)
+summary(trust.mod.maineff.occ)
+
+
+fair.mod.maineff.occ <-  lmer(dec ~ age.year + demomotheroccupation.primary + dist + (1|pid),
+                      data = x.long)
+summary(fair.mod.maineff.occ)
+
+```
+
+
+
+## Various Descriptive Stats for the Manuscript
+
+```{r}
+table(x$fair.c1) # 99.25% success
+table(x$fair.c2) # 100% success
+
+(99.25+100)/2
+## 99.6%
+
+table(x$trust.c1) # 99.7% success
+table(x$trust.c2) # 100% success
+table(x$trust.c3) # 98% success
+table(x$trust.c4) # 100% success
+table(x$trust.c5) # 99.2% success
+table(x$trust.c6) # 100% success
+(99.7 + 100 + 98 + 100 + 99.2 + 100) / 6
+## 99.5%
+
+
+table(x$forg.c1) # 100% success
+table(x$forg.c2) # 100% success
+# 100%
+
+```
+
+
+
+
+
+
+## OCTOBER COMBO PLOT VIZ  (AKA THE SUPER MEGA PLOT) (Oct 27, 2022)
+
+### ------- Advantageous Inequity October Combo Plot
+#### Uganda
+```{r}
+
+
+## INEQUITY AVERSION
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+just.uganda.ai.child <- ai.summary.2.child %>% 
+  filter(., country == "Uganda") 
+
+
+## plotting kids' norms
+just.uganda.ai <-  ggplot(data = just.uganda.ai.child, aes(x=age.year, y=ai_yesno)) + 
+  geom_smooth(data = just.uganda.ai.child , method = "lm", fill = color.Uganda, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.uganda.ai.child , stat = "smooth", linetype = "dotted",
+            method = "lm", size=1, color = color.Uganda) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   ylim(-0.4,1.4) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.uganda.ai
+
+
+inequity.summary.4v1.adult3 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult3$age.year <- 14
+inequity.summary.4v1.adult3 <- rename(inequity.summary.4v1.adult3, ai_yesno = inequity_4v1)
+
+
+just.uganda.ai.adult <- 
+   inequity.summary.4v1.adult3 %>% 
+  filter(., country == "Uganda")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.uganda.superimposed <- just.uganda.ai + 
+  geom_pointrange(data=just.uganda.ai.adult, 
+                  fatten = 1,
+                  size = 2,
+                  aes(ymin=ai_yesno-se, ymax=ai_yesno+se),
+                  position=position_dodge(width=1),
+                  color = color.Uganda) + theme(legend.position = "none") 
+just.uganda.superimposed
+
+
+
+just.uganda.ai.kids <- ai.only %>% 
+  filter(country == "Uganda") %>% 
+  rename(., ai_yesno = dec)
+
+## now adding in kids' behavior
+# putting it all together
+ai.Uganda.final <- just.uganda.superimposed +
+  geom_smooth(data = just.uganda.ai.kids, alpha=0.2, method = "lm",  fill = color.Uganda) +
+  geom_line(data=just.uganda.ai.kids, stat = "smooth", method = "lm",  size=1,  color = color.Uganda) +
+  ggtitle("AI - Uganda")
+
+ai.Uganda.final  
+
+
+```
+
+
+
+#### USA
+```{r}
+
+
+
+## INEQUITY AVERSION
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+just.USA.ai.child <- ai.summary.2.child %>% 
+  filter(., country == "USA") 
+
+
+## plotting kids' norms
+just.USA.ai <-  ggplot(data = just.USA.ai.child, aes(x=age.year, y=ai_yesno)) + 
+  geom_smooth(data = just.USA.ai.child , method = "lm", fill = color.USA , alpha = 0.09, linetype = 0) +
+  geom_line(data= just.USA.ai.child , stat = "smooth", linetype = "dotted",
+            method = "lm", size=1, color = color.USA ) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   ylim(-0.4,1.4) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.USA.ai
+
+
+inequity.summary.4v1.adult3 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult3$age.year <- 14
+inequity.summary.4v1.adult3 <- rename(inequity.summary.4v1.adult3, ai_yesno = inequity_4v1)
+
+
+just.USA.ai.adult <- 
+   inequity.summary.4v1.adult3 %>% 
+  filter(., country == "USA")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.USA.superimposed <- just.USA.ai + 
+  geom_pointrange(data=just.USA.ai.adult, 
+                  fatten = 1,
+                  size = 2,
+                  aes(ymin=ai_yesno-se, ymax=ai_yesno+se),
+                  position=position_dodge(width=1),
+                  color = color.USA ) + theme(legend.position = "none") 
+just.USA.superimposed
+
+
+
+just.USA.ai.kids <- ai.only %>% 
+  filter(country == "USA") %>% 
+  rename(., ai_yesno = dec)
+
+## now adding in kids' behavior
+# putting it all together
+ai.USA.final <- just.USA.superimposed +
+  geom_smooth(data = just.USA.ai.kids, alpha=0.2, method = "lm",  fill = color.USA ) +
+  geom_line(data=just.USA.ai.kids, stat = "smooth", method = "lm",  size=1,  color = color.USA ) +
+  ggtitle("AI - USA")
+
+ai.USA.final  
+
+
+```
+
+
+
+#### Ecuador
+```{r}
+
+
+## INEQUITY AVERSION
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+just.Ecuador.ai.child <- ai.summary.2.child %>% 
+  filter(., country == "Ecuador") 
+
+
+## plotting kids' norms
+just.Ecuador.ai <-  ggplot(data = just.Ecuador.ai.child, aes(x=age.year, y=ai_yesno)) + 
+  geom_smooth(data = just.Ecuador.ai.child , method = "lm", fill = color.Ecuador, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.Ecuador.ai.child , stat = "smooth", linetype = "dotted",
+            method = "lm", size=1, color = color.Ecuador) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   ylim(-0.4,1.4) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Ecuador.ai
+
+
+inequity.summary.4v1.adult3 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult3$age.year <- 14
+inequity.summary.4v1.adult3 <- rename(inequity.summary.4v1.adult3, ai_yesno = inequity_4v1)
+
+
+just.Ecuador.ai.adult <- 
+   inequity.summary.4v1.adult3 %>% 
+  filter(., country == "Ecuador")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Ecuador.superimposed <- just.Ecuador.ai + 
+  geom_pointrange(data=just.Ecuador.ai.adult, 
+                  fatten = 1,
+                  size = 2,
+                  aes(ymin=ai_yesno-se, ymax=ai_yesno+se),
+                  position=position_dodge(width=1),
+                  color = color.Ecuador) + theme(legend.position = "none") 
+just.Ecuador.superimposed
+
+
+
+just.Ecuador.ai.kids <- ai.only %>% 
+  filter(country == "Ecuador") %>% 
+  rename(., ai_yesno = dec)
+
+## now adding in kids' behavior
+# putting it all together
+ai.Ecuador.final <- just.Ecuador.superimposed +
+  geom_smooth(data = just.Ecuador.ai.kids, alpha=0.2, method = "lm",  fill = color.Ecuador) +
+  geom_line(data=just.Ecuador.ai.kids, stat = "smooth", method = "lm",  size=1,  color = color.Ecuador) +
+  ggtitle("AI - Ecuador")
+
+ai.Ecuador.final  
+
+```
+
+
+
+#### Canada
+
+```{r}
+
+
+
+## INEQUITY AVERSION
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+just.Canada.ai.child <- ai.summary.2.child %>% 
+  filter(., country == "Canada") 
+
+
+## plotting kids' norms
+just.Canada.ai <-  ggplot(data = just.Canada.ai.child, aes(x=age.year, y=ai_yesno)) + 
+  geom_smooth(data = just.Canada.ai.child , method = "lm", fill = color.Canada, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.Canada.ai.child , stat = "smooth", linetype = "dotted",
+            method = "lm", size=1, color = color.Canada) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   ylim(-0.4,1.4) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Canada.ai
+
+
+inequity.summary.4v1.adult3 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult3$age.year <- 14
+inequity.summary.4v1.adult3 <- rename(inequity.summary.4v1.adult3, ai_yesno = inequity_4v1)
+
+
+just.Canada.ai.adult <- 
+   inequity.summary.4v1.adult3 %>% 
+  filter(., country == "Canada")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Canada.superimposed <- just.Canada.ai + 
+  geom_pointrange(data=just.Canada.ai.adult, 
+                  fatten = 1,
+                  size = 2,
+                  aes(ymin=ai_yesno-se, ymax=ai_yesno+se),
+                  position=position_dodge(width=1),
+                  color = color.Canada) + theme(legend.position = "none") 
+just.Canada.superimposed
+
+
+
+just.Canada.ai.kids <- ai.only %>% 
+  filter(country == "Canada") %>% 
+  rename(., ai_yesno = dec)
+
+## now adding in kids' behavior
+# putting it all together
+ai.Canada.final <- just.Canada.superimposed +
+  geom_smooth(data = just.Canada.ai.kids, alpha=0.2, method = "lm",  fill = color.Canada) +
+  geom_line(data=just.Canada.ai.kids, stat = "smooth", method = "lm",  size=1,  color = color.Canada) +
+  ggtitle("AI - Canada")
+
+ai.Canada.final  
+
+```
+
+
+#### Peru
+```{r}
+
+
+
+
+## INEQUITY AVERSION
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+just.Peru.ai.child <- ai.summary.2.child %>% 
+  filter(., country == "Peru") 
+
+
+## plotting kids' norms
+just.Peru.ai <-  ggplot(data = just.Peru.ai.child, aes(x=age.year, y=ai_yesno)) + 
+  geom_smooth(data = just.Peru.ai.child , method = "lm", fill = color.Peru, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.Peru.ai.child , stat = "smooth", linetype = "dotted",
+            method = "lm", size=1, color = color.Peru) +
+  xlab("\n Age") +
+  ylab("Proportion Rejecting AI \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   ylim(-0.4,1.4) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Peru.ai
+
+
+inequity.summary.4v1.adult3 <- inequity.summary.4v1.adult
+inequity.summary.4v1.adult3$age.year <- 14
+inequity.summary.4v1.adult3 <- rename(inequity.summary.4v1.adult3, ai_yesno = inequity_4v1)
+
+
+just.Peru.ai.adult <- 
+   inequity.summary.4v1.adult3 %>% 
+  filter(., country == "Peru")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Peru.superimposed <- just.Peru.ai + 
+  geom_pointrange(data=just.Peru.ai.adult, 
+                  fatten = 1,
+                  size = 2,
+                  aes(ymin=ai_yesno-se, ymax=ai_yesno+se),
+                  position=position_dodge(width=1),
+                  color = color.Peru) + theme(legend.position = "none") 
+just.Peru.superimposed
+
+
+
+just.Peru.ai.kids <- ai.only %>% 
+  filter(country == "Peru") %>% 
+  rename(., ai_yesno = dec)
+
+## now adding in kids' behavior
+# putting it all together
+ai.Peru.final <- just.Peru.superimposed +
+  geom_smooth(data = just.Peru.ai.kids, alpha=0.2, method = "lm",  fill = color.Peru) +
+  geom_line(data=just.Peru.ai.kids, stat = "smooth", method = "lm",  size=1,  color = color.Peru) +
+  ggtitle("AI - Peru")
+
+ai.Peru.final  
+
+
+```
+
+
+#### Combining AI October Plot
+```{r}
+comboplot.alldata.ai <- ai.Ecuador.final  + ai.Peru.final + ai.Uganda.final + ai.Canada.final + ai.USA.final
+comboplot.alldata.ai
+
+vert.ai <- grid.arrange(ai.USA.final  , ai.Canada.final , ai.Uganda.final , ai.Peru.final , ai.Ecuador.final,
+             ncol = 1)
+vert.ai
+
+horiz.ai <- grid.arrange(ai.USA.final  , ai.Canada.final , ai.Uganda.final , ai.Peru.final , ai.Ecuador.final,
+             nrow = 1)
+horiz.ai
+```
+
+
+
+
+
+
+
+
+### ------- Trust October Combo Plot
+
+
+```{r}
+trust.summary.child.2 <- summarySE(data = childnorms, na.rm = TRUE,
+                           measurevar = "trust.norms",
+                           groupvars = c("country", "age.year"))
+trust.summary.child.2
+
+
+trust.summary.adult2 <- trust.summary.adult
+trust.summary.adult2$age.year <- 14
+trust.summary.adult2 <- rename(trust.summary.adult2, trust.norms = trust.norm)
+
+
+
+trust.kidsbehavior.summary <- summarySE(data = x, na.rm = TRUE,
+                         measurevar = "trust.numshared",
+                         groupvars = c("country","age.year"))
+trust.kidsbehavior.summary
+```
+
+
+
+#### Uganda
+```{r}
+
+
+## TRUSTWORTHINESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.uganda.trust.child <- trust.summary.child.2 %>% 
+  filter(., country == "Uganda") 
+just.uganda.trust.child
+
+
+## plotting kids' norms
+just.uganda.trust <-  ggplot(data = just.uganda.trust.child, aes(x=age.year, y= trust.norms )) + 
+  geom_smooth(data = just.uganda.trust.child, method = "lm", fill = color.Uganda, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.uganda.trust.child, stat = "smooth", linetype = "dotted",
+            method = "lm", size = 1, color = color.Uganda) +
+  xlab("\n Age") +
+  ylab("Number Shared \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+ coord_cartesian(ylim = c(0, 6)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.uganda.trust
+
+
+
+just.uganda.trust.adult <- 
+   trust.summary.adult2 %>% 
+  filter(., country == "Uganda")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.uganda.superimposed.trust <- just.uganda.trust + 
+  geom_pointrange(data=just.uganda.trust.adult, aes(ymin=trust.norms-se, ymax=trust.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Uganda) + 
+  theme(legend.position = "none") 
+just.uganda.superimposed.trust
+
+
+
+just.uganda.trust.kids <- trust.kidsbehavior.summary %>% 
+  filter(country == "Uganda")
+
+just.uganda.trust.kids <- rename(just.uganda.trust.kids, trust.norms = trust.numshared)
+
+## now adding in kids' behavior
+
+trust.uganda.final <- just.uganda.superimposed.trust +
+  geom_smooth(data = just.uganda.trust.kids, alpha=0.2, fill = color.Uganda, method = "lm") +
+  geom_line(data=just.uganda.trust.kids, stat = "smooth", method = "lm", size=1,  color = color.Uganda) +
+  ggtitle("Trust - Uganda")
+
+trust.uganda.final  
+
+
+```
+
+
+
+
+#### USA
+```{r}
+
+
+## TRUSTWORTHINESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.USA.trust.child <- trust.summary.child.2 %>% 
+  filter(., country == "USA") 
+just.USA.trust.child
+
+
+## plotting kids' norms
+just.USA.trust <-  ggplot(data = just.USA.trust.child, aes(x=age.year, y= trust.norms )) + 
+  geom_smooth(data = just.USA.trust.child, method = "lm", fill = color.USA , alpha = 0.09, linetype = 0) +
+  geom_line(data= just.USA.trust.child, stat = "smooth", linetype = "dotted",
+            method = "lm", size = 1, color = color.USA ) +
+  xlab("\n Age") +
+  ylab("Number Shared \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+ coord_cartesian(ylim = c(0, 6)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.USA.trust
+
+
+
+just.USA.trust.adult <- 
+   trust.summary.adult2 %>% 
+  filter(., country == "USA")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.USA.superimposed.trust <- just.USA.trust + 
+  geom_pointrange(data=just.USA.trust.adult, aes(ymin=trust.norms-se, ymax=trust.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.USA ) + 
+  theme(legend.position = "none") 
+just.USA.superimposed.trust
+
+
+
+just.USA.trust.kids <- trust.kidsbehavior.summary %>% 
+  filter(country == "USA")
+
+just.USA.trust.kids <- rename(just.USA.trust.kids, trust.norms = trust.numshared)
+
+## now adding in kids' behavior
+
+trust.USA.final <- just.USA.superimposed.trust +
+  geom_smooth(data = just.USA.trust.kids, alpha=0.2, fill = color.USA , method = "lm") +
+  geom_line(data=just.USA.trust.kids, stat = "smooth", method = "lm", size=1,  color = color.USA ) +
+  ggtitle("Trust - USA")
+
+trust.USA.final  
+
+
+```
+
+
+
+
+#### Ecuador
+```{r}
+
+
+## TRUSTWORTHINESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Ecuador.trust.child <- trust.summary.child.2 %>% 
+  filter(., country == "Ecuador") 
+just.Ecuador.trust.child
+
+
+## plotting kids' norms
+just.Ecuador.trust <-  ggplot(data = just.Ecuador.trust.child, aes(x=age.year, y= trust.norms )) + 
+  geom_smooth(data = just.Ecuador.trust.child, method = "lm", fill = color.Ecuador, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.Ecuador.trust.child, stat = "smooth", linetype = "dotted",
+            method = "lm", size = 1, color = color.Ecuador) +
+  xlab("\n Age") +
+  ylab("Number Shared \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 6)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Ecuador.trust
+
+
+
+just.Ecuador.trust.adult <- 
+   trust.summary.adult2 %>% 
+  filter(., country == "Ecuador")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Ecuador.superimposed.trust <- just.Ecuador.trust + 
+  geom_pointrange(data=just.Ecuador.trust.adult, aes(ymin=trust.norms-se, ymax=trust.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Ecuador) + 
+  theme(legend.position = "none") 
+just.Ecuador.superimposed.trust
+
+
+
+just.Ecuador.trust.kids <- trust.kidsbehavior.summary %>% 
+  filter(country == "Ecuador")
+
+just.Ecuador.trust.kids <- rename(just.Ecuador.trust.kids, trust.norms = trust.numshared)
+
+## now adding in kids' behavior
+
+trust.Ecuador.final <- just.Ecuador.superimposed.trust +
+  geom_smooth(data = just.Ecuador.trust.kids, alpha=0.2, fill = color.Ecuador, method = "lm") +
+  geom_line(data=just.Ecuador.trust.kids, stat = "smooth", method = "lm", size=1,  color = color.Ecuador) +
+  ggtitle("Trust - Ecuador")
+
+trust.Ecuador.final  
+
+
+```
+
+
+
+
+
+#### Canada
+```{r}
+
+
+## TRUSTWORTHINESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Canada.trust.child <- trust.summary.child.2 %>% 
+  filter(., country == "Canada") 
+just.Canada.trust.child
+
+
+## plotting kids' norms
+just.Canada.trust <-  ggplot(data = just.Canada.trust.child, aes(x=age.year, y= trust.norms )) + 
+  geom_smooth(data = just.Canada.trust.child, method = "lm", fill = color.Canada, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.Canada.trust.child, stat = "smooth", linetype = "dotted",
+            method = "lm", size = 1, color = color.Canada) +
+  xlab("\n Age") +
+  ylab("Number Shared \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 6)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Canada.trust
+
+
+
+just.Canada.trust.adult <- 
+   trust.summary.adult2 %>% 
+  filter(., country == "Canada")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Canada.superimposed.trust <- just.Canada.trust + 
+  geom_pointrange(data=just.Canada.trust.adult, aes(ymin=trust.norms-se, ymax=trust.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Canada) + 
+  theme(legend.position = "none") 
+just.Canada.superimposed.trust
+
+
+
+just.Canada.trust.kids <- trust.kidsbehavior.summary %>% 
+  filter(country == "Canada")
+
+just.Canada.trust.kids <- rename(just.Canada.trust.kids, trust.norms = trust.numshared)
+
+## now adding in kids' behavior
+
+trust.Canada.final <- just.Canada.superimposed.trust +
+  geom_smooth(data = just.Canada.trust.kids, alpha=0.2, fill = color.Canada, method = "lm") +
+  geom_line(data=just.Canada.trust.kids, stat = "smooth", method = "lm", size=1,  color = color.Canada) +
+  ggtitle("Trust - Canada")
+
+trust.Canada.final  
+
+
+
+
+```
+
+
+
+#### Peru
+```{r}
+
+
+## TRUSTWORTHINESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Peru.trust.child <- trust.summary.child.2 %>% 
+  filter(., country == "Peru") 
+just.Peru.trust.child
+
+
+## plotting kids' norms
+just.Peru.trust <-  ggplot(data = just.Peru.trust.child, aes(x=age.year, y= trust.norms )) + 
+  geom_smooth(data = just.Peru.trust.child, method = "lm", fill = color.Peru, alpha = 0.09, linetype = 0) +
+  geom_line(data= just.Peru.trust.child, stat = "smooth", linetype = "dotted",
+            method = "lm", size = 1, color = color.Peru) +
+  xlab("\n Age") +
+  ylab("Number Shared \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 6)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Peru.trust
+
+
+
+just.Peru.trust.adult <- 
+   trust.summary.adult2 %>% 
+  filter(., country == "Peru")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Peru.superimposed.trust <- just.Peru.trust + 
+  geom_pointrange(data=just.Peru.trust.adult, aes(ymin=trust.norms-se, ymax=trust.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Peru) + 
+  theme(legend.position = "none") 
+just.Peru.superimposed.trust
+
+
+
+just.Peru.trust.kids <- trust.kidsbehavior.summary %>% 
+  filter(country == "Peru")
+
+just.Peru.trust.kids <- rename(just.Peru.trust.kids, trust.norms = trust.numshared)
+
+## now adding in kids' behavior
+
+trust.Peru.final <- just.Peru.superimposed.trust +
+  geom_smooth(data = just.Peru.trust.kids, alpha=0.2, fill = color.Peru, method = "lm") +
+  geom_line(data=just.Peru.trust.kids, stat = "smooth", method = "lm", size=1,  color = color.Peru) +
+  ggtitle("Trust - Peru")
+
+trust.Peru.final  
+
+
+
+```
+
+
+
+
+#### Combining Trust October Plot
+```{r}
+comboplot.alldata.trust <- trust.Peru.final + trust.Canada.final + trust.USA.final + trust.Ecuador.final + trust.uganda.final
+comboplot.alldata.trust
+
+vert.trust <- grid.arrange(trust.USA.final, trust.Canada.final, trust.uganda.final, 
+                           trust.Peru.final, trust.Ecuador.final,
+                           ncol = 1)
+vert.trust
+
+horiz.trust <- grid.arrange(trust.USA.final, trust.Canada.final, trust.uganda.final, 
+                           trust.Peru.final, trust.Ecuador.final,
+                           nrow = 1)
+horiz.trust
+```
+
+
+
+
+
+### ------- Forgiveness October Combo Plot
+
+
+```{r}
+forgive.summary.child.2 <- summarySE(data = childnorms, na.rm = TRUE,
+                           measurevar = "forgiveness.norms",
+                           groupvars = c("country", "age.year"))
+forgive.summary.child.2
+
+
+forgiveness.summary.adult4 <- forgiveness.summary.adult3
+forgiveness.summary.adult4$age.year <- 14
+
+
+forgive.kidsbehavior.summary <- summarySE(data = x, na.rm = TRUE,
+                         measurevar = "forg.givenback",
+                         groupvars = c("country","age.year"))
+
+forgive.kidsbehavior.summary <- rename(forgive.kidsbehavior.summary, forgiveness.norms = forg.givenback)
+forgive.kidsbehavior.summary
+```
+
+
+
+#### Uganda
+```{r}
+
+
+## FORGIVENESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.uganda.forgive.child <- forgive.summary.child.2 %>% 
+  filter(., country == "Uganda") 
+just.uganda.forgive.child
+
+
+just.uganda.forgive <-  ggplot(data = just.uganda.forgive.child, 
+                               aes(x=age.year, y= forgiveness.norms)) + 
+  geom_smooth(data = just.uganda.forgive.child, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0,
+              fill = color.Uganda) +
+  geom_line(data= just.uganda.forgive.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Uganda, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   coord_cartesian(ylim = c(0, 5)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.uganda.forgive
+
+
+
+just.uganda.forgive.adult <- 
+   forgiveness.summary.adult4 %>% 
+  filter(., country == "Uganda")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.uganda.superimposed.forgive <- 
+  just.uganda.forgive + 
+  geom_pointrange(data=just.uganda.forgive.adult, 
+                  aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Uganda) + 
+  theme(legend.position = "none") 
+just.uganda.superimposed.forgive
+
+
+
+just.uganda.forgive.kids <- forgive.kidsbehavior.summary %>% 
+  filter(country == "Uganda")
+
+## now adding in kids' behavior
+
+forgive.uganda.final <- just.uganda.superimposed.forgive +
+  geom_smooth(data = just.uganda.forgive.kids, 
+              alpha=0.2, 
+              fill = color.Uganda, 
+              method = "lm") +
+  geom_line(data=just.uganda.forgive.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Uganda, 
+            size = 1) +
+  ggtitle("Forgiveness - Uganda")
+
+forgive.uganda.final
+
+```
+
+
+
+#### USA
+```{r}
+
+
+## FORGIVENESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.USA.forgive.child <- forgive.summary.child.2 %>% 
+  filter(., country == "USA") 
+just.USA.forgive.child
+
+
+just.USA.forgive <-  ggplot(data = just.USA.forgive.child, 
+                               aes(x=age.year, y= forgiveness.norms)) + 
+  geom_smooth(data = just.USA.forgive.child, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0,
+              fill = color.USA) +
+  geom_line(data= just.USA.forgive.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.USA, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   coord_cartesian(ylim = c(0, 5)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.USA.forgive
+
+
+
+just.USA.forgive.adult <- 
+   forgiveness.summary.adult4 %>% 
+  filter(., country == "USA")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.USA.superimposed.forgive <- 
+  just.USA.forgive + 
+  geom_pointrange(data=just.USA.forgive.adult, 
+                  aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.USA) + 
+  theme(legend.position = "none") 
+just.USA.superimposed.forgive
+
+
+
+just.USA.forgive.kids <- forgive.kidsbehavior.summary %>% 
+  filter(country == "USA")
+
+## now adding in kids' behavior
+
+forgive.USA.final <- just.USA.superimposed.forgive +
+  geom_smooth(data = just.USA.forgive.kids, 
+              alpha=0.2, 
+              fill = color.USA, 
+              method = "lm") +
+  geom_line(data=just.USA.forgive.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.USA, 
+            size = 1) +
+  ggtitle("Forgiveness - USA")
+
+forgive.USA.final
+
+```
+
+
+
+
+#### Ecuador
+```{r}
+
+
+## FORGIVENESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Ecuador.forgive.child <- forgive.summary.child.2 %>% 
+  filter(., country == "Ecuador") 
+just.Ecuador.forgive.child
+
+
+just.Ecuador.forgive <-  ggplot(data = just.Ecuador.forgive.child, 
+                               aes(x=age.year, y= forgiveness.norms)) + 
+  geom_smooth(data = just.Ecuador.forgive.child, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0,
+              fill = color.Ecuador) +
+  geom_line(data= just.Ecuador.forgive.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Ecuador, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   coord_cartesian(ylim = c(0, 5)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Ecuador.forgive
+
+
+
+just.Ecuador.forgive.adult <- 
+   forgiveness.summary.adult4 %>% 
+  filter(., country == "Ecuador")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Ecuador.superimposed.forgive <- 
+  just.Ecuador.forgive + 
+  geom_pointrange(data=just.Ecuador.forgive.adult, 
+                  aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Ecuador) + 
+  theme(legend.position = "none") 
+just.Ecuador.superimposed.forgive
+
+
+
+just.Ecuador.forgive.kids <- forgive.kidsbehavior.summary %>% 
+  filter(country == "Ecuador")
+
+## now adding in kids' behavior
+
+forgive.Ecuador.final <- just.Ecuador.superimposed.forgive +
+  geom_smooth(data = just.Ecuador.forgive.kids, 
+              alpha=0.2, 
+              fill = color.Ecuador, 
+              method = "lm") +
+  geom_line(data=just.Ecuador.forgive.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Ecuador, 
+            size = 1) +
+  ggtitle("Forgiveness - Ecuador")
+
+forgive.Ecuador.final
+
+```
+
+
+
+
+
+#### Canada
+```{r}
+
+
+## FORGIVENESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Canada.forgive.child <- forgive.summary.child.2 %>% 
+  filter(., country == "Canada") 
+just.Canada.forgive.child
+
+
+just.Canada.forgive <-  ggplot(data = just.Canada.forgive.child, 
+                               aes(x=age.year, y= forgiveness.norms)) + 
+  geom_smooth(data = just.Canada.forgive.child, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0,
+              fill = color.Canada) +
+  geom_line(data= just.Canada.forgive.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Canada, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   coord_cartesian(ylim = c(0, 5)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Canada.forgive
+
+
+
+just.Canada.forgive.adult <- 
+   forgiveness.summary.adult4 %>% 
+  filter(., country == "Canada")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Canada.superimposed.forgive <- 
+  just.Canada.forgive + 
+  geom_pointrange(data=just.Canada.forgive.adult, 
+                  aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Canada) + 
+  theme(legend.position = "none") 
+just.Canada.superimposed.forgive
+
+
+
+just.Canada.forgive.kids <- forgive.kidsbehavior.summary %>% 
+  filter(country == "Canada")
+
+## now adding in kids' behavior
+
+forgive.Canada.final <- just.Canada.superimposed.forgive +
+  geom_smooth(data = just.Canada.forgive.kids, 
+              alpha=0.2, 
+              fill = color.Canada, 
+              method = "lm") +
+  geom_line(data=just.Canada.forgive.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Canada, 
+            size = 1) +
+  ggtitle("Forgiveness - Canada")
+
+forgive.Canada.final
+
+```
+
+
+
+
+#### Peru
+```{r}
+
+
+
+
+## FORGIVENESS
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Peru.forgive.child <- forgive.summary.child.2 %>% 
+  filter(., country == "Peru") 
+just.Peru.forgive.child
+
+
+just.Peru.forgive <-  ggplot(data = just.Peru.forgive.child, 
+                               aes(x=age.year, y= forgiveness.norms)) + 
+  geom_smooth(data = just.Peru.forgive.child, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0,
+              fill = color.Peru) +
+  geom_line(data= just.Peru.forgive.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Peru, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+   coord_cartesian(ylim = c(0, 5)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Peru.forgive
+
+
+
+just.Peru.forgive.adult <- 
+   forgiveness.summary.adult4 %>% 
+  filter(., country == "Peru")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Peru.superimposed.forgive <- 
+  just.Peru.forgive + 
+  geom_pointrange(data=just.Peru.forgive.adult, 
+                  aes(ymin=forgiveness.norms-se, ymax=forgiveness.norms+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Peru) + 
+  theme(legend.position = "none") 
+just.Peru.superimposed.forgive
+
+
+
+just.Peru.forgive.kids <- forgive.kidsbehavior.summary %>% 
+  filter(country == "Peru")
+
+## now adding in kids' behavior
+
+forgive.Peru.final <- just.Peru.superimposed.forgive +
+  geom_smooth(data = just.Peru.forgive.kids, 
+              alpha=0.2, 
+              fill = color.Peru, 
+              method = "lm") +
+  geom_line(data=just.Peru.forgive.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Peru, 
+            size = 1) +
+  ggtitle("Forgiveness - Peru")
+
+forgive.Peru.final
+```
+
+
+
+#### Combining Forgiveness October Plot
+```{r}
+comboplot.alldata.forgive <- forgive.Peru.final + forgive.Canada.final + forgive.USA.final + forgive.Ecuador.final + forgive.uganda.final
+comboplot.alldata.forgive
+
+vert.forgive <- grid.arrange(forgive.USA.final, forgive.Canada.final, forgive.uganda.final, forgive.Peru.final, forgive.Ecuador.final,
+                             ncol = 1)
+vert.forgive
+
+horiz.forgive <- grid.arrange(forgive.USA.final, forgive.Canada.final, forgive.uganda.final, forgive.Peru.final, forgive.Ecuador.final,
+                             nrow = 1)
+horiz.forgive
+```
+
+
+
+
+### ------- Honesty October Combo Plot
+
+
+```{r}
+
+honesty.summary.child3 <- summarySE(data = childnorms, na.rm = TRUE,
+                            measurevar = "honesty.number.returned",
+                            groupvars = c("country", "age.year"))
+honesty.summary.child3
+
+
+
+honesty.summary.adult.numreturned4 <- honesty.summary.adult.numreturned3
+honesty.summary.adult.numreturned4$age.year <- 14
+
+
+honesty.kidsbehavior.summary <- summarySE(data = x, na.rm = TRUE,
+                         measurevar = "honesty.numreturned",
+                         groupvars = c("country","age.year"))
+
+honesty.kidsbehavior.summary <- rename(honesty.kidsbehavior.summary, honesty.number.returned = honesty.numreturned)
+honesty.kidsbehavior.summary
+```
+
+
+
+#### Uganda
+```{r}
+
+
+## HONESTY
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.uganda.honesty.child <- honesty.summary.child3 %>% 
+  filter(., country == "Uganda") 
+just.uganda.honesty.child
+
+
+just.uganda.honesty <-  ggplot(data = just.uganda.honesty.child, 
+                               aes(x=age.year, y= honesty.number.returned)) + 
+  geom_smooth(data = just.uganda.honesty.child, 
+              fill = color.Uganda, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0) +
+  geom_line(data= just.uganda.honesty.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Uganda, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 4)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.uganda.honesty
+
+
+
+just.uganda.honesty.adult <- 
+   honesty.summary.adult.numreturned4 %>% 
+  filter(., country == "Uganda")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.uganda.superimposed.honesty <- just.uganda.honesty + 
+  geom_pointrange(data=just.uganda.honesty.adult, 
+                  aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Uganda) + 
+  theme(legend.position = "none") 
+just.uganda.superimposed.honesty
+
+
+
+just.uganda.honesty.kids <- honesty.kidsbehavior.summary %>% 
+  filter(country == "Uganda")
+
+## now adding in kids' behavior
+
+honesty.uganda.final <- just.uganda.superimposed.honesty +
+  geom_smooth(data = just.uganda.honesty.kids, 
+              alpha=0.2, 
+              fill = color.Uganda, 
+              method = "lm") +
+  geom_line(data=just.uganda.honesty.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Uganda, 
+            size = 1) +
+  ggtitle("Honesty - Uganda")
+
+honesty.uganda.final
+
+```
+
+
+
+
+
+#### USA
+```{r}
+
+
+## HONESTY
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.USA.honesty.child <- honesty.summary.child3 %>% 
+  filter(., country == "USA") 
+just.USA.honesty.child
+
+
+just.USA.honesty <-  ggplot(data = just.USA.honesty.child, 
+                               aes(x=age.year, y= honesty.number.returned)) + 
+  geom_smooth(data = just.USA.honesty.child, 
+              fill = color.USA, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0) +
+  geom_line(data= just.USA.honesty.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.USA, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 4)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.USA.honesty
+
+
+
+just.USA.honesty.adult <- 
+   honesty.summary.adult.numreturned4 %>% 
+  filter(., country == "USA")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.USA.superimposed.honesty <- just.USA.honesty + 
+  geom_pointrange(data=just.USA.honesty.adult, 
+                  aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.USA) + 
+  theme(legend.position = "none") 
+just.USA.superimposed.honesty
+
+
+
+just.USA.honesty.kids <- honesty.kidsbehavior.summary %>% 
+  filter(country == "USA")
+
+## now adding in kids' behavior
+
+honesty.USA.final <- just.USA.superimposed.honesty +
+  geom_smooth(data = just.USA.honesty.kids, 
+              alpha=0.2, 
+              fill = color.USA, 
+              method = "lm") +
+  geom_line(data=just.USA.honesty.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.USA, 
+            size = 1) +
+  ggtitle("Honesty - USA")
+
+honesty.USA.final
+
+
+```
+
+
+
+
+
+
+#### Ecuador
+```{r}
+
+
+
+## HONESTY
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Ecuador.honesty.child <- honesty.summary.child3 %>% 
+  filter(., country == "Ecuador") 
+just.Ecuador.honesty.child
+
+
+just.Ecuador.honesty <-  ggplot(data = just.Ecuador.honesty.child, 
+                               aes(x=age.year, y= honesty.number.returned)) + 
+  geom_smooth(data = just.Ecuador.honesty.child, 
+              fill = color.Ecuador, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0) +
+  geom_line(data= just.Ecuador.honesty.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Ecuador, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 4)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Ecuador.honesty
+
+
+
+just.Ecuador.honesty.adult <- 
+   honesty.summary.adult.numreturned4 %>% 
+  filter(., country == "Ecuador")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Ecuador.superimposed.honesty <- just.Ecuador.honesty + 
+  geom_pointrange(data=just.Ecuador.honesty.adult, 
+                  aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Ecuador) + 
+  theme(legend.position = "none") 
+just.Ecuador.superimposed.honesty
+
+
+
+just.Ecuador.honesty.kids <- honesty.kidsbehavior.summary %>% 
+  filter(country == "Ecuador")
+
+## now adding in kids' behavior
+
+honesty.Ecuador.final <- just.Ecuador.superimposed.honesty +
+  geom_smooth(data = just.Ecuador.honesty.kids, 
+              alpha=0.2, 
+              fill = color.Ecuador, 
+              method = "lm") +
+  geom_line(data=just.Ecuador.honesty.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Ecuador, 
+            size = 1) +
+  ggtitle("Honesty - Ecuador")
+
+honesty.Ecuador.final
+
+
+```
+
+
+
+
+
+
+
+#### Canada
+```{r}
+
+
+## HONESTY
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Canada.honesty.child <- honesty.summary.child3 %>% 
+  filter(., country == "Canada") 
+just.Canada.honesty.child
+
+
+just.Canada.honesty <-  ggplot(data = just.Canada.honesty.child, 
+                               aes(x=age.year, y= honesty.number.returned)) + 
+  geom_smooth(data = just.Canada.honesty.child, 
+              fill = color.Canada, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0) +
+  geom_line(data= just.Canada.honesty.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Canada, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 4)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Canada.honesty
+
+
+
+just.Canada.honesty.adult <- 
+   honesty.summary.adult.numreturned4 %>% 
+  filter(., country == "Canada")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Canada.superimposed.honesty <- just.Canada.honesty + 
+  geom_pointrange(data=just.Canada.honesty.adult, 
+                  aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Canada) + 
+  theme(legend.position = "none") 
+just.Canada.superimposed.honesty
+
+
+
+just.Canada.honesty.kids <- honesty.kidsbehavior.summary %>% 
+  filter(country == "Canada")
+
+## now adding in kids' behavior
+
+honesty.Canada.final <- just.Canada.superimposed.honesty +
+  geom_smooth(data = just.Canada.honesty.kids, 
+              alpha=0.2, 
+              fill = color.Canada, 
+              method = "lm") +
+  geom_line(data=just.Canada.honesty.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Canada, 
+            size = 1) +
+  ggtitle("Honesty - Canada")
+
+honesty.Canada.final
+
+
+```
+
+
+
+
+
+
+#### Peru
+```{r}
+
+
+## HONESTY
+## KIDS NORM AS A DASHED LINE
+## KIDS BEHAVIOR AS A STRAIGHT LINE
+## ADULT NORM AS A POINTRANGE
+
+
+
+## CHILD NORM
+just.Peru.honesty.child <- honesty.summary.child3 %>% 
+  filter(., country == "Peru") 
+just.Peru.honesty.child
+
+
+just.Peru.honesty <-  ggplot(data = just.Peru.honesty.child, 
+                               aes(x=age.year, y= honesty.number.returned)) + 
+  geom_smooth(data = just.Peru.honesty.child, 
+              fill = color.Peru, 
+              method = "lm", 
+              alpha = 0.09, 
+              linetype = 0) +
+  geom_line(data= just.Peru.honesty.child, 
+            stat = "smooth", 
+            linetype = "dotted",
+            method = "lm", 
+            color = color.Peru, 
+            size = 1) +
+  xlab("\n Age") +
+  ylab("Number Returned \n") + theme_gray() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  coord_cartesian(ylim = c(0, 4)) +
+  scale_x_continuous(breaks=c(6, 8, 10, 12))
+just.Peru.honesty
+
+
+
+just.Peru.honesty.adult <- 
+   honesty.summary.adult.numreturned4 %>% 
+  filter(., country == "Peru")
+
+
+## so now we have a graph that's adult norms in a pointrange, and kid norms as a line
+just.Peru.superimposed.honesty <- just.Peru.honesty + 
+  geom_pointrange(data=just.Peru.honesty.adult, 
+                  aes(ymin=honesty.number.returned-se, ymax=honesty.number.returned+se),
+                  position=position_dodge(width=1),
+                  fatten = 1,
+                  size = 2,
+                  color = color.Peru) + 
+  theme(legend.position = "none") 
+just.Peru.superimposed.honesty
+
+
+
+just.Peru.honesty.kids <- honesty.kidsbehavior.summary %>% 
+  filter(country == "Peru")
+
+## now adding in kids' behavior
+
+honesty.Peru.final <- just.Peru.superimposed.honesty +
+  geom_smooth(data = just.Peru.honesty.kids, 
+              alpha=0.2, 
+              fill = color.Peru, 
+              method = "lm") +
+  geom_line(data=just.Peru.honesty.kids, 
+            stat = "smooth", 
+            method = "lm", 
+            color = color.Peru, 
+            size = 1) +
+  ggtitle("Honesty - Peru")
+
+honesty.Peru.final
+
+
+
+```
+
+
+
+
+#### Combining Honesty October Plot
+```{r}
+comboplot.alldata.honesty <- honesty.Peru.final + honesty.Canada.final + honesty.USA.final + honesty.Ecuador.final + honesty.uganda.final
+comboplot.alldata.honesty
+
+vert.honesty <- grid.arrange(honesty.USA.final, honesty.Canada.final, honesty.uganda.final, honesty.Peru.final, honesty.Ecuador.final,
+             ncol = 1)
+vert.honesty 
+
+
+
+horiz.honesty <- grid.arrange(honesty.USA.final, honesty.Canada.final, honesty.uganda.final, honesty.Peru.final, honesty.Ecuador.final,
+             nrow = 1)
+horiz.honesty 
+```
+
+
+
+
+```{r, super mega plot}
+## combining all vertical plots for super mega plot
+
+supermega <- grid.arrange(vert.ai , vert.trust , vert.forgive , vert.honesty, ncol = 4)
+supermega
+
+## vertical, each country is a column
+supermega2 <- grid.arrange(arrangeGrob(vert.ai, top = "AI"),
+                           arrangeGrob(vert.trust, top = "Trustworthiness"),
+                           arrangeGrob(vert.forgive, top = "Forgiveness"),
+                           arrangeGrob(vert.honesty, top = "Honesty"),
+                           ncol = 4)
+supermega2
+
+
+## horizontal, each task is a column
+supermega3 <- grid.arrange(horiz.ai, horiz.trust, 
+                           horiz.forgive, horiz.honesty,
+                           nrow = 4)
+supermega3
+
+
+```
+
+
+
+```{r}
+#Order effects output table
+
+# # outputting to table
+# htmlreg(
+#   list(honesty.mod.maineff.lpm.oe, trust.mod.maineff.oe,
+#        forg.mod.maineff.oe, fair.mod.maineff.oe), # list of models to include
+#   file = "No order effects.doc",  # output filename
+#   stars = c(0.001, 0.01, 0.05),
+#   center = TRUE,                     # center on page
+#   digits = 2,                        # digits for coefs and standard errors
+#   naive = TRUE,
+#   single.row = FALSE,                # standard errors below coefs or on same line
+#   leading.zero = TRUE,
+#   custom.model.names = c("Honesty Model", "Trustworthiness Model",
+#                          "Forgiveness Model", "Inequity Model"), # model names
+#   inline.css = FALSE, doctype = TRUE, html.tag = TRUE, head.tag = TRUE, body.tag = TRUE
+# )
+```
+

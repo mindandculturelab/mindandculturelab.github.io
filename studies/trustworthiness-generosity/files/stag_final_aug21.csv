@@ -1,0 +1,119 @@
+﻿pid,location,ageyears,exactage,agegroup,gender,condition,comp1,comp2,comp3,comp4,comp5,comp6,comp7,comp8,numberkept,numbershared,q.expectation,expectation,cat.expectation
+E1,commons,6,6.194835681,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,4,2,not sure,,unsure
+E10,commons,7,7.345653662,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,four,4,4
+E11,commons,5,5.748435055,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,cwe1,3,3,not sure,,unsure
+E12,acton,6,6.252347418,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,three,3,3
+E13,acton,8,8.567386675,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,5,1,not sure,,unsure
+E2,zoo,6,6.06885759,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,4,2,"not sure, maybe 2",2,2
+E3,zoo,5,5.063441351,5-6 years old,M,generosity,cwe1,sc,sc,sc,,,sc,cwe1,5,1,two,2,2
+E4,zoo,6,6.460485133,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,six,6,6
+E5,zoo,8,8.572862793,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,5,1,zero,0,0
+E7,commons,7,7.735016733,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,six,6,6
+E8,commons,7,7.452429843,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,three,3,3
+E9,commons,6,6.891170431,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,not sure,,unsure
+P1,commons,5,5.723787167,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,all of them,6,6
+P10,acton,5,5.126426289,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,5,1,more than,,uninterpretable
+P100,commons,8,8.5,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,4,2,six,6,6
+P101,acton,8,8.069059933,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,I don’t know,,unsure
+P102,commons,8,7.230663929,7-8 years old,M,generosity,cwe1,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P103,commons,7,7.170431211,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,6,0,one,1,1
+P104,commons,8,8.625410734,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,5,1,three,3,3
+P105,acton,8,8.71577218,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,"half, three",3,3
+P106,commons,7,7.392197125,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,three,3,3
+P107,commons,7,7.869181625,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,four,4,4
+P108,commons,7,7.091033539,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P11,acton,6,6.082550861,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,5,1,one,1,1
+P110,commons,7,7.526351814,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,"three, cuz I have three",3,3
+P111,commons,8,8.266200183,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,three,3,3
+P112,acton,7,7.65835108,7-8 years old,M,generosity,sc,sc,sc,sc,sc,sc,sc,sc,3,3,four,4,4
+P12,acton,6,6.085289515,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,three,3,3
+P13,commons,6,6.704996578,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,cwe2,0,6,not sure,,unsure
+P14,commons,5,5.882629108,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,four,4,4
+P15,commons,6,6.5,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,5,1,four,4,4
+P16,acton,6,6.137323944,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,2,4,none,0,0
+P17,zoo,5,5.123687814,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,five,5,5
+P18,acton,6,6.570031299,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,four or five,,multiple numbers given
+P19,commons,6,6.757015743,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,two,2,2
+P2,commons,6,6.636550308,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,two,2,2
+P20,commons,5,5.235965313,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,5,1,one,1,1
+P21,acton,6,6.48513302,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,idk,,unsure
+P22,commons,6,6.131846635,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P23,commons,5,5.112733911,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,six,6,6
+P24,zoo,5,5.868935837,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,5,1,not sure,,unsure
+P25,zoo,6,6.096244131,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,all of them,6,6
+P26,commons,6,6.624804382,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,two,2,2
+P27,commons,6,6.858316222,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,three,3,3
+P28,commons,5,5.983959311,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,two,2,2
+P29,commons,5,5.304427202,5-6 years old,M,standard,sc,sc,sc,i,cwe1,sc,sc,sc,3,3,two ,2,2
+P3,acton,6,6.413928013,5-6 years old,F,standard,sc,sc,sc,sc,sc,cwe1,sc,sc,3,3,two,2,2
+P31,acton,6,6.951403149,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,6,0,three,3,3
+P32,commons,6,6.814510609,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,6,0,none,0,0
+P33,acton,5,5.723787167,5-6 years old,M,standard,sc,cwe1,sc,sc,sc,cwe1,sc,cwe1,3,3,not sure,,unsure
+P34,commons,5,5.016887266,5-6 years old,M,standard,sc,sc,sc,sc,sc,cwe1,sc,sc,3,3,good,,uninterpretable
+P35,commons,6,6.211267606,5-6 years old,M,standard,cwe1,sc,sc,sc,sc,cwe1,sc,sc,3,3,three,3,3
+P36,commons,6,6.691307324,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,6,0,two,2,2
+P37,acton,5,5.693661972,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,six,6,6
+P38,commons,5,5.340027385,5-6 years old,M,generosity,cwe1,sc,sc,sc,,,sc,sc,6,0,two,2,2
+P39,acton,5,5.726525822,5-6 years old,M,standard,cwe1,sc,sc,sc,cwe1,sc,sc,sc,4,2,four,4,4
+P4,commons,6,6.123630673,5-6 years old,F,generosity,sc,sc,cwe1,sc,,,sc,sc,3,3,three,3,3
+P40,acton,5,5.737480438,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,4,2,not sure,,unsure
+P42,commons,6,6.063380282,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,zero,0,0
+P43,zoo,5,5.252396166,5-6 years old,M,standard,sc,sc,sc,cwe1,sc,sc,sc,sc,3,3,one,1,1
+P44,acton,6,6.74880219,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,two or four or maybe three,,multiple numbers given
+P45,acton,5,5.301688727,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,four,4,4
+P46,acton,6,6.951403149,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,6,0,at least three,3,3
+P47,acton,5,5.882629108,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,six,6,6
+P48,zoo,5,5.871674491,5-6 years old,M,generosity,cwe1,sc,sc,sc,,,sc,sc,4,2,1,1,1
+P49,acton,6,6.186619718,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,not sure,,unsure
+P5,acton,5,5.104518485,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,I don’t know,,unsure
+P50,acton,6,6.498826291,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,three,3,3
+P51,acton,5,5.879890454,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,three,3,3
+P52,acton,5,5.126426289,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P53,acton,6,6.896646133,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,5,1,three,3,3
+P54,acton,5,5.438612506,5-6 years old,M,standard,sc,sc,sc,sc,sc,cwe1,sc,sc,2,4,six,6,6
+P55,commons,6,6.474178404,5-6 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,three,3,3
+P56,acton,5,5.8114241,5-6 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,6,0,for the bag,,uninterpretable
+P57,commons,8,8.003346517,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,three I guess,3,3
+P58,acton,7,7.206023272,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,five,5,5
+P6,acton,5,5.885367762,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,not sure,,unsure
+P60,acton,7,7.789777913,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,ten,,implausible number given
+P61,commons,7,7.496805598,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,three,3,3
+P62,acton,7,7.565257073,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,four,4,4
+P63,commons,7,7.57347125,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,three,3,3
+P64,commons,8,8.017036812,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P65,commons,8,8.841730559,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,1,5,four,4,4
+P66,acton,7,7.557042896,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,four,4,4
+P67,commons,8,8.751369113,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,five,5,5
+P68,commons,7,7.923942805,7-8 years old,F,generosity,sc,sc,sc,sc,,,cwe1,sc,6,0,zero,0,0
+P69,acton,8,8.000608458,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,four,4,4
+P7,acton,5,5.685446009,5-6 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,not sure,,unsure
+P70,commons,8,8.090964405,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,two,2,2
+P71,acton,8,8.096440523,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,four,4,4
+P72,acton,7,7.975965926,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,two or three,,multiple numbers given
+P73,commons,7,7.277207392,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,2,4,not sure,,unsure
+P74,acton,8,8.041679343,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,nothing,0,0
+P75,acton,8,8.16215394,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,idk,,unsure
+P76,commons,7,7.244353183,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,six,6,6
+P78,acton,7,7.047227926,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P79,commons,8,8.318223304,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,three,3,3
+P8,acton,5,5.575899844,5-6 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,three,3,3
+P80,zoo,8,8.219653179,7-8 years old,F,generosity,cwe2,cwe2,sc,sc,,,sc,sc,3,3,four,4,4
+P81,acton,8,8.320961363,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,six,6,6
+P82,commons,8,8.572862793,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,two,2,2
+P83,commons,7,7.682993611,7-8 years old,F,standard,sc,sc,sc,sc,sc,sc,cwe1,sc,3,3,the even split: ,3,3
+P84,commons,8,8.498935199,7-8 years old,F,generosity,sc,sc,sc,sc,,,sc,sc,4,2,three,3,3
+P85,commons,8,8.781489595,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,three,3,3
+P86,acton,7,7.082819986,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,all of them,6,6
+P87,commons,8,8.208700943,7-8 years old,M,standard,cwe1,sc,sc,sc,sc,sc,sc,sc,4,2,three,3,3
+P89,commons,8,8.838992333,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,4,2,a lot,,uninterpretable
+P9,commons,5,5.729264476,5-6 years old,F,standard,sc,sc,sc,cwe2,cwe1,sc,sc,sc,3,3,three,3,3
+P90,commons,8,8.008822635,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,5,1,four or three,,multiple numbers given
+P91,acton,7,7.729540615,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,three,3,3
+P92,commons,8,8.375722543,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,5,1,a lot,,uninterpretable
+P93,acton,7,7.238877481,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,five,5,5
+P94,commons,8,8.84720701,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,about all of them,6,6
+P95,commons,7,7.880133861,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,4,2,three,3,3
+P96,acton,8,8.140249468,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,4,2,two or three,,multiple numbers given
+P97,commons,8,8.419531488,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,not sure,,unsure
+P98,commons,7,7.932156982,7-8 years old,M,generosity,sc,sc,sc,sc,,,sc,sc,3,3,three,3,3
+P99,acton,7,7.230663929,7-8 years old,M,standard,sc,sc,sc,sc,sc,sc,sc,sc,3,3,not sure,,unsure

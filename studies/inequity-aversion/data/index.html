@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data — Computational Signatures of Inequity Aversion in Children Across Seven Societies — Mind &amp; Culture Lab</title>
+    <meta name="description" content="Explore Inequity Game choices and reaction times across 7 societies (N = 808 participants, 11,931 trials) modeled via drift-diffusion in Amir et al. (JEP: General, 2023)." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mindandculturelab.github.io/studies/inequity-aversion/data/" />
+    <meta property="og:title" content="Data — Computational Signatures of Inequity Aversion in Children Across Seven Societies" />
+    <meta property="og:description" content="Explore Inequity Game choices and reaction times across 7 societies (N = 808 participants, 11,931 trials) modeled via drift-diffusion in Amir et al. (JEP: General, 2023)." />
+    <meta property="og:url" content="https://mindandculturelab.github.io/studies/inequity-aversion/data/" />
+    <meta property="og:image" content="https://mindandculturelab.github.io/assets/images/og-image.svg" />
+    <meta name="theme-color" content="#285c3f" />
+    <link rel="icon" href="../../../assets/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../../assets/images/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="shortcut icon" href="../../../favicon.ico" />
+    <link rel="apple-touch-icon" href="../../../assets/images/apple-touch-icon.png" sizes="180x180" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../../../assets/css/styles.css" />
+    <script src="../../../site-config.js"></script>
+    <script src="../../../assets/js/apply-site-url.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="logo" href="../../../index.html">
+          <img src="../../../assets/images/maclab-mark.png" alt="" width="280" height="254" />
+          <span class="logo-lockup">
+            <span class="logo-name">Mind &amp; Culture Lab</span>
+            <span class="logo-sub">Duke University</span>
+          </span>
+        </a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
+        <nav id="site-nav" class="site-nav" data-nav aria-label="Primary">
+          <a href="../../../data/" aria-current="page">Data</a>
+          <a href="../../../experience/">Procedures</a>
+          <a href="../../../sites/">Sites</a>
+          <a href="../../../index.html#about">About</a>
+          <a href="../../../index.html#contact">Contact</a>
+          <a class="nav-external" href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Site <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+      <div class="stripe" aria-hidden="true"></div>
+    </header>
+    <main id="main">
+      <section class="hero wrap">
+        <div>
+          <p class="eyebrow">Moral Development &amp; Cooperation · Amir, Melnikoff, Warneken, … &amp; McAuliffe (2023)</p>
+          <h1>Choices &amp; Reaction Times Across Seven Societies</h1>
+        </div>
+        <div class="hero-aside">
+          <p class="lede">808 child actors (ages 4–15; 11,931 valid reaction-time trials) played the Inequity Game across Canada, India, Maya communities in Mexico, Peru, Senegal, Uganda, and the USA, modeled computationally via the Drift-Diffusion Model (DDM).</p>
+          <p class="links">
+            <a href="../">Study overview</a>
+            <a href="../../../experience/?study=inequity-aversion">3D procedure</a>
+          </p>
+        </div>
+      </section>
+      <section class="wrap section" aria-labelledby="graphs-heading">
+        <h2 id="graphs-heading" class="visually-hidden">Interactive graphs and dataset</h2>
+        <form class="filters filters-even" id="filters">
+          <label>
+            Society
+            <select id="country" name="country">
+              <option value="">All 7 societies</option>
+              <option value="Canada">Canada</option>
+              <option value="India">India</option>
+              <option value="Mexico (Maya)">Mexico (Maya)</option>
+              <option value="Peru">Peru</option>
+              <option value="Senegal">Senegal</option>
+              <option value="Uganda">Uganda</option>
+              <option value="USA">USA</option>
+            </select>
+          </label>
+          <label>
+            Inequity type
+            <select id="condShort" name="condShort">
+              <option value="">Both DI & AI</option>
+              <option value="DI">Disadvantageous (1–4 DI)</option>
+              <option value="AI">Advantageous (4–1 AI)</option>
+            </select>
+          </label>
+          <label>
+            Age group
+            <select id="ageGroup" name="ageGroup">
+              <option value="">All ages</option>
+              <option value="4–6 yrs">4–6 years</option>
+              <option value="7–9 yrs">7–9 years</option>
+              <option value="10–12 yrs">10–12 years</option>
+              <option value="13–15 yrs">13–15 years</option>
+            </select>
+          </label>
+          <label>
+            Gender
+            <select id="gender" name="gender">
+              <option value="">All genders</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </label>
+        </form>
+        <p class="result-count" id="summary" aria-live="polite">Loading the recorded scores.</p>
+        <div id="views">
+          <div class="stat-row" id="stats"></div>
+          <article class="chart-card">
+            <h2>Unequal-offer rejection rates across seven societies (DI vs. AI)</h2>
+            <p class="chart-note">Disadvantageous inequity aversion (rejecting 1-for-self / 4-for-peer offers) emerged broadly across societies, whereas advantageous inequity aversion (rejecting 4-for-self / 1-for-peer offers) varied markedly across cultures—driven by DDM drift rate (v).</p>
+            <div id="chart-reject"></div>
+            <div id="chart-reject-table"></div>
+          </article>
+          <article class="chart-card">
+            <h2>Decision reaction times (seconds) on unequal vs. equal trials</h2>
+            <p class="chart-note">Mean decision latency (in seconds) when evaluating unequal (4–1 / 1–4) versus equal (1–1) allocations across societies.</p>
+            <div id="chart-rt"></div>
+            <div id="chart-rt-table"></div>
+          </article>
+          <article class="chart-card">
+            <h2>Participant-level summary dataset</h2>
+            <p class="chart-note">Each row summarizes one child actor's rejection rates and mean reaction times across equal and unequal trials (download the full 11,989-trial raw CSV on the study overview page).</p>
+            <p class="facts" id="sheet-trunc-note"></p>
+            <div class="data-view" id="sheet"></div>
+          </article>
+        </div>
+        <p><a href="../">Back to the study</a></p>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div class="footer-brand">
+          <p class="footer-title">© <span data-year>2026</span> Mind &amp; Culture Lab · Duke University</p>
+          <p class="footer-sub">Department of Psychology &amp; Neuroscience · Durham, North Carolina</p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="../../../data/">Data</a>
+          <a href="../../../experience/">Procedures</a>
+          <a href="../../../sites/">Sites</a>
+          <a href="../../../data/researchers/">Researchers</a>
+          <a href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Website ↗</a>
+        </nav>
+      </div>
+    </footer>
+    <script src="../../../assets/js/main.js"></script>
+    <script src="config.js"></script>
+    <script src="../../../assets/js/study-explorer.js"></script>
+  </body>
+</html>

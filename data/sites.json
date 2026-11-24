@@ -1,0 +1,195 @@
+{
+  "sites": [
+    {
+      "id": "greater-boston",
+      "name": "Greater Boston",
+      "region": "Massachusetts, USA",
+      "lat": 42.36,
+      "lng": -71.06,
+      "sampleN": 644,
+      "sampleNote": "Combined across venues (Acton, Commons, Zoo, BC, and related sites)",
+      "venues": ["Acton", "Commons", "Zoo", "Boston College", "Artesani", "BCM"],
+      "blurb": "Preschool, museum, and campus venues across Greater Boston where children completed trust, forgiveness, inequity, and cooperation games with Boston-area collaborators.",
+      "studyIds": [
+        "trustworthiness-generosity",
+        "accidental-harms",
+        "cooperative-behaviors",
+        "inequity-aversion"
+      ]
+    },
+    {
+      "id": "new-haven",
+      "name": "New Haven",
+      "region": "Connecticut, USA",
+      "lat": 41.31,
+      "lng": -72.92,
+      "sampleN": 156,
+      "venues": ["Yale-area schools and labs"],
+      "blurb": "Urban U.S. comparison samples for risk, time preference, and subjective social status tasks collected with children in the New Haven area.",
+      "studyIds": ["risk-time-preferences", "subjective-social-status"]
+    },
+    {
+      "id": "durham",
+      "name": "Durham",
+      "region": "North Carolina, USA",
+      "lat": 35.994,
+      "lng": -78.899,
+      "sampleN": 100,
+      "venues": ["Lab", "Local preschools"],
+      "blurb": "Home of the Mind & Culture Lab. Two- and three-year-olds coordinated keys on the square box apparatus in dyads and triads at the lab and nearby schools.",
+      "studyIds": ["tsa"]
+    },
+    {
+      "id": "usa-urban-epistemic",
+      "name": "USA (urban)",
+      "region": "United States",
+      "lat": 39.83,
+      "lng": -98.58,
+      "sampleN": 56,
+      "blurb": "Urban U.S. children and adolescents in the epistemic-versus-physical uncertainty dice task. Exact city is not named in the open dataset.",
+      "studyIds": ["epistemic-uncertainty"]
+    },
+    {
+      "id": "antigonish",
+      "name": "Antigonish / StFX",
+      "region": "Nova Scotia, Canada",
+      "lat": 45.62,
+      "lng": -61.99,
+      "sampleN": 163,
+      "venues": ["Antigonish", "StFX Labs", "Heatherton", "Arisaig", "Club 60"],
+      "blurb": "Canadian children tested near St. Francis Xavier University and surrounding communities on cooperation and inequity-aversion batteries.",
+      "studyIds": ["cooperative-behaviors", "inequity-aversion"]
+    },
+    {
+      "id": "vadodara",
+      "name": "Vadodara",
+      "region": "Gujarat, India",
+      "lat": 22.31,
+      "lng": 73.18,
+      "sampleN": 172,
+      "sampleNote": "Primary samples; India also includes separate 1-week and 1-year ladder retest cohorts",
+      "blurb": "Urban Indian children who completed risk/time preference choices and MacArthur Ladder subjective social status ratings, with follow-up retest waves.",
+      "studyIds": ["risk-time-preferences", "subjective-social-status"]
+    },
+    {
+      "id": "srikakulam",
+      "name": "Srikakulam",
+      "region": "Andhra Pradesh, India",
+      "lat": 18.3,
+      "lng": 83.9,
+      "sampleN": 100,
+      "venues": ["Srikakulam", "Vakk B"],
+      "blurb": "Children in coastal Andhra Pradesh who played the Inequity Game while reaction times fed drift-diffusion models of fairness.",
+      "studyIds": ["inequity-aversion"]
+    },
+    {
+      "id": "iran-urban",
+      "name": "Iran (urban)",
+      "region": "Iran",
+      "lat": 35.69,
+      "lng": 51.39,
+      "sampleN": 100,
+      "blurb": "Urban Iranian children and adolescents who chose between Roll-Then-Guess (epistemic) and Guess-Then-Roll (physical) uncertainty games.",
+      "studyIds": ["epistemic-uncertainty"]
+    },
+    {
+      "id": "tsimane",
+      "name": "Tsimané",
+      "region": "Bolivian Amazon",
+      "lat": -15.0,
+      "lng": -66.5,
+      "sampleN": 54,
+      "blurb": "Tsimané communities in the Bolivian Amazon—one of three cultures in the epistemic-versus-physical uncertainty study, with minimal prior dice exposure.",
+      "studyIds": ["epistemic-uncertainty"]
+    },
+    {
+      "id": "mayangna",
+      "name": "Mayangna",
+      "region": "Nicaragua",
+      "lat": 14.3,
+      "lng": -84.5,
+      "sampleN": 67,
+      "sampleNote": "Supplement cohort in OSF files; not in the main explorer N = 210",
+      "blurb": "Mayangna communities in Nicaragua who completed a supplementary dice-task cohort alongside the main three-culture sample.",
+      "studyIds": ["epistemic-uncertainty"]
+    },
+    {
+      "id": "shuar-upano",
+      "name": "Shuar — Upano Valley",
+      "region": "Amazonian Ecuador",
+      "lat": -2.2,
+      "lng": -78.1,
+      "sampleN": 234,
+      "venues": ["Yamanunka", "San Pablo", "San Ramon"],
+      "blurb": "Shuar communities in the Upano Valley who took part in cooperation, risk/time preference, and subjective social status studies.",
+      "studyIds": [
+        "cooperative-behaviors",
+        "risk-time-preferences",
+        "subjective-social-status"
+      ]
+    },
+    {
+      "id": "shuar-cross-cutucu",
+      "name": "Shuar — Cross-Cutucú",
+      "region": "Remote Amazonian Ecuador",
+      "lat": -2.5,
+      "lng": -77.5,
+      "sampleN": 129,
+      "venues": ["Panints", "Sintinis", "Pablo Sexo"],
+      "blurb": "More remote Cross-Cutucú Shuar communities—key market-integration contrasts for risk, time preference, and ladder status ratings.",
+      "studyIds": ["risk-time-preferences", "subjective-social-status"]
+    },
+    {
+      "id": "san-pedro",
+      "name": "San Pedro de Saño",
+      "region": "Peru",
+      "lat": -11.95,
+      "lng": -75.2,
+      "sampleN": 233,
+      "blurb": "Children in San Pedro de Saño who completed the four-task cooperation battery and the Inequity Game reaction-time protocol.",
+      "studyIds": ["cooperative-behaviors", "inequity-aversion"]
+    },
+    {
+      "id": "toba-qom",
+      "name": "Toba/Qom",
+      "region": "Gran Chaco, Argentina",
+      "lat": -26.5,
+      "lng": -60.0,
+      "sampleN": 139,
+      "blurb": "Toba/Qom communities in Argentina’s Gran Chaco who completed risk and time preference choices and MacArthur Ladder ratings.",
+      "studyIds": ["risk-time-preferences", "subjective-social-status"]
+    },
+    {
+      "id": "maya-mexico",
+      "name": "Maya communities",
+      "region": "Mexico",
+      "lat": 20.4,
+      "lng": -89.5,
+      "sampleN": 47,
+      "blurb": "Maya children in Mexico who played the Inequity Game as part of the seven-society computational fairness study.",
+      "studyIds": ["inequity-aversion"]
+    },
+    {
+      "id": "tooro-uganda",
+      "name": "Tooro / Kasiisi",
+      "region": "Uganda",
+      "lat": 0.66,
+      "lng": 30.28,
+      "sampleN": 221,
+      "venues": ["Kasiisi", "Kigarama", "Kiko", "Kanyawara"],
+      "blurb": "Children near Fort Portal and Kasiisi who completed cooperation and inequity tasks across several village schools.",
+      "studyIds": ["cooperative-behaviors", "inequity-aversion"]
+    },
+    {
+      "id": "senegal-dakar",
+      "name": "Senegal (Dakar area)",
+      "region": "Senegal",
+      "lat": 14.76,
+      "lng": -17.48,
+      "sampleN": 121,
+      "venues": ["Yoff", "Boune", "Diacksao"],
+      "blurb": "Children in Yoff, Boune, and Diacksao who contributed Inequity Game reaction-time data in the seven-society sample.",
+      "studyIds": ["inequity-aversion"]
+    }
+  ]
+}

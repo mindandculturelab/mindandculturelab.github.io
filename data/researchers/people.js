@@ -1,11 +1,11 @@
 (function () {
   var order = [
     "Dorsa Amir",
+    "Julia Smith",
     "Alissa Rivero",
     "Julia Bainbridge",
     "Gita Paladugu",
-    "Serena Spada",
-    "Julia Smith"
+    "Serena Spada"
   ];
   var photos = {
     "Dorsa Amir": "../../assets/images/researchers/dorsa-amir.png",
@@ -19,11 +19,18 @@
       role: "Assistant Professor of Psychology & Neuroscience, Duke University · Principal Investigator",
       education: "PhD in Anthropology, Yale University",
       links: [
-        { label: "OSF", href: "https://osf.io/ndcmw/" },
         { label: "Website", href: "https://www.dorsaamir.com/" },
         { label: "Google Scholar", href: "https://scholar.google.com/citations?user=0r5bdCYAAAAJ" },
         { label: "ORCID", href: "https://orcid.org/0000-0003-0255-0228" },
         { label: "ResearchGate", href: "https://www.researchgate.net/profile/Dorsa_Amir" }
+      ]
+    },
+    "Julia Smith": {
+      role: "Postdoctoral Scholar in Psychology & Neuroscience, Duke University",
+      education: "Cross-Cultural Moral & Cognitive Development · Mind & Culture Lab ('24–'26)",
+      links: [
+        { label: "ORCID", href: "https://orcid.org/0000-0001-8788-6948" },
+        { label: "Email", href: "mailto:julia.m.smith@duke.edu" }
       ]
     }
   };

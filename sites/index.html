@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cognitive science on a global scale — Mind &amp; Culture Lab</title>
+    <meta name="description" content="Explore the Mind &amp; Culture Lab’s testing and field sites around the world on an interactive 3D globe." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mindandculturelab.github.io/sites/" />
+    <meta property="og:title" content="Cognitive science on a global scale — Mind &amp; Culture Lab" />
+    <meta property="og:description" content="Orbit a stylized globe and learn about the communities where we collect developmental and cross-cultural data." />
+    <meta property="og:url" content="https://mindandculturelab.github.io/sites/" />
+    <meta property="og:image" content="https://mindandculturelab.github.io/assets/images/og-image.svg" />
+    <meta name="theme-color" content="#285c3f" />
+    <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../assets/images/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="shortcut icon" href="../favicon.ico" />
+    <link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png" sizes="180x180" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+    <script src="../site-config.js"></script>
+    <script src="../assets/js/apply-site-url.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="logo" href="../index.html">
+          <img src="../assets/images/maclab-mark.png" alt="" width="280" height="254" />
+          <span class="logo-lockup">
+            <span class="logo-name">Mind &amp; Culture Lab</span>
+            <span class="logo-sub">Duke University</span>
+          </span>
+        </a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
+        <nav id="site-nav" class="site-nav" data-nav aria-label="Primary">
+          <a href="../data/">Data</a>
+          <a href="../experience/">Procedures</a>
+          <a href="./" aria-current="page">Sites</a>
+          <a href="../index.html#about">About</a>
+          <a href="../index.html#contact">Contact</a>
+          <a class="nav-external" href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Site <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+      <div class="stripe" aria-hidden="true"></div>
+    </header>
+
+    <main id="main">
+      <section class="hero wrap">
+        <div>
+          <p class="eyebrow">Field sites · Cross-cultural sampling</p>
+          <h1>Cognitive science on a global scale</h1>
+        </div>
+        <p class="lede">
+          Drag to orbit the globe, click a pin, and learn about the communities where we have collected developmental and cross-cultural data.
+        </p>
+      </section>
+
+      <section class="wrap section sites-layout" aria-label="Interactive field-site globe">
+        <div class="sites-stage" data-globe-stage>
+          <p class="experience-hint">Drag to rotate · Scroll to zoom · Click a pin</p>
+          <p class="experience-badge" data-globe-badge>17 field sites</p>
+        </div>
+        <aside class="sites-panel" aria-live="polite">
+          <p class="experience-kicker" data-site-kicker>Select a site</p>
+          <h2 data-site-title>Our testing &amp; field sites</h2>
+          <p data-site-region class="sites-region"></p>
+          <p data-site-body>
+            Pins mark communities and venues across the Americas, Africa, the Middle East, and South Asia. Sample sizes combine open datasets linked from each study page.
+          </p>
+          <p class="sites-stat" data-site-stat hidden></p>
+          <p class="sites-venues" data-site-venues hidden></p>
+          <div class="sites-studies" data-site-studies></div>
+        </aside>
+      </section>
+
+      <section class="wrap section">
+        <p class="eyebrow">Browse by name</p>
+        <div class="site-chips" data-site-chips role="list"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div class="footer-brand">
+          <p class="footer-title">© <span data-year>2026</span> Mind &amp; Culture Lab · Duke University</p>
+          <p class="footer-sub">Department of Psychology &amp; Neuroscience · Durham, North Carolina</p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="../data/">Data</a>
+          <a href="../experience/">Procedures</a>
+          <a href="./">Sites</a>
+          <a href="../data/researchers/">Researchers</a>
+          <a href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Website ↗</a>
+        </nav>
+      </div>
+    </footer>
+    <script src="../assets/js/main.js"></script>
+    <script type="module" src="globe.js"></script>
+  </body>
+</html>

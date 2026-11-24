@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data — No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures — Mind &amp; Culture Lab</title>
+    <meta name="description" content="Explore cross-cultural dice-game choices between Roll-Then-Guess (epistemic uncertainty) and Guess-Then-Roll (physical uncertainty) from Smith et al. (Developmental Science, 2025)." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mindandculturelab.github.io/studies/epistemic-uncertainty/data/" />
+    <meta property="og:title" content="Data — No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures" />
+    <meta property="og:description" content="Explore cross-cultural dice-game choices between Roll-Then-Guess (epistemic uncertainty) and Guess-Then-Roll (physical uncertainty) from Smith et al. (Developmental Science, 2025)." />
+    <meta property="og:url" content="https://mindandculturelab.github.io/studies/epistemic-uncertainty/data/" />
+    <meta property="og:image" content="https://mindandculturelab.github.io/assets/images/og-image.svg" />
+    <meta name="theme-color" content="#285c3f" />
+    <link rel="icon" href="../../../assets/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="../../../assets/images/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="shortcut icon" href="../../../favicon.ico" />
+    <link rel="apple-touch-icon" href="../../../assets/images/apple-touch-icon.png" sizes="180x180" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../../../assets/css/styles.css" />
+    <script src="../../../site-config.js"></script>
+    <script src="../../../assets/js/apply-site-url.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="logo" href="../../../index.html">
+          <img src="../../../assets/images/maclab-mark.png" alt="" width="280" height="254" />
+          <span class="logo-lockup">
+            <span class="logo-name">Mind &amp; Culture Lab</span>
+            <span class="logo-sub">Duke University</span>
+          </span>
+        </a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav">Menu</button>
+        <nav id="site-nav" class="site-nav" data-nav aria-label="Primary">
+          <a href="../../../data/" aria-current="page">Data</a>
+          <a href="../../../experience/">Procedures</a>
+          <a href="../../../sites/">Sites</a>
+          <a href="../../../index.html#about">About</a>
+          <a href="../../../index.html#contact">Contact</a>
+          <a class="nav-external" href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Site <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+      <div class="stripe" aria-hidden="true"></div>
+    </header>
+    <main id="main">
+      <section class="hero wrap">
+        <div>
+          <p class="eyebrow">Exploration &amp; Innovation · Smith, Mohamadpour, Engelmann, … &amp; Amir (2025)</p>
+          <h1>Epistemic vs. Physical Uncertainty Preferences</h1>
+        </div>
+        <div class="hero-aside">
+          <p class="lede">210 children and adolescents across urban Iran (N = 100), urban USA (N = 56), and hunter-horticulturalist Bolivian Tsimané communities with no prior exposure to dice (N = 54) chose between Roll-Then-Guess (epistemic) and Guess-Then-Roll (physical) dice games.</p>
+          <p class="links">
+            <a href="../">Study overview</a>
+            <a href="../../../experience/?study=epistemic-uncertainty">3D procedure</a>
+          </p>
+        </div>
+      </section>
+      <section class="wrap section" aria-labelledby="graphs-heading">
+        <h2 id="graphs-heading" class="visually-hidden">Interactive graphs and dataset</h2>
+        <form class="filters filters-even" id="filters">
+          <label>
+            Research site
+            <select id="site" name="site">
+              <option value="">All sites</option>
+              <option value="USA">United States</option>
+              <option value="Bolivia (Tsimané)">Bolivia (Tsimané)</option>
+              <option value="Iran">Iran</option>
+            </select>
+          </label>
+          <label>
+            Age band
+            <select id="ageBand" name="ageBand">
+              <option value="">All ages</option>
+              <option value="4–7 yrs">6–7 years</option>
+              <option value="8–10 yrs">8–10 years</option>
+              <option value="11–17 yrs">11–19 years</option>
+            </select>
+          </label>
+          <label>
+            Gender
+            <select id="sex" name="sex">
+              <option value="">All genders</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </label>
+          <label>
+            Prior dice exposure
+            <select id="seenDice" name="seenDice">
+              <option value="">All participants</option>
+              <option value="Yes">Had seen dice</option>
+              <option value="No">Never seen dice</option>
+            </select>
+          </label>
+        </form>
+        <p class="result-count" id="summary" aria-live="polite">Loading the recorded scores.</p>
+        <div id="views">
+          <div class="stat-row" id="stats"></div>
+          <article class="chart-card">
+            <h2>Epistemic vs. physical uncertainty choice by culture (Figure 3)</h2>
+            <p class="chart-note">Share of participants choosing Roll-Then-Guess (epistemic uncertainty: die is rolled under an opaque cup before guessing) versus Guess-Then-Roll (physical uncertainty: participant guesses before the die is rolled). Dashed line marks 50% chance.</p>
+            <div id="chart-site"></div>
+            <div id="chart-site-table"></div>
+          </article>
+          <article class="chart-card">
+            <h2>Stability of epistemic preference across age bands (Figure 2)</h2>
+            <p class="chart-note">Across childhood and adolescence, participants consistently favored epistemic uncertainty with no developmental shift toward physical uncertainty—regardless of prior cultural familiarity with dice.</p>
+            <div id="chart-age"></div>
+            <div id="chart-age-table"></div>
+          </article>
+          <article class="chart-card">
+            <h2>Participant-level dice task dataset</h2>
+            <p class="chart-note">Each row is one participant (N = 210) showing site, age, prior exposure to dice, comprehension check, chosen test game, and outcome. Choose a column heading to sort.</p>
+            <p class="facts" id="sheet-trunc-note"></p>
+            <div class="data-view" id="sheet"></div>
+          </article>
+        </div>
+        <p><a href="../">Back to the study</a></p>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <div class="footer-brand">
+          <p class="footer-title">© <span data-year>2026</span> Mind &amp; Culture Lab · Duke University</p>
+          <p class="footer-sub">Department of Psychology &amp; Neuroscience · Durham, North Carolina</p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="../../../data/">Data</a>
+          <a href="../../../experience/">Procedures</a>
+          <a href="../../../sites/">Sites</a>
+          <a href="../../../data/researchers/">Researchers</a>
+          <a href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Website ↗</a>
+        </nav>
+      </div>
+    </footer>
+    <script src="../../../assets/js/main.js"></script>
+    <script src="config.js"></script>
+    <script src="../../../assets/js/study-explorer.js"></script>
+  </body>
+</html>

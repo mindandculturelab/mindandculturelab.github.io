@@ -120,7 +120,35 @@
         { "label": "Communication coding", "href": "files/tsa_comm.xlsx" }
       ],
       "explorer": "data/",
+      "procedure": "../../experience/?study=tsa",
       "citation": "Rivero, A., Vasil, J., & Tomasello, M. (2026). Two- and three-year-olds coordinate decisions in dyads and triads. Child Development. https://doi.org/10.1093/chidev/aacag167"
+    },
+    {
+      "id": "epistemic-uncertainty",
+      "name": "No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures",
+      "leads": ["Julia Smith", "Dorsa Amir"],
+      "topic": "Exploration & Innovation",
+      "keywords": ["exploration", "decision-making"],
+      "ageLabel": "6–19",
+      "ageMin": 6,
+      "ageMax": 19,
+      "ranges": [
+        { "min": 6, "max": 19 }
+      ],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "Published paper (PDF)", "href": "files/Smith-et-al-2025-epistemic-uncertainty.pdf" },
+        { "label": "Coded dice task worksheet (PDF)", "href": "files/Coded-Dice-Task-Worksheet.pdf" },
+        { "label": "Supplementary materials (DOCX)", "href": "files/Dice-Task-Supplement.docx" },
+        { "label": "Main cross-cultural dataset (CSV)", "href": "files/EpistemicPhysicalDeid.csv" },
+        { "label": "Primary analysis script (Rmd)", "href": "files/EpistemicPhysicalAnalysis.Rmd" },
+        { "label": "Nicaragua Mayangna dataset (CSV)", "href": "files/EpistemicPhysNicaraguaDeid.csv" },
+        { "label": "Nicaragua analysis script (Rmd)", "href": "files/dice_task_nicaragua.Rmd" }
+      ],
+      "explorer": "data/",
+      "procedure": "../../experience/?study=epistemic-uncertainty",
+      "citation": "Smith, J. M., Mohamadpour, H., Engelmann, J., Davis, H. E., Krieger, J., Sørensen, B. G., Koster, J., Heysieattalab, S., & Amir, D. (2025). No developmental differences in preferences for epistemic versus physical uncertainty across three diverse cultures. Developmental Science, 28, e70078. https://doi.org/10.1111/desc.70078"
     },
     {
       "id": "cooperative-behaviors",
@@ -138,30 +166,16 @@
       "stats": null,
       "figures": [],
       "downloads": [
-        { "label": "OSF data & code", "href": "https://osf.io/d64qn/" },
-        { "label": "PsyArXiv preprint", "href": "https://osf.io/preprints/psyarxiv/f7ud4_v1/" }
+        { "label": "Paper / Preprint (PDF)", "href": "files/Amir-et-al-cooperative-behaviors.pdf" },
+        { "label": "Pre-registration (PDF)", "href": "files/TBXC-Pre-registration.pdf" },
+        { "label": "Behavioral dataset (CSV)", "href": "files/tbxc_finaldata_oct15.csv" },
+        { "label": "Child norms dataset (CSV)", "href": "files/childnorms_mar12.csv" },
+        { "label": "Adult norms dataset (CSV)", "href": "files/adultnorms_mar12.csv" },
+        { "label": "Analysis script (Rmd)", "href": "files/tbxc_waveone_analysis_OSF_20240215.Rmd" }
       ],
-      "citation": null
-    },
-    {
-      "id": "epistemic-uncertainty",
-      "name": "Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures",
-      "leads": ["Dorsa Amir"],
-      "topic": "Exploration & Innovation",
-      "keywords": ["exploration", "decision-making"],
-      "ageLabel": "5–12 and 18+",
-      "ageMin": 5,
-      "ageMax": 12,
-      "ranges": [
-        { "min": 5, "max": 12 },
-        { "min": 18, "max": null }
-      ],
-      "stats": null,
-      "figures": [],
-      "downloads": [
-        { "label": "OSF data & code", "href": "https://osf.io/8fa54/" }
-      ],
-      "citation": null
+      "explorer": "data/",
+      "procedure": "../../experience/?study=cooperative-behaviors",
+      "citation": "Amir, D., Ahl, R. E., Jordan, M. R., Bolotin, H., Bogese, M., González, G. T., Callaghan, T., Sugiyama, L. S., Kabatabazi, J., Otali, E., Tusiime, P., Bangayan, S., Snodgrass, J. J., & McAuliffe, K. (2025). The emergence of cooperative behaviors, norms, and strategies across five diverse societies. Science Advances, 11, eadw9995. https://doi.org/10.1126/sciadv.adw9995"
     },
     {
       "id": "trustworthiness-generosity",
@@ -176,10 +190,13 @@
       "stats": null,
       "figures": [],
       "downloads": [
-        { "label": "OSF data & code", "href": "https://osf.io/rwpd8/" },
-        { "label": "OSF preprint", "href": "https://osf.io/c2by7_v1/" }
+        { "label": "Published paper (PDF)", "href": "files/Amir-et-al-2021-trustworthiness-generosity.pdf" },
+        { "label": "Trust Apparatus dataset (CSV)", "href": "files/stag_final_aug21.csv" },
+        { "label": "Analysis script (R)", "href": "files/STAG_Analysis_March2021.R" }
       ],
-      "citation": null
+      "explorer": "data/",
+      "procedure": "../../experience/?study=trustworthiness-generosity",
+      "citation": "Amir, D., Parsons, W. S., Ahl, R. E., & McAuliffe, K. (2021). Trustworthiness is distinct from generosity in children. Developmental Psychology, 57(8), 1318–1324. https://doi.org/10.1037/dev0001214"
     },
     {
       "id": "accidental-harms",
@@ -194,10 +211,13 @@
       "stats": null,
       "figures": [],
       "downloads": [
-        { "label": "OSF project", "href": "https://osf.io/se89d/" },
-        { "label": "OSF preprint", "href": "https://osf.io/2rzfs_v1/" }
+        { "label": "Manuscript / Preprint (PDF)", "href": "files/Amir-et-al-2021-accidental-harms-preprint.pdf" },
+        { "label": "Forgiveness dataset (CSV)", "href": "files/forgiveness_final_mar30.csv" },
+        { "label": "Analysis script (R)", "href": "files/forgiveness_analysis_OSF.R" }
       ],
-      "citation": null
+      "explorer": "data/",
+      "procedure": "../../experience/?study=accidental-harms",
+      "citation": "Amir, D., Ahl, R. E., Parsons, W. S., & McAuliffe, K. (2021). Children are more forgiving of accidental harms across development. Journal of Experimental Child Psychology, 205, 105081. https://doi.org/10.1016/j.jecp.2020.105081"
     },
     {
       "id": "inequity-aversion",
@@ -212,9 +232,14 @@
       "stats": null,
       "figures": [],
       "downloads": [
-        { "label": "OSF data & DDM files", "href": "https://osf.io/t98f7/" }
+        { "label": "Published paper (PDF)", "href": "files/Amir-et-al-2023-inequity-aversion.pdf" },
+        { "label": "Seven-society reaction time dataset (CSV)", "href": "files/all.countries.rxn.time.FINAL.KMC.with.new.ids.csv" },
+        { "label": "Data preparation script (R)", "href": "files/prepRawData.R" },
+        { "label": "Drift-diffusion modeling code (Python)", "href": "files/allModels.py" }
       ],
-      "citation": null
+      "explorer": "data/",
+      "procedure": "../../experience/?study=inequity-aversion",
+      "citation": "Amir, D., Melnikoff, D., Warneken, F., Blake, P. R., Corbit, J., Callaghan, T. C., Barry, O., Bowie, A., Kleutsch, L., Kramer, K. L., Ross, E., Vongsachang, H., Wrangham, R., & McAuliffe, K. (2023). Computational signatures of inequity aversion in children across seven societies. Journal of Experimental Psychology: General, 152(8), 2361–2373. https://doi.org/10.1037/xge0001385"
     },
     {
       "id": "risk-time-preferences",
@@ -229,9 +254,17 @@
       "stats": null,
       "figures": [],
       "downloads": [
-        { "label": "OSF data & code", "href": "https://osf.io/8bsfm/" }
+        { "label": "Full cross-cultural sample (CSV)", "href": "files/fullsample_data.csv" },
+        { "label": "Study 1 four-country dataset (CSV)", "href": "files/study1_data.csv" },
+        { "label": "Study 2 Shuar dataset (CSV)", "href": "files/study2_data.csv" },
+        { "label": "Variable codebook (XLSX)", "href": "files/itc_risk_codebook.xlsx" },
+        { "label": "Full sample analysis code (R)", "href": "files/fullsample_code.R" },
+        { "label": "Study 1 analysis code (R)", "href": "files/study1_code.R" },
+        { "label": "Study 2 analysis code (R)", "href": "files/study2_code.R" }
       ],
-      "citation": null
+      "explorer": "data/",
+      "procedure": "../../experience/?study=risk-time-preferences",
+      "citation": "Amir, D., Jordan, M. R., McAuliffe, K., Valeggia, C. R., Sugiyama, L. S., Bribiescas, R. G., Snodgrass, J. J., & Dunham, Y. (2020). The developmental origins of risk and time preferences across diverse societies. Journal of Experimental Psychology: General, 149(4), 651–661. https://doi.org/10.1037/xge0000675"
     },
     {
       "id": "subjective-social-status",
@@ -239,16 +272,24 @@
       "leads": ["Dorsa Amir"],
       "topic": "Social Cognition",
       "keywords": ["decision-making"],
-      "ageLabel": "4–12",
+      "ageLabel": "4–18",
       "ageMin": 4,
-      "ageMax": 12,
-      "ranges": [{ "min": 4, "max": 12 }],
+      "ageMax": 18,
+      "ranges": [{ "min": 4, "max": 18 }],
       "stats": null,
       "figures": [],
       "downloads": [
-        { "label": "OSF data & code", "href": "https://osf.io/by29z/" }
+        { "label": "Published paper (PDF)", "href": "files/Amir-et-al-2019-subjective-social-status.pdf" },
+        { "label": "Cross-cultural MacArthur Ladder dataset (CSV)", "href": "files/sesladder.csv" },
+        { "label": "India 1-week test–retest (CSV)", "href": "files/india_one_week.csv" },
+        { "label": "India 1-year test–retest (CSV)", "href": "files/india_one_year.csv" },
+        { "label": "India 1-year ages (CSV)", "href": "files/india_one_year_ages.csv" },
+        { "label": "Primary analysis script (R)", "href": "files/sesladder_R_trim.R" },
+        { "label": "Test–retest analysis script (R)", "href": "files/india_retest.R" }
       ],
-      "citation": null
+      "explorer": "data/",
+      "procedure": "../../experience/?study=subjective-social-status",
+      "citation": "Amir, D., Valeggia, C. R., Srinivasan, M., Sugiyama, L. S., & Dunham, Y. (2019). Measuring subjective social status in children of diverse societies. PLOS ONE, 14(12), e0226550. https://doi.org/10.1371/journal.pone.0226550"
     }
   ]
 }

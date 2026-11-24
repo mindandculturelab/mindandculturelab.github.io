@@ -20,6 +20,13 @@
 
   var view = "studies";
   var studies = [];
+  var photoMap = {
+    "Dorsa Amir": "../../assets/images/researchers/dorsa-amir.png",
+    "Alissa Rivero": "../../assets/images/researchers/alissa-rivero.jpg",
+    "Julia Bainbridge": "../../assets/images/researchers/julia-bainbridge.png",
+    "Gita Paladugu": "../../assets/images/researchers/gita-paladugu.png",
+    "Serena Spada": "../../assets/images/researchers/serena-spada.png"
+  };
 
   function rangesOf(study) {
     if (study.ranges && study.ranges.length) {
@@ -173,13 +180,21 @@
       item.appendChild(heading);
       addText(item, "p", "meta", study.topic + " · " + study.ageLabel);
       addText(item, "p", "", study.leads.join(", "));
-      if (study.explorer) {
+      if (study.explorer || study.procedure) {
         var graphs = document.createElement("p");
-        graphs.className = "graphs";
-        var graphsLink = document.createElement("a");
-        graphsLink.href = "../../studies/" + study.id + "/" + study.explorer;
-        graphsLink.textContent = "Look at the data";
-        graphs.appendChild(graphsLink);
+        graphs.className = "graphs links";
+        if (study.explorer) {
+          var graphsLink = document.createElement("a");
+          graphsLink.href = "../../studies/" + study.id + "/" + study.explorer;
+          graphsLink.textContent = "Look at the data";
+          graphs.appendChild(graphsLink);
+        }
+        if (study.procedure) {
+          var procLink = document.createElement("a");
+          procLink.href = "../../experience/?study=" + study.id;
+          procLink.textContent = "Experience 3D procedure";
+          graphs.appendChild(procLink);
+        }
         item.appendChild(graphs);
       }
       ol.appendChild(item);
@@ -212,8 +227,26 @@
       var heading = document.createElement("h3");
       var button = document.createElement("button");
       button.type = "button";
-      button.textContent = name;
+      button.className = "person-chip";
       button.setAttribute("data-person", name);
+      if (photoMap[name]) {
+        var img = document.createElement("img");
+        img.className = "portrait-sm";
+        img.src = photoMap[name];
+        img.alt = "";
+        img.width = 40;
+        img.height = 40;
+        button.appendChild(img);
+      } else {
+        var initial = document.createElement("span");
+        initial.className = "person-chip-initial";
+        initial.setAttribute("aria-hidden", "true");
+        initial.textContent = name.charAt(0);
+        button.appendChild(initial);
+      }
+      var label = document.createElement("span");
+      label.textContent = name;
+      button.appendChild(label);
       heading.appendChild(button);
       block.appendChild(heading);
       var ul = document.createElement("ul");

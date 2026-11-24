@@ -6,8 +6,12 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mindandculturelab.github.io/studies/</loc>
+    <loc>https://mindandculturelab.github.io/sites/</loc>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/</loc>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/data/</loc>
@@ -20,6 +24,10 @@
   <url>
     <loc>https://mindandculturelab.github.io/data/topics/</loc>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/experience/</loc>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/has/</loc>
@@ -47,42 +55,66 @@
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/tsa/</loc>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/tsa/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://mindandculturelab.github.io/experience/</loc>
-    <priority>0.8</priority>
+    <loc>https://mindandculturelab.github.io/studies/epistemic-uncertainty/</loc>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mindandculturelab.github.io/studies/cooperative-behaviors/</loc>
+    <loc>https://mindandculturelab.github.io/studies/epistemic-uncertainty/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://mindandculturelab.github.io/studies/epistemic-uncertainty/</loc>
+    <loc>https://mindandculturelab.github.io/studies/cooperative-behaviors/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/cooperative-behaviors/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/trustworthiness-generosity/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/trustworthiness-generosity/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/accidental-harms/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/accidental-harms/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/inequity-aversion/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/inequity-aversion/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/risk-time-preferences/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/risk-time-preferences/data/</loc>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://mindandculturelab.github.io/studies/subjective-social-status/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/subjective-social-status/data/</loc>
     <priority>0.6</priority>
   </url>
 </urlset>

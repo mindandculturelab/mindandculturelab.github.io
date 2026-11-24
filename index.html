@@ -77,7 +77,7 @@
         <nav id="site-nav" class="site-nav" data-nav aria-label="Primary">
           <a href="data/">Data</a>
           <a href="experience/">Procedures</a>
-          <a href="studies/">Studies</a>
+          <a href="sites/">Sites</a>
           <a href="#about">About</a>
           <a href="#contact">Contact</a>
           <a class="nav-external" href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Site <span aria-hidden="true">↗</span></a>
@@ -114,38 +114,9 @@
             </p>
           </div>
 
-          <aside class="hero-card" aria-label="Open science overview">
-            <div class="hero-card-head">
-              <div class="hero-card-badge">
-                <img src="assets/images/maclab-mark.png" alt="" width="280" height="254" />
-              </div>
-              <div>
-                <p class="hero-card-kicker">Open Science Portal</p>
-                <p class="hero-card-title">Empirical Research &amp; Reproducible Materials</p>
-              </div>
-            </div>
-            <dl class="hero-metrics">
-              <div>
-                <dt>Open Studies</dt>
-                <dd>14</dd>
-              </div>
-              <div>
-                <dt>Age Span</dt>
-                <dd>2–18+</dd>
-              </div>
-              <div>
-                <dt>Global Scope</dt>
-                <dd>7+ Societies</dd>
-              </div>
-              <div>
-                <dt>Resources</dt>
-                <dd>Data &amp; 3D</dd>
-              </div>
-            </dl>
-            <p class="hero-card-foot">
-              Principal Investigator: <a href="data/researchers/">Dr. Dorsa Amir</a> · Durham, NC
-            </p>
-          </aside>
+          <div class="hero-art" aria-hidden="true">
+            <canvas class="hero-art-canvas" data-mind-culture></canvas>
+          </div>
         </section>
       </div>
 
@@ -181,8 +152,8 @@
             <a class="card pathway-card" href="experience/">
               <span class="pathway-kicker">Interactive 3D</span>
               <h3>Experience Procedures</h3>
-              <p>Walk step-by-step through our dyad and triad coordination apparatus with design rationales for every trial.</p>
-              <span class="pathway-cta">Launch 3D walkthrough <span aria-hidden="true">→</span></span>
+              <p>Step inside 8 diagram-faithful 3D experimental apparatuses—from coordination boxes and dice cups to two-channel trust trays and inequity levers.</p>
+              <span class="pathway-cta">Launch 3D walkthroughs <span aria-hidden="true">→</span></span>
             </a>
           </li>
         </ul>
@@ -211,28 +182,36 @@
             </div>
             <div class="featured-actions">
               <a class="button button-compact" href="studies/tsa/data/">Interactive data explorer</a>
-              <a class="button button-secondary button-compact" href="experience/">3D procedure</a>
+              <a class="button button-secondary button-compact" href="experience/?study=tsa">3D procedure</a>
               <a class="pill-link" href="studies/tsa/files/Rivero-et-al-2026-dyad-triad.pdf">Paper (PDF)</a>
               <a class="pill-link" href="studies/tsa/">Study page</a>
             </div>
           </article>
 
           <article class="study featured-card">
-            <p class="meta">Moral Development &amp; Cooperation · Ages 5–13 &amp; 18+</p>
+            <p class="meta">Exploration &amp; Innovation · Ages 6–19 · <em>Developmental Science</em> (2025)</p>
             <h3>
-              <a href="studies/cooperative-behaviors/">The Emergence of Cooperative Behaviors, Norms, and Strategies Across Five Diverse Societies</a>
+              <a href="studies/epistemic-uncertainty/">No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures</a>
             </h3>
-            <p>Led by Dorsa Amir · Cross-cultural behavioral experiments with open OSF datasets, analysis scripts, and PsyArXiv preprint.</p>
-            <p class="featured-card-foot"><a href="studies/cooperative-behaviors/">Open study &amp; OSF files →</a></p>
+            <p>Led by Julia M. Smith &amp; Dorsa Amir · Live Roll-Then-Guess vs. Guess-Then-Roll dice experiments across the USA, Bolivia (Tsimané), and Iran.</p>
+            <p class="featured-card-foot">
+              <a href="studies/epistemic-uncertainty/data/">Explore data →</a>
+              <span aria-hidden="true"> · </span>
+              <a href="experience/?study=epistemic-uncertainty">3D procedure →</a>
+            </p>
           </article>
 
           <article class="study featured-card">
-            <p class="meta">Computational Modeling · Ages 4–15</p>
+            <p class="meta">Moral Development &amp; Cooperation · Ages 5–13 &amp; 18+ · <em>Science Advances</em> (2025)</p>
             <h3>
-              <a href="studies/inequity-aversion/">Computational Signatures of Inequity Aversion in Children Across Seven Societies</a>
+              <a href="studies/cooperative-behaviors/">The Emergence of Cooperative Behaviors, Norms, and Strategies Across Five Diverse Societies</a>
             </h3>
-            <p>Led by Dorsa Amir · Drift-diffusion modeling of fairness decisions across seven societies with open OSF data and DDM code.</p>
-            <p class="featured-card-foot"><a href="studies/inequity-aversion/">Open study &amp; DDM files →</a></p>
+            <p>Led by Dorsa Amir · Four-task behavioral battery across Ecuador, Peru, Uganda, Canada, and the USA with peer and adult norm surveys.</p>
+            <p class="featured-card-foot">
+              <a href="studies/cooperative-behaviors/data/">Explore data →</a>
+              <span aria-hidden="true"> · </span>
+              <a href="experience/?study=cooperative-behaviors">3D procedure →</a>
+            </p>
           </article>
         </div>
       </section>
@@ -306,12 +285,13 @@
         <nav class="footer-nav" aria-label="Footer">
           <a href="data/">Data</a>
           <a href="experience/">Procedures</a>
-          <a href="studies/">Studies</a>
+          <a href="sites/">Sites</a>
           <a href="data/researchers/">Researchers</a>
           <a href="https://www.mindandculturelab.com/" target="_blank" rel="noopener">Lab Website ↗</a>
         </nav>
       </div>
     </footer>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/mind-culture-hero.js" defer></script>
   </body>
 </html>

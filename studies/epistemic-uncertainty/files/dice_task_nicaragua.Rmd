@@ -1,0 +1,184 @@
+---
+title: "Dice Task Nicaragua Analysis"
+author: "Dorsa Amir"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+
+packages <- c("tidyverse", "needs")
+lapply(packages, library, character.only = TRUE)
+
+prioritize(dplyr)
+
+theme_set(theme_classic(base_size = 16))
+options(scipen=999)
+
+```
+
+
+```{r data entry}
+
+x <- read.csv("EpistemicPhysNicaraguaDeid.csv", na = "")
+
+
+
+x$practice1_match <- factor(x$practice1_match)
+x$practice2_match <- factor(x$practice2_match)
+```
+
+
+
+# Descriptive Tables
+
+```{r}
+
+x %>% 
+  tally()
+
+# Ages in general
+x %>% 
+  summarise(tibble(mean.age= mean(age, na.rm = T), sd.age = sd(age, na.rm = T)))
+  
+summary(x$age)
+
+x %>%
+  group_by(age) %>% 
+  tally()
+
+x %>%
+  group_by(age, sex) %>% 
+  tally()
+
+table(x$sex)
+
+agedensity <- 
+  ggplot(x, aes(x=age), 
+         y=..scaled..) + 
+  geom_density(aes(fill=country), linewidth=0.1, alpha=0.4) +
+  xlab("\n Age") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19, family="Helvetica"))  +
+  xlim(5,20) +
+  ggtitle("Dice Task Age Distribution")
+agedensity
+
+
+```
+
+
+
+```{r, data viz}
+## Some basic data viz
+
+
+choice.density <-  x %>% 
+  filter(!is.na(gamechoice)) %>% 
+  ggplot(., aes(x=age), 
+         y=..scaled..) + 
+  geom_density(aes(fill=gamechoice), size=0.1, alpha=0.4) +
+  xlab("\n Age") + ylab("Density\n") + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(text = element_text(size=19, family="Helvetica")) 
+
+choice.density
+
+
+
+
+```
+
+
+```{r}
+## model prep
+
+x$gamechoice.f <- factor(x$gamechoice)
+x$gamechoice.guessthenroll0 <- x$gamechoice.f
+x$gamechoice.guessthenroll0 <- gsub("guess then roll", "0", x$gamechoice.guessthenroll0)
+x$gamechoice.guessthenroll0 <- gsub("roll then guess", "1", x$gamechoice.guessthenroll0)
+x$gamechoice.guessthenroll0 <- as.numeric(x$gamechoice.guessthenroll0)
+str(x$gamechoice.guessthenroll0)
+
+
+```
+
+
+
+```{r}
+#game choice only 
+prop.table(table(x$gamechoice.guessthenroll0))
+prop.test(57.8, 64)
+
+x %>%
+  filter(!is.na(gamechoice)) %>%
+  ggplot(aes(gamechoice)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)), width = .5) +
+  scale_y_continuous(labels = scales::percent) +
+  ylab("Percent Choosing")+
+  xlab("Game") +
+  geom_hline(yintercept = .5, linetype = "dotted") +
+  annotate("text", x = 2.54, y = .52, size = 4.5, label="50%")
+
+
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ age , data = .) %>% 
+  summary()
+# No age related changes in game choice
+
+
+#figure
+ageperc <- x %>%
+  select(age, gamechoice) 
+
+counttbl <- ageperc %>%
+  count(age, gamechoice)
+
+wide <-  pivot_wider(counttbl, names_from = gamechoice, values_from = n)
+
+wide <- wide %>%
+  mutate(total = `guess then roll` + `roll then guess`) %>%
+  mutate(`Percent Choosing Guess then Roll` = `guess then roll`/total*100) %>%
+  mutate(Age = age)
+
+wide <- wide %>%
+  mutate(total = `guess then roll` + `roll then guess`) %>%
+  mutate(`Percent Choosing Roll then Guess` = `roll then guess`/total*100) %>%
+  mutate(Age = age)
+
+
+#No age effect 
+wide %>%
+  ggplot(aes(Age, `Percent Choosing Roll then Guess`)) +
+  geom_smooth() +
+  ylim(0, 100) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20)) +
+  geom_hline(yintercept = 50, linetype = "dotted") +
+  annotate("text", x = 17, y = 53, size = 4, label="50%")
+
+
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ age  + seendice1, data = .) %>% 
+  summary()
+
+
+
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ practice1_match, data = .) %>% 
+  summary()
+
+
+
+x %>% 
+  lm(gamechoice.guessthenroll0 ~ practice2_match, data = .) %>% 
+  summary()
+
+```
+
+
