@@ -2106,13 +2106,17 @@ main > .section + .contact-band {
 }
 
 /* 3D Procedure Experience */
+.experience-picker-section {
+  padding-bottom: 1.2rem;
+}
+
 .procedure-picker {
-  margin-bottom: 1.35rem;
+  margin-bottom: 0;
 }
 
 .procedure-picker-label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.65rem;
   color: var(--sage-ink);
   font-size: 0.76rem;
   font-weight: 700;
@@ -2123,17 +2127,17 @@ main > .section + .contact-band {
 .procedure-tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .procedure-tab {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.16rem;
-  padding: 0.62rem 0.78rem;
+  align-items: stretch;
+  gap: 0.45rem;
+  padding: 0.55rem;
   border: 1px solid var(--line-strong);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--paper);
   color: var(--ink);
   font: inherit;
@@ -2144,28 +2148,59 @@ main > .section + .contact-band {
 
 .procedure-tab:hover {
   border-color: var(--sage);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .procedure-tab[aria-selected="true"] {
   border-color: var(--sage-ink);
-  background: var(--sage-soft);
-  box-shadow: 0 6px 18px rgba(40, 92, 63, 0.1);
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(40, 92, 63, 0.12);
 }
 
-.procedure-tab-tag {
-  font-size: 0.69rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--sage-ink);
+.procedure-tab-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 10px;
+  background:
+    linear-gradient(145deg, #f7f3ec 0%, #ebe4d8 100%);
+  border: 1px solid rgba(26, 26, 26, 0.06);
+}
+
+.procedure-tab-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .procedure-tab-name {
-  font-size: 0.87rem;
+  margin: 0 0.2rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  line-height: 1.22;
+  line-height: 1.25;
   color: var(--ink);
+}
+
+.procedure-tab-study {
+  margin: 0 0.2rem 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.experience-sim-band {
+  background: #ffffff;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.experience-sim-inner {
+  padding-top: 1.8rem;
+  padding-bottom: 2.4rem;
 }
 
 .experience-controls {

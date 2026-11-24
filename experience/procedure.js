@@ -144,8 +144,11 @@ const offsetVec = new THREE.Vector3();
 const raycaster = new THREE.Raycaster();
 const pointerNDC = new THREE.Vector2();
 
-// Build 8-study procedure tabs
+// Build 8-study procedure tabs (screenshot + task name + study title)
 const tabButtons = {};
+const tabThumbs = {};
+const simBand = document.getElementById("task-simulation");
+
 procedures.forEach(function (proc) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -153,21 +156,77 @@ procedures.forEach(function (proc) {
   btn.setAttribute("role", "tab");
   btn.setAttribute("aria-selected", "false");
 
-  const tag = document.createElement("span");
-  tag.className = "procedure-tab-tag";
-  tag.textContent = proc.tabTag;
+  const thumb = document.createElement("span");
+  thumb.className = "procedure-tab-thumb";
+  thumb.setAttribute("aria-hidden", "true");
+  const thumbImg = document.createElement("img");
+  thumbImg.alt = "";
+  thumbImg.decoding = "async";
+  thumb.appendChild(thumbImg);
+  tabThumbs[proc.id] = thumbImg;
 
   const name = document.createElement("span");
   name.className = "procedure-tab-name";
   name.textContent = proc.tabName;
 
-  btn.append(tag, name);
+  const study = document.createElement("span");
+  study.className = "procedure-tab-study";
+  study.textContent = proc.studyTitle;
+
+  btn.append(thumb, name, study);
   btn.addEventListener("click", function () {
     selectProcedure(proc.id, true);
+    if (simBand) {
+      simBand.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   });
   studyTabsHost.appendChild(btn);
   tabButtons[proc.id] = btn;
 });
+
+function captureProcedureThumb(proc) {
+  procedures.forEach(function (p) {
+    p.root.visible = false;
+  });
+  proc.root.visible = true;
+  if (typeof proc.setCondition === "function") {
+    proc.setCondition(proc.defaultCondition, 0);
+  }
+  if (typeof proc.setStep === "function") {
+    proc.setStep(0, 0);
+  }
+  const st = proc.steps[0];
+  camera.position.set(st.camera.pos[0], st.camera.pos[1], st.camera.pos[2]);
+  camera.lookAt(st.camera.look[0], st.camera.look[1], st.camera.look[2]);
+  camera.aspect = 16 / 10;
+  camera.updateProjectionMatrix();
+  renderer.setSize(360, 225, false);
+  if (typeof proc.update === "function") {
+    proc.update(0);
+  }
+  renderer.render(scene, camera);
+  return renderer.domElement.toDataURL("image/jpeg", 0.84);
+}
+
+function populateTabThumbs() {
+  const previouslyActive = activeProc;
+  procedures.forEach(function (proc) {
+    try {
+      const dataUrl = captureProcedureThumb(proc);
+      if (tabThumbs[proc.id]) {
+        tabThumbs[proc.id].src = dataUrl;
+      }
+    } catch (err) {
+      // leave placeholder if a scene fails to snapshot
+    }
+  });
+  procedures.forEach(function (p) {
+    p.root.visible = false;
+  });
+  previouslyActive.root.visible = true;
+  resize();
+  renderFrame(true);
+}
 
 function hideInspectCard(restoreStepCamera) {
   inspectCard.hidden = true;
@@ -423,6 +482,7 @@ const initialParam = new URLSearchParams(window.location.search).get("study");
 selectProcedure(initialParam || "tsa", false);
 resize();
 renderFrame(true);
+populateTabThumbs();
 window.__dbg = { scene, camera, renderer, procMap, getActive: () => activeProc };
 
 if (typeof ResizeObserver === "function") {

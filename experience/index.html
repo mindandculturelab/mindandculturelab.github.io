@@ -62,48 +62,52 @@
           </p>
         </div>
       </section>
-      <section class="wrap section">
+      <section class="wrap section experience-picker-section">
         <div class="procedure-picker">
           <span class="procedure-picker-label">Choose a study apparatus (8 interactive 3D tasks)</span>
           <div class="procedure-tabs" role="tablist" aria-label="Study tasks" data-study-tabs></div>
         </div>
+      </section>
 
-        <div class="experience-controls">
-          <div class="experience-condition">
-            <p class="experience-kicker" data-cond-label>Same-aged peers</p>
-            <div class="segment" role="group" aria-label="Experimental condition" data-cond-buttons></div>
-          </div>
-          <div class="experience-steps" role="navigation" aria-label="Procedure steps" data-steps></div>
-        </div>
-        <div class="experience">
-          <div class="experience-stage" data-stage>
-            <div class="experience-actions-bar">
-              <button class="experience-anim-btn" type="button" data-play-anim>
-                <span aria-hidden="true">▶</span>
-                <span data-play-label>Watch key matching</span>
-              </button>
-              <p class="experience-click-tip" data-click-tip>Click the box, music box, or keys to inspect</p>
+      <section class="experience-sim-band" id="task-simulation" aria-label="Full 3D task simulation">
+        <div class="wrap section experience-sim-inner">
+          <div class="experience-controls">
+            <div class="experience-condition">
+              <p class="experience-kicker" data-cond-label>Same-aged peers</p>
+              <div class="segment" role="group" aria-label="Experimental condition" data-cond-buttons></div>
             </div>
-            <p class="experience-badge" data-badge>Apparatus &amp; seating</p>
-            <p class="experience-hint">Drag to rotate · Scroll to zoom</p>
+            <div class="experience-steps" role="navigation" aria-label="Procedure steps" data-steps></div>
           </div>
-          <aside class="experience-panel" aria-live="polite">
-            <p class="experience-kicker" data-kicker>Step 1 of 6</p>
-            <h2 data-title>Setup &amp; apparatus</h2>
-            <p data-body></p>
-            <div class="experience-inspect" data-inspect hidden>
-              <div class="experience-inspect-head">
-                <strong data-inspect-title>Apparatus detail</strong>
-                <button class="experience-inspect-close" type="button" data-inspect-close>Back to step</button>
+          <div class="experience">
+            <div class="experience-stage" data-stage>
+              <div class="experience-actions-bar">
+                <button class="experience-anim-btn" type="button" data-play-anim>
+                  <span aria-hidden="true">▶</span>
+                  <span data-play-label>Watch key matching</span>
+                </button>
+                <p class="experience-click-tip" data-click-tip>Click the box, music box, or keys to inspect</p>
               </div>
-              <p data-inspect-body></p>
+              <p class="experience-badge" data-badge>Apparatus &amp; seating</p>
+              <p class="experience-hint">Drag to rotate · Scroll to zoom</p>
             </div>
-            <p class="experience-why"><strong>Why this design. </strong><span data-why></span></p>
-            <div class="experience-nav">
-              <button class="button button-secondary" type="button" data-prev>Previous</button>
-              <button class="button" type="button" data-next>Next</button>
-            </div>
-          </aside>
+            <aside class="experience-panel" aria-live="polite">
+              <p class="experience-kicker" data-kicker>Step 1 of 6</p>
+              <h2 data-title>Setup &amp; apparatus</h2>
+              <p data-body></p>
+              <div class="experience-inspect" data-inspect hidden>
+                <div class="experience-inspect-head">
+                  <strong data-inspect-title>Apparatus detail</strong>
+                  <button class="experience-inspect-close" type="button" data-inspect-close>Back to step</button>
+                </div>
+                <p data-inspect-body></p>
+              </div>
+              <p class="experience-why"><strong>Why this design. </strong><span data-why></span></p>
+              <div class="experience-nav">
+                <button class="button button-secondary" type="button" data-prev>Previous</button>
+                <button class="button" type="button" data-next>Next</button>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
     </main>
