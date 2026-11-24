@@ -48,34 +48,32 @@
     </header>
 
     <main id="main">
-      <div class="interior-hero-backdrop">
-        <section class="hero wrap">
-          <div>
+      <div class="interior-hero-backdrop sites-hero-backdrop">
+        <section class="hero wrap sites-hero">
+          <div class="sites-hero-copy">
             <p class="eyebrow">Field sites · Cross-cultural sampling</p>
             <h1>Cognitive science on a global scale</h1>
           </div>
-          <p class="lede">Seventeen communities where we collect developmental and cross-cultural data—drag the globe, then click a pin to learn more.</p>
+          <div class="sites-layout" aria-label="Interactive field-site globe">
+            <div class="sites-stage" data-globe-stage>
+              <p class="stage-badge" data-globe-badge>17 sites</p>
+            </div>
+            <div class="sites-sidebar">
+              <aside class="sites-panel" aria-live="polite">
+                <p class="panel-kicker" data-site-kicker hidden></p>
+                <h2 data-site-title>Testing sites</h2>
+                <p data-site-region class="sites-region"></p>
+                <p data-site-meta class="sites-meta" hidden></p>
+                <p data-site-body>Click a pin—or a name—to learn more.</p>
+                <p class="sites-stat" data-site-stat hidden></p>
+                <div class="sites-venues" data-site-venues hidden></div>
+                <div class="sites-studies" data-site-studies></div>
+              </aside>
+              <div class="site-chips" data-site-chips role="list" aria-label="Sites"></div>
+            </div>
+          </div>
         </section>
       </div>
-
-      <section class="wrap section sites-layout" aria-label="Interactive field-site globe">
-        <div class="sites-stage" data-globe-stage>
-          <p class="stage-badge" data-globe-badge>17 sites</p>
-        </div>
-        <div class="sites-sidebar">
-          <aside class="sites-panel" aria-live="polite">
-            <p class="panel-kicker" data-site-kicker hidden></p>
-            <h2 data-site-title>Testing sites</h2>
-            <p data-site-region class="sites-region"></p>
-            <p data-site-meta class="sites-meta" hidden></p>
-            <p data-site-body>Click a pin—or a name below—to see venues, ages, and related studies.</p>
-            <p class="sites-stat" data-site-stat hidden></p>
-            <div class="sites-venues" data-site-venues hidden></div>
-            <div class="sites-studies" data-site-studies></div>
-          </aside>
-          <div class="site-chips" data-site-chips role="list" aria-label="Sites"></div>
-        </div>
-      </section>
     </main>
 
     <footer class="site-footer">

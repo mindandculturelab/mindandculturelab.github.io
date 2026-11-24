@@ -1140,17 +1140,40 @@ h2 {
 }
 
 /* Sites globe */
+.sites-hero-backdrop {
+  min-height: calc(100dvh - 4.5rem - 6px);
+  display: flex;
+  flex-direction: column;
+}
+
+.sites-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+  align-content: start;
+  flex: 1;
+  padding: clamp(1.4rem, 3.2vh, 2.4rem) 0 clamp(1.6rem, 3.5vh, 2.6rem);
+  min-height: 0;
+}
+
+.sites-hero-copy {
+  min-width: 0;
+}
+
 .sites-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(17.5rem, 23.5rem);
-  gap: 1.25rem;
-  align-items: start;
+  gap: 1.25rem 1.5rem;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 .sites-sidebar {
   display: grid;
   gap: 0.85rem;
   align-content: start;
+  min-height: 0;
 }
 
 .sites-stage {
@@ -1158,8 +1181,8 @@ h2 {
   background: transparent;
   border: 0;
   border-radius: 0;
-  min-height: 460px;
-  height: min(72vh, 680px);
+  min-height: min(58vh, 560px);
+  height: 100%;
   overflow: visible;
   box-shadow: none;
   cursor: grab;
@@ -2621,7 +2644,8 @@ main > .section + .contact-band {
     grid-template-columns: 1fr;
   }
 
-  .home-hero-backdrop {
+  .home-hero-backdrop,
+  .sites-hero-backdrop {
     min-height: 0;
   }
 
@@ -2637,6 +2661,7 @@ main > .section + .contact-band {
   }
 
   .sites-stage {
+    min-height: min(42vh, 380px);
     height: min(42vh, 380px);
   }
 
