@@ -152,12 +152,12 @@ if (!stage) {
   let pinEntries = [];
   let userAzimuth = 0.55;
   let userPolar = 0.06;
-  // Stage is expanded (inset -14% → 128% of orb) so pins can stick out.
-  // Pull the camera back so the globe sits inside the black circle with a
-  // visible ring of the orb still showing around it.
-  const ORB_FRACTION = 1 / 1.28;
+  // Stage is expanded (inset -18% → 136% of orb) so pins can stick out past
+  // the black ring. Earth itself is sized to sit just inside that ring.
+  const STAGE_SCALE = 1.36; // must match CSS inset -18%
+  const ORB_FRACTION = 1 / STAGE_SCALE;
   const cameraDistance =
-    (GLOBE_R * 1.16) / (ORB_FRACTION * Math.tan((38 * Math.PI) / 360));
+    (GLOBE_R * 1.03) / (ORB_FRACTION * Math.tan((38 * Math.PI) / 360));
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let autoSpin = reduceMotion ? 0 : 0.12;
   let dragging = false;

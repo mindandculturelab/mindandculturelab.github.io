@@ -548,7 +548,8 @@ h2 {
 }
 
 .glimpse-sites .glimpse-stage {
-  inset: -14%;
+  /* Extra margin so pins can render outside the black ring */
+  inset: -18%;
   overflow: visible;
   border-radius: 0;
   background: transparent;
