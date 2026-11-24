@@ -106,8 +106,8 @@ renderer.toneMappingExposure = 1.05;
 stage.insertBefore(renderer.domElement, stage.firstChild);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf4f0e8);
-scene.fog = new THREE.Fog(0xf4f0e8, 11, 20);
+scene.background = null;
+scene.fog = null;
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
 camera.position.set(0, 0.35, 4.2);
@@ -180,9 +180,9 @@ const pointerNDC = new THREE.Vector2();
 const camOffset = new THREE.Vector3();
 const lookAt = new THREE.Vector3(0, 0, 0);
 
-function pinScaleForN(n) {
-  const base = Math.sqrt(Math.max(n || 40, 20) / 120);
-  return Math.min(1.55, Math.max(0.72, base));
+function pinScaleForN() {
+  // Uniform pin size across sites (sample size no longer scales markers).
+  return 1;
 }
 
 // mindandculturelab.com brand: terracotta · sage · lilac

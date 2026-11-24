@@ -97,7 +97,8 @@ if (!stage) {
 
   const scene = new THREE.Scene();
   // Transparent so the homepage hero backdrop shows through
-  scene.fog = new THREE.Fog(0xf4f0e8, 11, 20);
+  scene.background = null;
+  scene.fog = null;
 
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 40);
   camera.position.set(0, 0.2, 5.1);
@@ -121,12 +122,13 @@ if (!stage) {
   const earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 128, 96), earthMat);
   globeGroup.add(earth);
 
+  // Keep atmosphere/rim inside the earth silhouette so the orb ring stays exact.
   const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(GLOBE_R * 1.045, 48, 32),
+    new THREE.SphereGeometry(GLOBE_R * 1.012, 48, 32),
     new THREE.MeshBasicMaterial({
       color: 0xd4cfc4,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.12,
       side: THREE.BackSide,
       depthWrite: false
     })
@@ -134,11 +136,11 @@ if (!stage) {
   globeGroup.add(atmosphere);
 
   const rim = new THREE.Mesh(
-    new THREE.SphereGeometry(GLOBE_R * 1.02, 48, 32),
+    new THREE.SphereGeometry(GLOBE_R * 1.006, 48, 32),
     new THREE.MeshBasicMaterial({
       color: 0xe8f2ec,
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.06,
       depthWrite: false
     })
   );
@@ -150,9 +152,10 @@ if (!stage) {
   let pinEntries = [];
   let userAzimuth = 0.55;
   let userPolar = 0.06;
-  // Stage is expanded so pins can stick out; camera distance keeps the globe
-  // exactly the diameter of the black ring (stage is 128% of the orb).
-  const cameraDistance = 4.35 * 1.28;
+  // Stage is expanded (inset -14% → 128% of orb) so pins can stick out.
+  // Distance is derived so the earth sphere matches the black ring exactly.
+  const ORB_FRACTION = 1 / 1.28;
+  const cameraDistance = GLOBE_R / (ORB_FRACTION * Math.tan((38 * Math.PI) / 360));
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let autoSpin = reduceMotion ? 0 : 0.12;
   let dragging = false;
@@ -168,9 +171,8 @@ if (!stage) {
   const camOffset = new THREE.Vector3();
   const lookAt = new THREE.Vector3(0, 0, 0);
 
-  function pinScaleForN(n) {
-    const base = Math.sqrt(Math.max(n || 40, 20) / 120);
-    return Math.min(1.55, Math.max(0.72, base));
+  function pinScaleForN() {
+    return 1;
   }
 
   // mindandculturelab.com brand: terracotta · sage · lilac

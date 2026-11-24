@@ -1169,14 +1169,13 @@ h2 {
 
 .sites-stage {
   position: relative;
-  background:
-    radial-gradient(circle at 42% 38%, #ffffff 0%, #f3eee6 55%, #ebe3d6 100%);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   min-height: 460px;
   height: min(72vh, 680px);
-  overflow: hidden;
-  box-shadow: var(--shadow);
+  overflow: visible;
+  box-shadow: none;
   cursor: grab;
   touch-action: none;
 }
