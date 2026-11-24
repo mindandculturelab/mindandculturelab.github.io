@@ -136,7 +136,8 @@ if (!stage) {
 
   let userAzimuth = 0.55;
   let userPolar = 0.28;
-  let autoSpin = 0.55;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let autoSpin = reduceMotion ? 0 : 0.55;
   let dragging = false;
   let downX = 0;
   let downY = 0;
@@ -150,7 +151,7 @@ if (!stage) {
 
   stage.addEventListener("pointerdown", function (event) {
     dragging = true;
-    autoSpin = 0.05;
+    autoSpin = reduceMotion ? 0 : 0.05;
     downX = event.clientX;
     downY = event.clientY;
     lastX = event.clientX;
@@ -168,6 +169,9 @@ if (!stage) {
     lastY = event.clientY;
     userAzimuth -= dx * 0.007;
     userPolar = Math.max(0.08, Math.min(0.85, userPolar + dy * 0.005));
+    if (reduceMotion) {
+      frame();
+    }
   });
 
   stage.addEventListener("pointerup", function (event) {
@@ -177,12 +181,12 @@ if (!stage) {
     if (movedDist < 7 && shift < 7) {
       window.location.href = "experience/?study=tsa";
     }
-    autoSpin = 0.45;
+    autoSpin = reduceMotion ? 0 : 0.45;
   });
 
   stage.addEventListener("pointercancel", function () {
     dragging = false;
-    autoSpin = 0.45;
+    autoSpin = reduceMotion ? 0 : 0.45;
   });
 
   function resize() {
@@ -210,8 +214,10 @@ if (!stage) {
   }
 
   function frame() {
-    requestAnimationFrame(frame);
-    if (!visible) return;
+    if (!reduceMotion) {
+      requestAnimationFrame(frame);
+    }
+    if (!visible && !reduceMotion) return;
     if (!dragging && autoSpin) {
       userAzimuth += autoSpin * 0.01;
     }
@@ -223,4 +229,7 @@ if (!stage) {
 
   resize();
   requestAnimationFrame(frame);
+  if (reduceMotion) {
+    stage.addEventListener("pointerup", frame);
+  }
 }

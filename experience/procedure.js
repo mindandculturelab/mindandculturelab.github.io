@@ -504,10 +504,26 @@ if (typeof ResizeObserver === "function") {
   }).observe(stage);
 }
 
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 function frame(ms) {
-  requestAnimationFrame(frame);
+  if (!reduceMotion) {
+    requestAnimationFrame(frame);
+  }
   nowSeconds = ms * 0.001;
-  renderFrame(false);
+  renderFrame(reduceMotion);
 }
 
-requestAnimationFrame(frame);
+if (reduceMotion) {
+  // Still redraw after user interaction; skip continuous RAF spin/lerp.
+  ["click", "pointerup", "change"].forEach(function (evt) {
+    stage.addEventListener(evt, function () {
+      renderFrame(true);
+    });
+  });
+  window.addEventListener("resize", function () {
+    renderFrame(true);
+  });
+} else {
+  requestAnimationFrame(frame);
+}

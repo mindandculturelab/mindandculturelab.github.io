@@ -153,7 +153,8 @@ if (!stage) {
   // Stage is expanded so pins can stick out; camera distance keeps the globe
   // exactly the diameter of the black ring (stage is 128% of the orb).
   const cameraDistance = 4.35 * 1.28;
-  let autoSpin = 0.12;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let autoSpin = reduceMotion ? 0 : 0.12;
   let dragging = false;
   let downX = 0;
   let downY = 0;
@@ -229,7 +230,7 @@ if (!stage) {
   stage.addEventListener("pointerdown", function (event) {
     if (event.target.closest("a")) return;
     dragging = true;
-    autoSpin = 0.02;
+    autoSpin = reduceMotion ? 0 : 0.02;
     downX = event.clientX;
     downY = event.clientY;
     lastX = event.clientX;
@@ -251,6 +252,9 @@ if (!stage) {
     lastY = event.clientY;
     userAzimuth -= dx * 0.005;
     userPolar = Math.max(-0.85, Math.min(0.85, userPolar + dy * 0.004));
+    if (reduceMotion) {
+      renderOnce();
+    }
   });
 
   stage.addEventListener("pointerup", function (event) {
@@ -266,12 +270,12 @@ if (!stage) {
       }
     }
     // Resume gentle spin after a drag
-    autoSpin = 0.08;
+    autoSpin = reduceMotion ? 0 : 0.08;
   });
 
   stage.addEventListener("pointercancel", function () {
     dragging = false;
-    autoSpin = 0.08;
+    autoSpin = reduceMotion ? 0 : 0.08;
   });
 
   function resize() {
@@ -299,8 +303,10 @@ if (!stage) {
   }
 
   function frame(ms) {
-    requestAnimationFrame(frame);
-    if (!visible) return;
+    if (!reduceMotion) {
+      requestAnimationFrame(frame);
+    }
+    if (!visible && !reduceMotion) return;
     const t = ms * 0.001;
     if (!dragging && autoSpin) {
       userAzimuth += autoSpin * 0.012;
@@ -310,8 +316,18 @@ if (!stage) {
     camera.position.copy(camOffset);
     camera.lookAt(lookAt);
 
-    atmosphere.rotation.y = t * 0.02;
+    if (!reduceMotion) {
+      atmosphere.rotation.y = t * 0.02;
+    }
     renderer.render(scene, camera);
+  }
+
+  function renderOnce() {
+    frame(performance.now());
+  }
+
+  if (reduceMotion) {
+    stage.addEventListener("pointerup", renderOnce);
   }
 
   Promise.all([

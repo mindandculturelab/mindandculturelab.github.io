@@ -166,7 +166,8 @@ const chipButtons = {};
 let userAzimuth = 0.55;
 let userPolar = 0.18;
 let userZoom = 1;
-let autoSpin = 0.08;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let autoSpin = reduceMotion ? 0 : 0.08;
 let dragging = false;
 let downX = 0;
 let downY = 0;
@@ -406,6 +407,9 @@ function selectSite(id, fromUser) {
     userAzimuth = sph.theta;
     userPolar = Math.PI / 2 - sph.phi;
   }
+  if (reduceMotion) {
+    renderOnce();
+  }
 }
 
 function pickPin(event) {
@@ -447,6 +451,9 @@ stage.addEventListener("pointermove", function (event) {
   lastY = event.clientY;
   userAzimuth -= dx * 0.005;
   userPolar = Math.max(-0.85, Math.min(0.85, userPolar + dy * 0.004));
+  if (reduceMotion) {
+    renderOnce();
+  }
 });
 
 stage.addEventListener("pointerup", function (event) {
@@ -469,6 +476,9 @@ stage.addEventListener(
     event.preventDefault();
     autoSpin = 0;
     userZoom = Math.max(0.72, Math.min(1.55, userZoom + event.deltaY * 0.0009));
+    if (reduceMotion) {
+      renderOnce();
+    }
   },
   { passive: false }
 );
@@ -487,7 +497,9 @@ if (typeof ResizeObserver === "function") {
 }
 
 function frame(ms) {
-  requestAnimationFrame(frame);
+  if (!reduceMotion) {
+    requestAnimationFrame(frame);
+  }
   const t = ms * 0.001;
   if (!dragging && autoSpin) {
     userAzimuth += autoSpin * 0.012;
@@ -498,8 +510,19 @@ function frame(ms) {
   camera.position.copy(camOffset);
   camera.lookAt(lookAt);
 
-  atmosphere.rotation.y = t * 0.02;
+  if (!reduceMotion) {
+    atmosphere.rotation.y = t * 0.02;
+  }
   renderer.render(scene, camera);
+}
+
+function renderOnce() {
+  frame(performance.now());
+}
+
+if (reduceMotion) {
+  stage.addEventListener("pointerup", renderOnce);
+  stage.addEventListener("wheel", renderOnce, { passive: true });
 }
 
 Promise.all([

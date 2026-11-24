@@ -44,7 +44,11 @@
     });
   }
 
-  if (typeof IntersectionObserver !== "undefined") {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduceMotion) {
+    animateIn();
+  } else if (typeof IntersectionObserver !== "undefined") {
     const io = new IntersectionObserver(
       function (entries) {
         if (entries.some(function (en) {

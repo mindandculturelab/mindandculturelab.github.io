@@ -308,6 +308,10 @@ h2 {
   margin: 1.25rem 0 0;
 }
 
+.actions .pill-link {
+  align-self: center;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -2734,5 +2738,31 @@ main > .section + .contact-band {
 
   .glimpse-sites .glimpse-orb {
     margin-block: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .glimpse:hover .glimpse-orb,
+  .glimpse-sites:hover .glimpse-orb,
+  .logo:hover img,
+  .glimpse-link:hover .cta-arrow {
+    transform: none;
+  }
+
+  .chart-bar-fill {
+    transition: none;
   }
 }
