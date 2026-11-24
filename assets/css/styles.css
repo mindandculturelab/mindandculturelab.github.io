@@ -2980,9 +2980,17 @@ main > .section + .contact-band {
 
   .home-glimpses {
     grid-template-columns: 1fr;
-    max-width: 18rem;
-    margin-inline: auto;
+    max-width: none;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
     gap: 0;
+    border-radius: 0;
+    padding-bottom: 0;
+  }
+
+  .glimpse {
+    width: 100%;
+    padding-inline: 1.15rem;
   }
 
   .glimpse + .glimpse {
@@ -2991,7 +2999,7 @@ main > .section + .contact-band {
 
   .glimpse-panel,
   .glimpse-orb {
-    width: min(100%, 17.5rem);
+    width: 100%;
   }
 
   .sites-stage {
@@ -3074,10 +3082,6 @@ main > .section + .contact-band {
 @media (max-width: 580px) {
   .procedure-tabs {
     grid-template-columns: 1fr;
-  }
-
-  .home-glimpses {
-    max-width: 16.5rem;
   }
 
   .glimpse-link {
