@@ -150,7 +150,8 @@ if (!stage) {
   let pinEntries = [];
   let userAzimuth = 0.55;
   let userPolar = 0.06;
-  let userZoom = 1.05;
+  // Stage is expanded so pins can stick out; keep the globe visually filling the ring.
+  let userZoom = 0.86;
   let autoSpin = 0.12;
   let dragging = false;
   let downX = 0;
@@ -276,7 +277,7 @@ if (!stage) {
     "wheel",
     function (event) {
       event.preventDefault();
-      userZoom = Math.max(0.9, Math.min(1.55, userZoom + event.deltaY * 0.0009));
+      userZoom = Math.max(0.72, Math.min(1.35, userZoom + event.deltaY * 0.0009));
     },
     { passive: false }
   );
