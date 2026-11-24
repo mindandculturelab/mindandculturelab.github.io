@@ -40,13 +40,15 @@ if (!stage) {
       let tg;
       let tb;
       if (isIce) {
-        tr = r * 0.35 + 236 * 0.65;
-        tg = g * 0.35 + 232 * 0.65;
-        tb = b * 0.35 + 222 * 0.65;
+        tr = r * 0.35 + 242 * 0.65;
+        tg = g * 0.35 + 236 * 0.65;
+        tb = b * 0.35 + 224 * 0.65;
       } else if (isOcean) {
-        tr = r * 0.42 + 186 * 0.58;
-        tg = g * 0.42 + 204 * 0.58;
-        tb = b * 0.48 + 198 * 0.52;
+        // Warm stone water (no blue) — enough contrast against cream page bg
+        const shade = 0.2 + luma * 0.35;
+        tr = r * 0.12 + (186 * (1 - shade) + 168 * shade);
+        tg = g * 0.12 + (180 * (1 - shade) + 172 * shade);
+        tb = b * 0.06 + (162 * (1 - shade) + 152 * shade);
       } else {
         tr = r * 0.55 + 72 * 0.45;
         tg = g * 0.55 + 118 * 0.45;
@@ -97,8 +99,8 @@ if (!stage) {
   // Transparent so the homepage hero backdrop shows through
   scene.fog = new THREE.Fog(0xf4f0e8, 11, 20);
 
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
-  camera.position.set(0, 0.35, 4.2);
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 40);
+  camera.position.set(0, 0.2, 5.1);
 
   scene.add(new THREE.AmbientLight(0xfff8ef, 0.78));
   const key = new THREE.DirectionalLight(0xfff4e6, 1.2);
@@ -122,9 +124,9 @@ if (!stage) {
   const atmosphere = new THREE.Mesh(
     new THREE.SphereGeometry(GLOBE_R * 1.045, 48, 32),
     new THREE.MeshBasicMaterial({
-      color: 0x9fc2ab,
+      color: 0xd4cfc4,
       transparent: true,
-      opacity: 0.14,
+      opacity: 0.16,
       side: THREE.BackSide,
       depthWrite: false
     })
@@ -147,8 +149,8 @@ if (!stage) {
 
   let pinEntries = [];
   let userAzimuth = 0.55;
-  let userPolar = 0.18;
-  let userZoom = 0.95;
+  let userPolar = 0.06;
+  let userZoom = 1.22;
   let autoSpin = 0.1;
   let dragging = false;
   let downX = 0;
@@ -265,7 +267,7 @@ if (!stage) {
     "wheel",
     function (event) {
       event.preventDefault();
-      userZoom = Math.max(0.72, Math.min(1.35, userZoom + event.deltaY * 0.0009));
+      userZoom = Math.max(0.9, Math.min(1.55, userZoom + event.deltaY * 0.0009));
     },
     { passive: false }
   );
@@ -302,7 +304,7 @@ if (!stage) {
       userAzimuth += autoSpin * 0.012;
     }
 
-    const radius = 4.15 * userZoom;
+    const radius = 4.35 * userZoom;
     camOffset.setFromSphericalCoords(radius, Math.PI / 2 - userPolar, userAzimuth);
     camera.position.copy(camOffset);
     camera.lookAt(lookAt);
@@ -331,7 +333,7 @@ if (!stage) {
       });
 
       const badge = stage.querySelector("[data-hero-globe-badge]");
-      if (badge) badge.textContent = sites.length + " field sites";
+      if (badge) badge.textContent = sites.length + " sites";
 
       resize();
       requestAnimationFrame(frame);

@@ -53,14 +53,15 @@ function stylizeEarthTexture(image) {
     let tb;
     if (isIce) {
       // Warm ivory ice shelves
-      tr = r * 0.35 + 236 * 0.65;
-      tg = g * 0.35 + 232 * 0.65;
-      tb = b * 0.35 + 222 * 0.65;
+      tr = r * 0.35 + 242 * 0.65;
+      tg = g * 0.35 + 236 * 0.65;
+      tb = b * 0.35 + 224 * 0.65;
     } else if (isOcean) {
-      // Sage-tinted water; keep original gradients for coast readability
-      tr = r * 0.42 + 186 * 0.58;
-      tg = g * 0.42 + 204 * 0.58;
-      tb = b * 0.48 + 198 * 0.52;
+      // Warm stone water (no blue) — enough contrast against cream page bg
+      const shade = 0.2 + luma * 0.35;
+      tr = r * 0.12 + (186 * (1 - shade) + 168 * shade);
+      tg = g * 0.12 + (180 * (1 - shade) + 172 * shade);
+      tb = b * 0.06 + (162 * (1 - shade) + 152 * shade);
     } else {
       // Sage land with original terrain retained
       tr = r * 0.55 + 72 * 0.45;
@@ -133,9 +134,9 @@ globeGroup.add(earth);
 const atmosphere = new THREE.Mesh(
   new THREE.SphereGeometry(GLOBE_R * 1.045, 48, 32),
   new THREE.MeshBasicMaterial({
-    color: 0x9fc2ab,
+    color: 0xd4cfc4,
     transparent: true,
-    opacity: 0.14,
+    opacity: 0.16,
     side: THREE.BackSide,
     depthWrite: false
   })
