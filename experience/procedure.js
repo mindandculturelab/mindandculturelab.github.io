@@ -183,9 +183,9 @@ procedures.forEach(function (proc) {
   tabButtons[proc.id] = btn;
 });
 
-function setActorsVisible(root, visible) {
+function setThumbExtrasVisible(root, visible) {
   root.traverse(function (obj) {
-    if (obj.userData && obj.userData.isActor) {
+    if (obj.userData && (obj.userData.thumbHide || obj.userData.isActor)) {
       obj.visible = visible;
     }
   });
@@ -202,19 +202,26 @@ function captureProcedureThumb(proc) {
   if (typeof proc.setStep === "function") {
     proc.setStep(0, 0);
   }
-  const st = proc.steps[0];
-  camera.position.set(st.camera.pos[0], st.camera.pos[1], st.camera.pos[2]);
-  camera.lookAt(st.camera.look[0], st.camera.look[1], st.camera.look[2]);
+  // Frame the primary apparatus for a clean task-only preview.
+  const focus = proc.inspectables && proc.inspectables[0];
+  if (focus && focus.focusPos && focus.focusLook) {
+    camera.position.set(focus.focusPos[0], focus.focusPos[1], focus.focusPos[2]);
+    camera.lookAt(focus.focusLook[0], focus.focusLook[1], focus.focusLook[2]);
+  } else {
+    const st = proc.steps[0];
+    camera.position.set(st.camera.pos[0], st.camera.pos[1], st.camera.pos[2]);
+    camera.lookAt(st.camera.look[0], st.camera.look[1], st.camera.look[2]);
+  }
   camera.aspect = 16 / 10;
   camera.updateProjectionMatrix();
   renderer.setSize(360, 225, false);
   if (typeof proc.update === "function") {
     proc.update(0);
   }
-  setActorsVisible(proc.root, false);
+  setThumbExtrasVisible(proc.root, false);
   renderer.render(scene, camera);
   const dataUrl = renderer.domElement.toDataURL("image/jpeg", 0.84);
-  setActorsVisible(proc.root, true);
+  setThumbExtrasVisible(proc.root, true);
   if (typeof proc.setStep === "function") {
     proc.setStep(0, 0);
   }
