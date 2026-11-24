@@ -11,25 +11,32 @@
   var height = 0;
   var dpr = 1;
   var visible = true;
-  var rafId = 0;
+  var markReady = false;
 
-  var pointer = { tx: 0, ty: 0, x: 0, y: 0, active: false };
+  var pointer = { tx: 0, ty: 0, x: 0, y: 0 };
 
-  // Brand stripe colors from mindandculturelab.com / og-image
-  var PALETTE = {
-    sageDeep: [36, 84, 58],
-    sageInk: [47, 107, 74],
-    sage: [90, 162, 118],
-    terracotta: [238, 135, 31],
-    sienna: [232, 84, 0],
-    lilac: [207, 188, 249],
-    violet: [124, 99, 201],
-    gold: [218, 165, 62],
-    ivory: [250, 248, 243],
-    ink: [28, 26, 23]
+  var INK = [28, 26, 23];
+  var SAGE = [47, 107, 74];
+  var TERR = [238, 135, 31];
+  var LILAC = [207, 188, 249];
+  var HUB_ACCENT = [LILAC, TERR, SAGE, [232, 84, 0]];
+
+  // Load the real lab mark — geometry fidelity comes from the asset, motion from overlays
+  var mark = new Image();
+  mark.decoding = "async";
+  mark.onload = function () {
+    markReady = true;
+    if (reducedMotion) renderFrame(1.2, 0.016);
   };
-
-  var HUB_COLORS = [PALETTE.sageInk, PALETTE.terracotta, PALETTE.lilac, PALETTE.sienna];
+  mark.onerror = function () {
+    markReady = false;
+  };
+  mark.src = (function () {
+    // Prefer the same mark path the header logo already resolved
+    var base = document.querySelector('.logo img[src*="maclab-mark"]');
+    if (base && base.getAttribute("src")) return base.getAttribute("src");
+    return "assets/images/maclab-mark.png";
+  })();
 
   function rgba(rgb, a) {
     return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a.toFixed(3) + ")";
@@ -47,88 +54,57 @@
     ];
   }
 
-  function cubicPoint(p0, p1, p2, p3, t) {
+  function cubic(p0, p1, p2, p3, t) {
     var u = 1 - t;
-    var uu = u * u;
-    var uuu = uu * u;
-    var tt = t * t;
-    var ttt = tt * t;
     return {
-      x: uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x,
-      y: uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y
+      x: u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x,
+      y: u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y
     };
   }
 
-  // Inner neural constellation (cool element kept inside the logo star)
+  // Quiet mind constellation in the mark's negative-space star
   var mindNodes = [];
-  var GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-  var MIND_COUNT = 22;
-  for (var i = 0; i < MIND_COUNT; i += 1) {
-    var yNorm = 1 - (i / (MIND_COUNT - 1)) * 2;
-    var rSlice = Math.sqrt(Math.max(0, 1 - yNorm * yNorm));
-    var theta = GOLDEN_ANGLE * i;
-    var shell = i < 5 ? 0.38 : 0.68 + (i % 3) * 0.12;
+  var GA = Math.PI * (3 - Math.sqrt(5));
+  var N = 16;
+  for (var i = 0; i < N; i += 1) {
+    var yn = 1 - (i / (N - 1)) * 2;
+    var rs = Math.sqrt(Math.max(0, 1 - yn * yn));
+    var th = GA * i;
+    var shell = i < 4 ? 0.32 : 0.58 + (i % 3) * 0.11;
     mindNodes.push({
-      bx: Math.cos(theta) * rSlice * shell,
-      by: yNorm * shell,
-      bz: Math.sin(theta) * rSlice * shell,
-      phase: i * 0.73,
-      energy: 0.25 + (i % 4) * 0.1,
-      cultureTint: 0,
+      bx: Math.cos(th) * rs * shell,
+      by: yn * shell,
+      bz: Math.sin(th) * rs * shell,
+      phase: i * 0.7,
+      energy: 0.28,
+      tint: 0,
       px: 0,
       py: 0,
       pz: 0
     });
   }
-
   var mindEdges = [];
-  for (var a = 0; a < MIND_COUNT; a += 1) {
-    for (var b = a + 1; b < MIND_COUNT; b += 1) {
+  for (var a = 0; a < N; a += 1) {
+    for (var b = a + 1; b < N; b += 1) {
       var dx = mindNodes[a].bx - mindNodes[b].bx;
       var dy = mindNodes[a].by - mindNodes[b].by;
       var dz = mindNodes[a].bz - mindNodes[b].bz;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (dist < 0.78) mindEdges.push({ a: a, b: b });
+      if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 0.78) mindEdges.push([a, b]);
     }
   }
 
-  // Four interlocking corner hubs (logo geometry at NE / SE / SW / NW)
-  var hubs = [];
-  for (var q = 0; q < 4; q += 1) {
-    var sats = [];
-    for (var s = 0; s < 5; s += 1) {
-      sats.push({
-        angleOffset: (s / 5) * Math.PI * 2,
-        orbit: s % 2 === 0 ? 1.0 : 1.18,
-        size: s % 2 === 0 ? 2.4 : 1.9,
-        phase: q * 1.2 + s * 0.85
-      });
-    }
-    hubs.push({
-      index: q,
-      // Logo places circles at diagonal cardinals
-      baseAngle: Math.PI * 0.25 + q * (Math.PI * 0.5),
-      color: HUB_COLORS[q],
-      bloom: 0.2,
-      ripple: 0,
-      satellites: sats,
-      x: 0,
-      y: 0
-    });
-  }
-
-  // Bidirectional signal particles along logo sweep arcs
   var signals = [];
-  for (var p = 0; p < 32; p += 1) {
+  for (var p = 0; p < 20; p += 1) {
     signals.push({
-      quadrant: p % 4,
+      q: p % 4,
       dir: p % 2 === 0 ? 1 : -1,
-      t: (p / 32) % 1,
-      speed: 0.16 + (p % 5) * 0.026,
-      lane: ((p % 3) - 1) * 0.35,
-      size: 2.0 + (p % 3) * 0.55
+      t: (p / 20) % 1,
+      speed: 0.12 + (p % 4) * 0.028,
+      size: 1.9 + (p % 3) * 0.4
     });
   }
+
+  var blooms = [0.18, 0.18, 0.18, 0.18];
 
   function resize() {
     var rect = canvas.getBoundingClientRect();
@@ -145,18 +121,16 @@
     var r = canvas.getBoundingClientRect();
     pointer.tx = ((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1;
     pointer.ty = ((e.clientY - r.top) / Math.max(1, r.height)) * 2 - 1;
-    pointer.active = true;
   });
   container.addEventListener("pointerleave", function () {
     pointer.tx = 0;
     pointer.ty = 0;
-    pointer.active = false;
   });
 
   if (typeof ResizeObserver !== "undefined") {
     new ResizeObserver(function () {
       resize();
-      if (reducedMotion) renderFrame(2.4, 0.016);
+      if (reducedMotion) renderFrame(1.2, 0.016);
     }).observe(canvas);
   } else {
     window.addEventListener("resize", resize);
@@ -173,437 +147,249 @@
     ).observe(canvas);
   }
 
-  /** Logo-faithful sweep from concave star tip → interlocking corner circle */
-  function getLogoArc(cx, cy, R, q, rot, lane) {
-    var a = Math.PI * 0.25 + q * (Math.PI * 0.5) + rot;
-    var tipR = R * 0.28;
-    var hubR = R * 0.72;
-    var hubCircleR = R * 0.165;
-    var perpX = -Math.sin(a) * lane * R * 0.03;
-    var perpY = Math.cos(a) * lane * R * 0.03;
+  /**
+   * Overlay geometry matched to maclab-mark:
+   * diagonal hubs (NE/SE/SW/NW) + cardinal star tips + spiral arms tip→hub.
+   */
+  function logoGeom(cx, cy, R, rot) {
+    var hubDist = R * 0.72;
+    var hubR = R * 0.155;
+    var starTip = R * 0.255;
+    var hubs = [];
+    var arcs = [];
 
-    // Star tip (slightly inset from concave point)
-    var p0 = {
-      x: cx + Math.cos(a) * tipR + perpX * 0.3,
-      y: cy + Math.sin(a) * tipR + perpY * 0.3
-    };
-    // Logo sweep: curve ahead of the radial, then back into the corner circle
-    var sweep = 0.55;
-    var p1 = {
-      x: cx + Math.cos(a - sweep) * R * 0.52 + perpX,
-      y: cy + Math.sin(a - sweep) * R * 0.52 + perpY
-    };
-    var p2 = {
-      x: cx + Math.cos(a - 0.12) * R * 0.78 + perpX,
-      y: cy + Math.sin(a - 0.12) * R * 0.78 + perpY
-    };
-    var hub = {
-      x: cx + Math.cos(a) * hubR,
-      y: cy + Math.sin(a) * hubR
-    };
-    var p3 = {
-      x: hub.x - Math.cos(a) * hubCircleR * 0.55,
-      y: hub.y - Math.sin(a) * hubCircleR * 0.55
-    };
+    for (var q = 0; q < 4; q += 1) {
+      var hubA = rot + Math.PI * 0.25 + q * (Math.PI * 0.5);
+      var tipA = rot + q * (Math.PI * 0.5) - Math.PI * 0.5;
 
-    // Counter-weave return path (other lobe of the logo line)
-    var q1 = {
-      x: cx + Math.cos(a + 0.14) * R * 0.78 - perpX,
-      y: cy + Math.sin(a + 0.14) * R * 0.78 - perpY
-    };
-    var q2 = {
-      x: cx + Math.cos(a + sweep) * R * 0.5 - perpX,
-      y: cy + Math.sin(a + sweep) * R * 0.5 - perpY
-    };
-    var q3 = {
-      x: cx + Math.cos(a) * tipR * 0.92 - perpX * 0.3,
-      y: cy + Math.sin(a) * tipR * 0.92 - perpY * 0.3
-    };
+      var hub = {
+        a: hubA,
+        x: cx + Math.cos(hubA) * hubDist,
+        y: cy + Math.sin(hubA) * hubDist,
+        r: hubR,
+        color: HUB_ACCENT[q]
+      };
+      hubs.push(hub);
 
-    return {
-      out: [p0, p1, p2, p3],
-      back: [p3, q1, q2, q3],
-      hub: hub,
-      angle: a,
-      hubCircleR: hubCircleR
-    };
+      var tip = {
+        x: cx + Math.cos(tipA) * starTip,
+        y: cy + Math.sin(tipA) * starTip
+      };
+
+      arcs.push({
+        out: [
+          tip,
+          {
+            x: cx + Math.cos(tipA + 0.55) * R * 0.48,
+            y: cy + Math.sin(tipA + 0.55) * R * 0.48
+          },
+          {
+            x: cx + Math.cos(hubA - 0.35) * R * 0.78,
+            y: cy + Math.sin(hubA - 0.35) * R * 0.78
+          },
+          {
+            x: hub.x - Math.cos(hubA) * hubR * 0.12,
+            y: hub.y - Math.sin(hubA) * hubR * 0.12
+          }
+        ],
+        hub: hub
+      });
+    }
+
+    return { hubs: hubs, arcs: arcs, starTip: starTip, hubDist: hubDist };
   }
 
-  function drawConcaveStar(cx, cy, tipR, midR, rot) {
+  function drawMark(cx, cy, size, rot) {
+    if (!markReady || !mark.naturalWidth) return false;
+    var nw = mark.naturalWidth;
+    var nh = mark.naturalHeight;
+    var scale = size / Math.max(nw, nh);
+    var dw = nw * scale;
+    var dh = nh * scale;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rot);
+    // Soft brand under-glow so the black mark sits on cream
+    var glow = ctx.createRadialGradient(0, 0, size * 0.12, 0, 0, size * 0.62);
+    glow.addColorStop(0, "rgba(47, 107, 74, 0.14)");
+    glow.addColorStop(0.55, "rgba(238, 135, 31, 0.07)");
+    glow.addColorStop(1, "rgba(244, 240, 232, 0)");
+    ctx.fillStyle = glow;
     ctx.beginPath();
-    for (var qs = 0; qs < 4; qs += 1) {
-      var tipA = rot + qs * (Math.PI * 0.5);
-      var nextTipA = tipA + Math.PI * 0.5;
-      var ctrlA = tipA + Math.PI * 0.25;
-      var sx = cx + Math.cos(tipA) * tipR;
-      var sy = cy + Math.sin(tipA) * tipR;
-      var ex = cx + Math.cos(nextTipA) * tipR;
-      var ey = cy + Math.sin(nextTipA) * tipR;
-      var mx = cx + Math.cos(ctrlA) * midR;
-      var my = cy + Math.sin(ctrlA) * midR;
-      if (qs === 0) ctx.moveTo(sx, sy);
+    ctx.arc(0, 0, size * 0.62, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = 0.94;
+    ctx.drawImage(mark, -dw * 0.5, -dh * 0.5, dw, dh);
+    ctx.restore();
+    return true;
+  }
+
+  /** Fallback silhouette if the mark asset fails to load */
+  function drawFallbackSilhouette(cx, cy, R, rot, g) {
+    var stroke = Math.max(2.2, R * 0.028);
+    ctx.strokeStyle = rgba(INK, 0.92);
+    ctx.lineWidth = stroke;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    for (var q = 0; q < 4; q += 1) {
+      var a0 = g.hubs[q].a;
+      var a1 = g.hubs[(q + 1) % 4].a;
+      if (a1 <= a0) a1 += Math.PI * 2;
+      var gap = Math.asin(Math.min(0.98, (g.hubs[q].r * 0.95) / g.hubDist));
+      ctx.beginPath();
+      ctx.arc(cx, cy, g.hubDist, a0 + gap, a1 - gap);
+      ctx.stroke();
+    }
+
+    for (var qi = 0; qi < 4; qi += 1) {
+      var arc = g.arcs[qi];
+      ctx.beginPath();
+      ctx.moveTo(arc.out[0].x, arc.out[0].y);
+      ctx.bezierCurveTo(arc.out[1].x, arc.out[1].y, arc.out[2].x, arc.out[2].y, arc.out[3].x, arc.out[3].y);
+      ctx.stroke();
+    }
+
+    // Concave star outline
+    ctx.beginPath();
+    for (var s = 0; s < 4; s += 1) {
+      var tipA = rot + s * (Math.PI * 0.5) - Math.PI * 0.5;
+      var nextA = tipA + Math.PI * 0.5;
+      var midA = tipA + Math.PI * 0.25;
+      var sx = cx + Math.cos(tipA) * g.starTip;
+      var sy = cy + Math.sin(tipA) * g.starTip;
+      var ex = cx + Math.cos(nextA) * g.starTip;
+      var ey = cy + Math.sin(nextA) * g.starTip;
+      var mx = cx + Math.cos(midA) * (R * 0.09);
+      var my = cy + Math.sin(midA) * (R * 0.09);
+      if (s === 0) ctx.moveTo(sx, sy);
       ctx.quadraticCurveTo(mx, my, ex, ey);
     }
     ctx.closePath();
+    ctx.stroke();
+
+    for (var h = 0; h < 4; h += 1) {
+      var hub = g.hubs[h];
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, hub.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
   }
 
   var lastTime = performance.now();
 
-  function renderFrame(timeSec, dt) {
+  function renderFrame(t, dt) {
     ctx.clearRect(0, 0, width, height);
 
-    pointer.x = lerp(pointer.x, pointer.tx, 0.065);
-    pointer.y = lerp(pointer.y, pointer.ty, 0.065);
+    pointer.x = lerp(pointer.x, pointer.tx, 0.06);
+    pointer.y = lerp(pointer.y, pointer.ty, 0.06);
 
-    var cx = width * 0.5 + pointer.x * width * 0.016;
-    var cy = height * 0.5 + pointer.y * height * 0.016;
-    var R = Math.min(width, height) * 0.44;
-    var slowRot = timeSec * 0.06;
+    var cx = width * 0.5 + pointer.x * width * 0.012;
+    var cy = height * 0.5 + pointer.y * height * 0.012;
+    var R = Math.min(width, height) * 0.42;
+    var rot = reducedMotion ? 0 : t * 0.035;
+    var g = logoGeom(cx, cy, R, rot);
 
-    // Soft aura
-    var aura = ctx.createRadialGradient(cx, cy, R * 0.05, cx, cy, R * 1.08);
-    aura.addColorStop(0, "rgba(90, 162, 118, 0.12)");
-    aura.addColorStop(0.45, "rgba(238, 135, 31, 0.06)");
-    aura.addColorStop(0.78, "rgba(207, 188, 249, 0.04)");
-    aura.addColorStop(1, "rgba(244, 240, 232, 0)");
-    ctx.fillStyle = aura;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * 1.08, 0, Math.PI * 2);
-    ctx.fill();
+    var drewMark = drawMark(cx, cy, R * 2.05, rot);
+    if (!drewMark) drawFallbackSilhouette(cx, cy, R, rot, g);
 
-    // Update hub positions from logo geometry
-    var arcs = [];
-    for (var q = 0; q < 4; q += 1) {
-      var arc = getLogoArc(cx, cy, R, q, slowRot, 0);
-      arcs.push(arc);
-      hubs[q].x = arc.hub.x;
-      hubs[q].y = arc.hub.y;
-      hubs[q].bloom = Math.max(0.16, hubs[q].bloom - dt * 0.5);
-      hubs[q].ripple = (hubs[q].ripple + dt * 0.4) % 1;
-    }
-
-    var ringR = arcs[0].hubCircleR;
-    var outerR = R * 0.72;
-
-    // --- Logo outer ring broken into 4 arcs between interlocking circles ---
-    ctx.save();
-    ctx.strokeStyle = rgba(PALETTE.ink, 0.78);
-    ctx.lineWidth = 2.15;
-    ctx.lineCap = "round";
-    for (var qa = 0; qa < 4; qa += 1) {
-      var a0 = arcs[qa].angle;
-      var a1 = arcs[(qa + 1) % 4].angle;
-      if (a1 < a0) a1 += Math.PI * 2;
-      // Leave gaps where corner circles sit
-      var gap = Math.asin(Math.min(0.95, (ringR * 0.92) / outerR));
+    // Brand blooms behind the four interlocking circles
+    for (var h = 0; h < 4; h += 1) {
+      var hub = g.hubs[h];
+      blooms[h] = Math.max(0.12, blooms[h] - dt * 0.42);
+      var hg = ctx.createRadialGradient(hub.x, hub.y, hub.r * 0.15, hub.x, hub.y, hub.r * 1.7);
+      hg.addColorStop(0, rgba(hub.color, 0.1 + blooms[h] * 0.22));
+      hg.addColorStop(0.55, rgba(hub.color, 0.06 + blooms[h] * 0.1));
+      hg.addColorStop(1, rgba(hub.color, 0));
+      ctx.fillStyle = hg;
       ctx.beginPath();
-      ctx.arc(cx, cy, outerR, a0 + gap, a1 - gap);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // Subtle dashed cultural orbit inside the logo ring
-    ctx.save();
-    ctx.strokeStyle = rgba(PALETTE.sageInk, 0.12);
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 7]);
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * 0.48, -slowRot, Math.PI * 2 - slowRot);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-
-    // Inter-society bridges along the outer ring (cool element)
-    for (var qb = 0; qb < 4; qb += 1) {
-      var hA = hubs[qb];
-      var hB = hubs[(qb + 1) % 4];
-      var midA = arcs[qb].angle + Math.PI * 0.25;
-      var ctrl = {
-        x: cx + Math.cos(midA) * (outerR + ringR * 0.35),
-        y: cy + Math.sin(midA) * (outerR + ringR * 0.35)
-      };
-      var g = ctx.createLinearGradient(hA.x, hA.y, hB.x, hB.y);
-      g.addColorStop(0, rgba(hA.color, 0.28));
-      g.addColorStop(0.5, rgba(PALETTE.gold, 0.18));
-      g.addColorStop(1, rgba(hB.color, 0.28));
-      ctx.strokeStyle = g;
-      ctx.lineWidth = 1.35;
-      ctx.beginPath();
-      ctx.moveTo(hA.x, hA.y);
-      ctx.quadraticCurveTo(ctrl.x, ctrl.y, hB.x, hB.y);
-      ctx.stroke();
+      ctx.arc(hub.x, hub.y, hub.r * 1.7, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // --- Logo sweep lines (star ↔ corner circles), multi-strand ---
-    var STRANDS = [-0.85, 0, 0.85];
-    for (var qk = 0; qk < 4; qk += 1) {
-      var hubColor = hubs[qk].color;
-      for (var si = 0; si < STRANDS.length; si += 1) {
-        var strand = getLogoArc(cx, cy, R, qk, slowRot, STRANDS[si]);
-        var isCenter = si === 1;
-
-        var outGrad = ctx.createLinearGradient(
-          strand.out[0].x,
-          strand.out[0].y,
-          strand.out[3].x,
-          strand.out[3].y
-        );
-        outGrad.addColorStop(0, rgba(PALETTE.ink, isCenter ? 0.72 : 0.22));
-        outGrad.addColorStop(0.5, rgba(PALETTE.sageInk, isCenter ? 0.55 : 0.18));
-        outGrad.addColorStop(1, rgba(hubColor, isCenter ? 0.7 : 0.22));
-
-        ctx.strokeStyle = outGrad;
-        ctx.lineWidth = isCenter ? 2.05 : 1.0;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(strand.out[0].x, strand.out[0].y);
-        ctx.bezierCurveTo(
-          strand.out[1].x,
-          strand.out[1].y,
-          strand.out[2].x,
-          strand.out[2].y,
-          strand.out[3].x,
-          strand.out[3].y
-        );
-        ctx.stroke();
-
-        var inGrad = ctx.createLinearGradient(
-          strand.back[0].x,
-          strand.back[0].y,
-          strand.back[3].x,
-          strand.back[3].y
-        );
-        inGrad.addColorStop(0, rgba(hubColor, isCenter ? 0.55 : 0.16));
-        inGrad.addColorStop(0.55, rgba(PALETTE.terracotta, isCenter ? 0.4 : 0.14));
-        inGrad.addColorStop(1, rgba(PALETTE.ink, isCenter ? 0.65 : 0.2));
-
-        ctx.strokeStyle = inGrad;
-        ctx.lineWidth = isCenter ? 1.7 : 0.9;
-        ctx.beginPath();
-        ctx.moveTo(strand.back[0].x, strand.back[0].y);
-        ctx.bezierCurveTo(
-          strand.back[1].x,
-          strand.back[1].y,
-          strand.back[2].x,
-          strand.back[2].y,
-          strand.back[3].x,
-          strand.back[3].y
-        );
-        ctx.stroke();
-      }
-    }
-
-    // --- Central logo star (concave 4-point) ---
-    var starTip = R * 0.3;
-    var starMid = R * 0.11;
-    drawConcaveStar(cx, cy, starTip, starMid, slowRot);
-    var coreFill = ctx.createRadialGradient(cx, cy, 0, cx, cy, starTip);
-    coreFill.addColorStop(0, "rgba(255, 255, 255, 0.82)");
-    coreFill.addColorStop(0.65, "rgba(231, 242, 235, 0.4)");
-    coreFill.addColorStop(1, "rgba(47, 107, 74, 0.08)");
-    ctx.fillStyle = coreFill;
-    ctx.fill();
-    ctx.strokeStyle = rgba(PALETTE.ink, 0.82);
-    ctx.lineWidth = 2.05;
-    ctx.stroke();
-
-    // Tiny inner star sparkle (logo crosshair feel)
-    drawConcaveStar(cx, cy, R * 0.09, R * 0.028, slowRot + Math.PI * 0.25);
-    ctx.strokeStyle = rgba(PALETTE.sageInk, 0.45);
-    ctx.lineWidth = 1.15;
-    ctx.stroke();
-
-    // --- 3D mind constellation inside the star ---
-    var mindR = R * 0.2;
-    var rotY = timeSec * 0.32 + pointer.x * 0.5;
-    var rotX = Math.sin(timeSec * 0.22) * 0.22 - pointer.y * 0.4;
-    var cosY = Math.cos(rotY);
-    var sinY = Math.sin(rotY);
-    var cosX = Math.cos(rotX);
-    var sinX = Math.sin(rotX);
-
-    for (var ni = 0; ni < MIND_COUNT; ni += 1) {
+    // Mind constellation in the star's open center
+    var mindR = g.starTip * 0.42;
+    var rotY = t * 0.28 + pointer.x * 0.35;
+    var rotX = Math.sin(t * 0.2) * 0.18 - pointer.y * 0.3;
+    var cY = Math.cos(rotY);
+    var sY = Math.sin(rotY);
+    var cX = Math.cos(rotX);
+    var sX = Math.sin(rotX);
+    for (var ni = 0; ni < N; ni += 1) {
       var nd = mindNodes[ni];
-      var pulse = 1 + Math.sin(timeSec * 1.85 + nd.phase) * 0.055;
-      var x1 = nd.bx * pulse * cosY - nd.bz * pulse * sinY;
-      var z1 = nd.bx * pulse * sinY + nd.bz * pulse * cosY;
-      var y2 = nd.by * pulse * cosX - z1 * sinX;
-      var z2 = nd.by * pulse * sinX + z1 * cosX;
-      var persp = 1 / (1 - z2 * 0.26);
+      var pulse = 1 + Math.sin(t * 1.6 + nd.phase) * 0.04;
+      var x1 = nd.bx * pulse * cY - nd.bz * pulse * sY;
+      var z1 = nd.bx * pulse * sY + nd.bz * pulse * cY;
+      var y2 = nd.by * pulse * cX - z1 * sX;
+      var z2 = nd.by * pulse * sX + z1 * cX;
+      var persp = 1 / (1 - z2 * 0.22);
       nd.px = cx + x1 * mindR * persp;
       nd.py = cy + y2 * mindR * persp;
       nd.pz = z2;
-      nd.energy = Math.max(0.2, nd.energy - dt * 0.48);
-      nd.cultureTint = Math.max(0, nd.cultureTint - dt * 0.42);
+      nd.energy = Math.max(0.2, nd.energy - dt * 0.4);
+      nd.tint = Math.max(0, nd.tint - dt * 0.35);
     }
-
     for (var ei = 0; ei < mindEdges.length; ei += 1) {
-      var edge = mindEdges[ei];
-      var n1 = mindNodes[edge.a];
-      var n2 = mindNodes[edge.b];
-      var depthAlpha = 0.14 + ((n1.pz + n2.pz + 2) * 0.25) * 0.26;
-      var boost = (n1.energy + n2.energy) * 0.32;
-      var cMix = Math.min(1, (n1.cultureTint + n2.cultureTint) * 0.5);
-      var lineCol = mixRgb(PALETTE.sageInk, PALETTE.terracotta, cMix * 0.75);
-      ctx.strokeStyle = rgba(lineCol, Math.min(0.78, depthAlpha + boost * 0.3));
-      ctx.lineWidth = 0.85 + boost;
+      var e = mindEdges[ei];
+      var n1 = mindNodes[e[0]];
+      var n2 = mindNodes[e[1]];
+      var col = mixRgb(SAGE, TERR, Math.min(1, (n1.tint + n2.tint) * 0.5));
+      ctx.strokeStyle = rgba(col, 0.28 + (n1.energy + n2.energy) * 0.14);
+      ctx.lineWidth = 0.9;
       ctx.beginPath();
       ctx.moveTo(n1.px, n1.py);
-      ctx.quadraticCurveTo(
-        (n1.px + n2.px) * 0.5 + (n1.py - n2.py) * 0.08,
-        (n1.py + n2.py) * 0.5 + (n2.px - n1.px) * 0.08,
-        n2.px,
-        n2.py
-      );
+      ctx.lineTo(n2.px, n2.py);
       ctx.stroke();
     }
-
-    var sortedMind = mindNodes.slice().sort(function (u, v) {
-      return u.pz - v.pz;
-    });
-    for (var sm = 0; sm < sortedMind.length; sm += 1) {
-      var mn = sortedMind[sm];
-      var zScale = 0.72 + (mn.pz + 1) * 0.3;
-      var nodeRadius = (2.0 + mn.energy * 2.2) * zScale;
-      var nodeCol = mixRgb(PALETTE.sageInk, PALETTE.terracotta, Math.min(1, mn.cultureTint));
-      if (mn.energy > 0.45) {
-        ctx.fillStyle = rgba(nodeCol, (mn.energy - 0.35) * 0.26);
-        ctx.beginPath();
-        ctx.arc(mn.px, mn.py, nodeRadius * 2.3, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.fillStyle = rgba(nodeCol, 0.9);
+    for (var sm = 0; sm < N; sm += 1) {
+      var mn = mindNodes[sm];
+      var rad = (1.4 + mn.energy * 1.35) * (0.75 + (mn.pz + 1) * 0.2);
+      ctx.fillStyle = rgba(mixRgb(SAGE, TERR, mn.tint), 0.82);
       ctx.beginPath();
-      ctx.arc(mn.px, mn.py, nodeRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = rgba(PALETTE.ivory, 0.85);
-      ctx.beginPath();
-      ctx.arc(mn.px - nodeRadius * 0.25, mn.py - nodeRadius * 0.25, nodeRadius * 0.32, 0, Math.PI * 2);
+      ctx.arc(mn.px, mn.py, rad, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // --- Signal particles on logo arcs ---
-    for (var sp = 0; sp < signals.length; sp += 1) {
-      var sig = signals[sp];
+    // Signal particles riding the logo arms
+    for (var si = 0; si < signals.length; si += 1) {
+      var sig = signals[si];
       if (!reducedMotion) sig.t += dt * sig.speed;
       if (sig.t >= 1) {
         sig.t -= 1;
-        if (sig.dir === 1) {
-          hubs[sig.quadrant].bloom = Math.min(1, hubs[sig.quadrant].bloom + 0.4);
-        } else {
-          var targetIdx = (sig.quadrant * 5 + sp) % MIND_COUNT;
-          mindNodes[targetIdx].energy = 1;
-          mindNodes[targetIdx].cultureTint = 1;
-          mindNodes[(targetIdx + 2) % MIND_COUNT].energy = 0.82;
-          mindNodes[(targetIdx + 2) % MIND_COUNT].cultureTint = 0.75;
+        if (sig.dir === 1) blooms[sig.q] = Math.min(1, blooms[sig.q] + 0.4);
+        else {
+          var ti = (sig.q * 4 + si) % N;
+          mindNodes[ti].energy = 1;
+          mindNodes[ti].tint = 0.9;
         }
       }
-
-      var laneC = getLogoArc(cx, cy, R, sig.quadrant, slowRot, sig.lane);
-      var pts = sig.dir === 1 ? laneC.out : laneC.back;
-      var pos = cubicPoint(pts[0], pts[1], pts[2], pts[3], sig.t);
-      var tailPos = cubicPoint(pts[0], pts[1], pts[2], pts[3], Math.max(0, sig.t - 0.06));
-      var sigColor =
-        sig.dir === 1
-          ? mixRgb(PALETTE.sage, PALETTE.gold, sig.t * 0.6)
-          : mixRgb(hubs[sig.quadrant].color, PALETTE.terracotta, 0.45);
+      var arm = g.arcs[sig.q].out;
+      var pts = sig.dir === 1 ? arm : [arm[3], arm[2], arm[1], arm[0]];
+      var pos = cubic(pts[0], pts[1], pts[2], pts[3], sig.t);
+      var tail = cubic(pts[0], pts[1], pts[2], pts[3], Math.max(0, sig.t - 0.07));
       var fade = Math.sin(sig.t * Math.PI);
-
-      var trailGrad = ctx.createLinearGradient(tailPos.x, tailPos.y, pos.x, pos.y);
-      trailGrad.addColorStop(0, rgba(sigColor, 0));
-      trailGrad.addColorStop(1, rgba(sigColor, 0.75 * fade));
-      ctx.strokeStyle = trailGrad;
-      ctx.lineWidth = sig.size * 1.1;
+      var sc = sig.dir === 1 ? mixRgb(SAGE, TERR, sig.t * 0.5) : g.hubs[sig.q].color;
+      var tg = ctx.createLinearGradient(tail.x, tail.y, pos.x, pos.y);
+      tg.addColorStop(0, rgba(sc, 0));
+      tg.addColorStop(1, rgba(sc, 0.78 * fade));
+      ctx.strokeStyle = tg;
+      ctx.lineWidth = sig.size;
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(tailPos.x, tailPos.y);
+      ctx.moveTo(tail.x, tail.y);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
-
-      ctx.fillStyle = rgba(sigColor, 0.22 * fade);
+      ctx.fillStyle = rgba(sc, 0.92 * fade);
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, sig.size * 2.4, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, sig.size * 0.55, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = rgba(sigColor, 0.95 * fade);
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, sig.size, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // --- Four interlocking corner circles (logo) ---
-    for (var qh = 0; qh < 4; qh += 1) {
-      var hub = hubs[qh];
-      var hCol = hub.color;
-
-      if (pointer.active) {
-        var pxCanvas = (pointer.x + 1) * 0.5 * width;
-        var pyCanvas = (pointer.y + 1) * 0.5 * height;
-        if (Math.hypot(pxCanvas - hub.x, pyCanvas - hub.y) < R * 0.26) {
-          hub.bloom = Math.min(1, hub.bloom + 0.08);
-        }
-      }
-
-      // Ripple
-      ctx.strokeStyle = rgba(hCol, (1 - hub.ripple) * 0.26 * (0.5 + hub.bloom));
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.arc(hub.x, hub.y, ringR * (1.12 + hub.ripple * 1.35), 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Halo
-      var hubGlow = ctx.createRadialGradient(hub.x, hub.y, ringR * 0.2, hub.x, hub.y, ringR * 1.7);
-      hubGlow.addColorStop(0, rgba(PALETTE.ivory, 0.95));
-      hubGlow.addColorStop(0.55, rgba(hCol, 0.16 + hub.bloom * 0.14));
-      hubGlow.addColorStop(1, rgba(hCol, 0));
-      ctx.fillStyle = hubGlow;
-      ctx.beginPath();
-      ctx.arc(hub.x, hub.y, ringR * 1.7, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Solid logo circle
-      ctx.fillStyle = rgba(PALETTE.ivory, 0.96);
-      ctx.beginPath();
-      ctx.arc(hub.x, hub.y, ringR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = rgba(PALETTE.ink, 0.88);
-      ctx.lineWidth = 2.15 + hub.bloom * 0.6;
-      ctx.stroke();
-
-      // Colored inner ring (brand accent inside logo circle)
-      ctx.strokeStyle = rgba(hCol, 0.75);
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.arc(hub.x, hub.y, ringR * 0.62, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = rgba(hCol, 0.88);
-      ctx.beginPath();
-      ctx.arc(hub.x, hub.y, 3.2 + hub.bloom * 1.6, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Orbiting social satellites (cool element)
-      for (var st = 0; st < hub.satellites.length; st += 1) {
-        var sat = hub.satellites[st];
-        var satA = sat.angleOffset + timeSec * (st % 2 === 0 ? 0.36 : -0.26) + qh * 0.5;
-        var satOrbitR = ringR * (1.38 * sat.orbit);
-        var sxPos = hub.x + Math.cos(satA) * satOrbitR;
-        var syPos = hub.y + Math.sin(satA) * satOrbitR;
-        ctx.strokeStyle = rgba(hCol, 0.2 + hub.bloom * 0.16);
-        ctx.lineWidth = 0.85;
-        ctx.beginPath();
-        ctx.moveTo(hub.x + Math.cos(satA) * ringR, hub.y + Math.sin(satA) * ringR);
-        ctx.lineTo(sxPos, syPos);
-        ctx.stroke();
-        ctx.fillStyle = rgba(hCol, 0.82);
-        ctx.beginPath();
-        ctx.arc(sxPos, syPos, sat.size + hub.bloom * 0.6, 0, Math.PI * 2);
-        ctx.fill();
-      }
     }
   }
 
   function loop(now) {
-    rafId = requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
     if (!visible) {
       lastTime = now;
       return;
@@ -614,9 +400,6 @@
   }
 
   resize();
-  if (reducedMotion) {
-    renderFrame(2.4, 0.016);
-  } else {
-    rafId = requestAnimationFrame(loop);
-  }
+  if (reducedMotion) renderFrame(1.2, 0.016);
+  else requestAnimationFrame(loop);
 })();

@@ -26,7 +26,10 @@ function latLngToVec3(lat, lng, radius) {
   );
 }
 
-/** Recolor a geographically accurate equirectangular Earth map into the lab's sage/cream palette. */
+/**
+ * Soft brand tint that keeps original coastline contrast.
+ * Prior binary land/ocean recolor washed coasts and made pins look misplaced.
+ */
 function stylizeEarthTexture(image) {
   const c = document.createElement("canvas");
   c.width = image.width;
@@ -35,52 +38,44 @@ function stylizeEarthTexture(image) {
   ctx.drawImage(image, 0, 0);
   const img = ctx.getImageData(0, 0, c.width, c.height);
   const d = img.data;
+
   for (let i = 0; i < d.length; i += 4) {
     const r = d[i];
     const g = d[i + 1];
     const b = d[i + 2];
-    const luma = (r + g + b) / 3;
-    const isIce = luma > 205 && Math.abs(r - g) < 20 && Math.abs(g - b) < 28;
-    const isOcean = b > r + 6 && b > g - 8 && b > 65;
+    const luma = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+    const blueDom = b - Math.max(r, g);
+    const isOcean = blueDom > 8 || (b > 110 && b > g + 15 && b > r + 20);
+    const isIce = luma > 0.86 && Math.abs(r - g) < 24 && Math.abs(g - b) < 28;
+
+    let tr;
+    let tg;
+    let tb;
     if (isIce) {
-      d[i] = 236;
-      d[i + 1] = 232;
-      d[i + 2] = 222;
+      // Warm ivory ice shelves
+      tr = r * 0.35 + 236 * 0.65;
+      tg = g * 0.35 + 232 * 0.65;
+      tb = b * 0.35 + 222 * 0.65;
     } else if (isOcean) {
-      const t = luma / 255;
-      d[i] = Math.round(198 + 22 * t);
-      d[i + 1] = Math.round(214 + 12 * t);
-      d[i + 2] = Math.round(210 + 6 * t);
+      // Sage-tinted water; keep original gradients for coast readability
+      tr = r * 0.42 + 186 * 0.58;
+      tg = g * 0.42 + 204 * 0.58;
+      tb = b * 0.48 + 198 * 0.52;
     } else {
-      const shade = Math.max(0.28, Math.min(1, luma / 175));
-      d[i] = Math.round(62 + 70 * shade);
-      d[i + 1] = Math.round(98 + 58 * shade);
-      d[i + 2] = Math.round(72 + 36 * shade);
+      // Sage land with original terrain retained
+      tr = r * 0.55 + 72 * 0.45;
+      tg = g * 0.55 + 118 * 0.45;
+      tb = b * 0.55 + 86 * 0.45;
     }
+    d[i] = Math.round(tr);
+    d[i + 1] = Math.round(tg);
+    d[i + 2] = Math.round(tb);
   }
   ctx.putImageData(img, 0, 0);
 
-  // Soft lat/long hairlines for geographic reading
-  ctx.strokeStyle = "rgba(255, 252, 245, 0.12)";
-  ctx.lineWidth = 1;
-  for (let i = 1; i < 12; i += 1) {
-    const y = (i / 12) * c.height;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(c.width, y);
-    ctx.stroke();
-  }
-  for (let i = 1; i < 24; i += 1) {
-    const x = (i / 24) * c.width;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, c.height);
-    ctx.stroke();
-  }
-
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.anisotropy = 8;
   return tex;
 }
 
@@ -110,7 +105,8 @@ renderer.toneMappingExposure = 1.05;
 stage.insertBefore(renderer.domElement, stage.firstChild);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xf5f2eb, 7.5, 14);
+scene.background = new THREE.Color(0xf4f0e8);
+scene.fog = new THREE.Fog(0xf4f0e8, 11, 20);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
 camera.position.set(0, 0.35, 4.2);
@@ -131,7 +127,7 @@ const earthMat = new THREE.MeshStandardMaterial({
   roughness: 0.92,
   metalness: 0.04
 });
-const earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 96, 64), earthMat);
+const earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 128, 96), earthMat);
 globeGroup.add(earth);
 
 const atmosphere = new THREE.Mesh(
@@ -225,8 +221,8 @@ function buildPin(site) {
 
   const pos = latLngToVec3(site.lat, site.lng, GLOBE_R);
   g.position.copy(pos);
-  g.lookAt(pos.clone().multiplyScalar(2));
-  g.rotateX(Math.PI / 2);
+  // Orient pin stem along outward surface normal
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
 
   g.userData.siteId = site.id;
   g.userData.head = head;
