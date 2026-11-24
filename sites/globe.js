@@ -309,7 +309,7 @@ function selectSite(id, fromUser) {
     titleEl.textContent = "Testing sites";
     regionEl.textContent = "";
     metaEl.hidden = true;
-    bodyEl.textContent = "";
+    bodyEl.textContent = "Click to learn more about each site";
     statEl.hidden = true;
     venuesEl.hidden = true;
     venuesEl.replaceChildren();

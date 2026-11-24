@@ -25,16 +25,17 @@ export function makeWoodTexture(baseHex, grainHex) {
 }
 
 export const palette = {
-  sage: 0x3b6e52,
-  sageDeep: 0x285c3f,
-  sageSoft: 0x8eb89d,
-  terracotta: 0xcf7a40,
-  ochre: 0xdba24a,
+  sage: 0x68a078,
+  sageDeep: 0x3d7a56,
+  sageSoft: 0xa7c5af,
+  terracotta: 0xe08c3c,
+  ochre: 0xd85f27,
+  lilac: 0xc8b8f0,
   slate: 0x5c738a,
-  coralRed: 0xc94a3d,
-  cobaltBlue: 0x3569b3,
-  cream: 0xf7f3eb,
-  ink: 0x1d1b18
+  coralRed: 0xd85f27,
+  cobaltBlue: 0x8b7bc4,
+  cream: 0xfaf8f4,
+  ink: 0x1a1a1a
 };
 
 export const materials = {

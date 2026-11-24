@@ -170,12 +170,21 @@ if (!stage) {
     return Math.min(1.55, Math.max(0.72, base));
   }
 
-  function buildPin(site) {
+  // mindandculturelab.com brand: terracotta · sage · lilac
+  const PIN_PALETTE = [
+    { head: 0xe08c3c, stem: 0xb86a28, emissive: 0x8a4a12 },
+    { head: 0x68a078, stem: 0x3d7a56, emissive: 0x24543a },
+    { head: 0xc8b8f0, stem: 0x8b7bc4, emissive: 0x5a4a8a },
+    { head: 0xd85f27, stem: 0xa84618, emissive: 0x6a2c0c }
+  ];
+
+  function buildPin(site, index) {
     const g = new THREE.Group();
     const scale = pinScaleForN(site.sampleN);
+    const style = PIN_PALETTE[(index || 0) % PIN_PALETTE.length];
     const stem = new THREE.Mesh(
       new THREE.CylinderGeometry(0.012 * scale, 0.018 * scale, 0.14 * scale, 10),
-      new THREE.MeshStandardMaterial({ color: 0x285c3f, roughness: 0.55 })
+      new THREE.MeshStandardMaterial({ color: style.stem, roughness: 0.55 })
     );
     stem.position.y = 0.07 * scale;
     g.add(stem);
@@ -183,9 +192,9 @@ if (!stage) {
     const head = new THREE.Mesh(
       new THREE.SphereGeometry(PIN_BASE * scale, 16, 12),
       new THREE.MeshStandardMaterial({
-        color: 0x5aa276,
-        emissive: 0x1e4730,
-        emissiveIntensity: 0.25,
+        color: style.head,
+        emissive: style.emissive,
+        emissiveIntensity: 0.28,
         roughness: 0.4
       })
     );
@@ -326,8 +335,8 @@ if (!stage) {
       earthMat.needsUpdate = true;
 
       const sites = pair[1].sites || [];
-      sites.forEach(function (site) {
-        const pin = buildPin(site);
+      sites.forEach(function (site, index) {
+        const pin = buildPin(site, index);
         pinsRoot.add(pin);
         pinEntries.push({ site: site, pin: pin });
       });
