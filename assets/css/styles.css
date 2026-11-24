@@ -621,14 +621,49 @@ h2 {
   padding: 0;
 }
 
+.chart-group-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.28rem;
+  margin: 0 0 0.4rem;
+}
+
+.chart-group-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.16rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 26, 26, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
+}
+
+.chart-group-pill.is-active {
+  background: var(--sage-soft);
+  border-color: rgba(61, 122, 86, 0.35);
+  color: var(--sage-ink);
+}
+
 .chart-label {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.5rem;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
   text-align: center;
+  transition: opacity 0.32s ease;
+}
+
+.chart-glimpse.is-fading .chart-label,
+.chart-glimpse.is-fading .chart-bar-row {
+  opacity: 0;
 }
 
 .chart-bar-row {
@@ -636,13 +671,20 @@ h2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.55rem;
   align-items: end;
+  min-height: 7.2rem;
+  transition: opacity 0.32s ease;
+}
+
+.chart-bar-row-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  max-width: 7.5rem;
+  margin-inline: auto;
 }
 
 .chart-bar-row-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.35rem;
-  align-items: end;
-  min-height: 7.2rem;
 }
 
 .chart-bar-item {
@@ -657,7 +699,7 @@ h2 {
   font-weight: 700;
   color: var(--ink);
   opacity: 0;
-  transition: opacity 0.35s ease 0.2s;
+  transition: opacity 0.35s ease 0.15s;
 }
 
 .chart-bar-pct.is-visible {
@@ -672,6 +714,11 @@ h2 {
   background: rgba(26, 26, 26, 0.06);
   overflow: hidden;
   position: relative;
+}
+
+.chart-bar-row-2 .chart-bar-track {
+  width: 1.35rem;
+  height: 4.85rem;
 }
 
 .chart-bar-fill {
