@@ -106,13 +106,15 @@ if (!stage) {
     box.add(wall);
   });
 
+  // Hinged glass lid (pivots at the back edge)
+  const lidPivot = new THREE.Group();
+  lidPivot.position.set(0, 0.175, -0.186);
   const lid = new THREE.Mesh(new THREE.BoxGeometry(0.396, 0.014, 0.396), glass);
-  lid.position.set(0, 0.175, 0);
-  box.add(lid);
-
+  lid.position.set(0, 0, 0.186);
   const latch = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.03, 0.016), brass);
-  latch.position.set(0, 0.17, 0.2);
-  box.add(latch);
+  latch.position.set(0, 0, 0.372);
+  lidPivot.add(lid, latch);
+  box.add(lidPivot);
 
   for (let i = 0; i < 4; i += 1) {
     const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.012, 20), gold);
@@ -121,23 +123,28 @@ if (!stage) {
     box.add(coin);
   }
 
-  const keySpecs = [
-    { pos: [-0.21, 0.09, 0], rot: [0, 0, Math.PI / 2], mat: blue },
-    { pos: [0, 0.09, -0.21], rot: [Math.PI / 2, 0, 0], mat: blue },
-    { pos: [0.21, 0.09, 0], rot: [0, 0, -Math.PI / 2], mat: red }
-  ];
-  keySpecs.forEach(function (spec) {
+  // Three wall keys — the east key flips red→blue so opening only happens when all match.
+  const keyMeshes = [
+    { pos: [-0.21, 0.09, 0], rot: [0, 0, Math.PI / 2], mat: blue.clone() },
+    { pos: [0, 0.09, -0.21], rot: [Math.PI / 2, 0, 0], mat: blue.clone() },
+    { pos: [0.21, 0.09, 0], rot: [0, 0, -Math.PI / 2], mat: red.clone() }
+  ].map(function (spec) {
     const keyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.018, 22), spec.mat);
     keyMesh.position.set(spec.pos[0], spec.pos[1], spec.pos[2]);
     keyMesh.rotation.set(spec.rot[0], spec.rot[1], spec.rot[2]);
     keyMesh.castShadow = true;
     box.add(keyMesh);
+    return keyMesh;
   });
+  const swapKey = keyMeshes[2];
 
   let userAzimuth = 0.55;
   let userPolar = 0.28;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let autoSpin = reduceMotion ? 0 : 0.55;
+  let autoSpin = reduceMotion ? 0 : 0.16;
+  const cycleStart = performance.now() * 0.001;
+  // Loop: mismatch (closed) → match keys → open lid → close → reset
+  const CYCLE = 10.5;
   let dragging = false;
   let downX = 0;
   let downY = 0;
@@ -181,13 +188,52 @@ if (!stage) {
     if (movedDist < 7 && shift < 7) {
       window.location.href = "experience/?study=tsa";
     }
-    autoSpin = reduceMotion ? 0 : 0.45;
+    autoSpin = reduceMotion ? 0 : 0.14;
   });
 
   stage.addEventListener("pointercancel", function () {
     dragging = false;
-    autoSpin = reduceMotion ? 0 : 0.45;
+    autoSpin = reduceMotion ? 0 : 0.14;
   });
+
+  function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+
+  function updateKeyMatch(nowSec) {
+    const t = (nowSec - cycleStart) % CYCLE;
+    // 0–2.8s: mismatched keys, lid locked shut
+    // 2.8–4.2s: east key swaps red → blue (match)
+    // 4.2–6.6s: lid opens
+    // 6.6–8.4s: hold open
+    // 8.4–10.0s: lid closes
+    // 10.0–10.5s: reset east key to red
+    let lidOpen = 0;
+    let match = 0;
+
+    if (t < 2.8) {
+      match = 0;
+      lidOpen = 0;
+    } else if (t < 4.2) {
+      match = easeInOut((t - 2.8) / 1.4);
+      lidOpen = 0;
+    } else if (t < 6.6) {
+      match = 1;
+      lidOpen = easeInOut((t - 4.2) / 2.4);
+    } else if (t < 8.4) {
+      match = 1;
+      lidOpen = 1;
+    } else if (t < 10.0) {
+      match = 1;
+      lidOpen = 1 - easeInOut((t - 8.4) / 1.6);
+    } else {
+      match = 1 - easeInOut((t - 10.0) / 0.5);
+      lidOpen = 0;
+    }
+
+    swapKey.material.color.copy(red.color).lerp(blue.color, match);
+    lidPivot.rotation.x = -0.95 * lidOpen;
+  }
 
   function resize() {
     const w = stage.clientWidth;
@@ -213,13 +259,21 @@ if (!stage) {
     ).observe(stage);
   }
 
-  function frame() {
+  function frame(ms) {
     if (!reduceMotion) {
       requestAnimationFrame(frame);
     }
     if (!visible && !reduceMotion) return;
+    const nowSec = (typeof ms === "number" ? ms : performance.now()) * 0.001;
     if (!dragging && autoSpin) {
       userAzimuth += autoSpin * 0.01;
+    }
+    if (!reduceMotion) {
+      updateKeyMatch(nowSec);
+    } else {
+      // Static matched + slightly open pose when motion is reduced
+      swapKey.material.color.copy(blue.color);
+      lidPivot.rotation.x = -0.35;
     }
     camOffset.setFromSphericalCoords(2.55, Math.PI / 2 - userPolar, userAzimuth);
     camera.position.copy(lookAt).add(camOffset);
