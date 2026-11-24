@@ -12,14 +12,14 @@
       "tasks": ["Trust Apparatus", "Forgiveness / scratch-art", "Inequity Game", "Cooperation battery"],
       "sampleNote": "Participant counts summed across open datasets for Boston-area venues",
       "venues": [
-        { "name": "Acton", "n": 237, "note": "Preschool / community site" },
-        { "name": "Commons / Common", "n": 96, "note": "Public park / playground recruitment" },
-        { "name": "Boston College (BC)", "n": 79, "note": "Campus lab venue" },
-        { "name": "Franklin Park Zoo", "n": 22, "note": "Museum / zoo outreach" },
-        { "name": "Harvard / HC", "n": 36, "note": "Inequity Game venue (approx. from HC code)" },
+        { "name": "Acton", "n": 237, "note": "Preschool / community site across trust, forgiveness, and cooperation datasets" },
+        { "name": "Commons / Common / CC", "n": 106, "note": "Park recruitment; CC in inequity data treated as Commons abbrev." },
+        { "name": "Boston College (BC)", "n": 211, "note": "Campus lab; 79 forgiveness + 132 inequity subjects" },
+        { "name": "Franklin Park Zoo", "n": 22, "note": "Zoo outreach" },
+        { "name": "HC", "n": 36, "note": "Inequity Game USA venue code (likely Harvard / related campus site; not expanded in open codebook)" },
         { "name": "Artesani", "n": 20 },
         { "name": "BCM", "n": 7 },
-        { "name": "Lab / CC", "n": 15 }
+        { "name": "Lab", "n": 5, "note": "On-campus / lab testing codes in forgiveness and cooperation files" }
       ],
       "blurb": "Greater Boston is the densest cluster of Mind & Culture Lab testing venues: preschool classrooms in Acton, park recruitment on Boston Common, Franklin Park Zoo outreach, and university labs at Boston College and related sites. Children here completed trust, forgiveness, inequity-aversion, and multi-task cooperation protocols with Boston-area collaborators.",
       "studyIds": [
@@ -91,14 +91,15 @@
       "tasks": ["Cooperation battery (fairness, trust, forgiveness, honesty)", "Inequity Game + reaction times"],
       "venues": [
         { "name": "Antigonish", "n": 48, "note": "Primary town venue (inequity)" },
-        { "name": "STFX Labs", "n": 15, "note": "Campus lab" },
-        { "name": "St. J’s / St. A’s community sites", "n": 30, "note": "Town and county recruitment codes" },
+        { "name": "STFX Labs", "n": 15, "note": "St. Francis Xavier University campus lab" },
+        { "name": "St. A’s (town / CC / county)", "n": 19, "note": "Cooperation battery recruitment variants" },
+        { "name": "St. J’s / St J (town / CC / county)", "n": 7, "note": "Inequity + cooperation codes" },
+        { "name": "H. Com (county) / Heatherton", "n": 24, "note": "Heatherton Community county site" },
+        { "name": "Club 60 / 60 Town", "n": 12, "note": "Town venue aliases in cooperation data" },
         { "name": "Fun Skills", "n": 7 },
         { "name": "Arisaig", "n": 5 },
         { "name": "Ponderosa", "n": 4 },
-        { "name": "RNS", "n": 4 },
-        { "name": "Heatherton", "n": 2 },
-        { "name": "H. Com / Club 60 / 60 Town", "n": 35, "note": "Cooperation-study county and town codes" }
+        { "name": "RNS", "n": 4 }
       ],
       "blurb": "Canadian testing centered on Antigonish and St. Francis Xavier University, with additional town and county venues (Arisaig, Heatherton, Club 60, Fun Skills, and related codes). Children completed both the four-task cooperation battery and the Inequity Game with reaction-time recording.",
       "studyIds": ["cooperative-behaviors", "inequity-aversion"]
@@ -198,11 +199,13 @@
       "society": "Shuar communities with greater market access (Upano Valley)",
       "tasks": ["Cooperation battery", "Risk preference", "Time preference", "MacArthur Ladder / SCI"],
       "venues": [
-        { "name": "Yamanunka", "n": 39, "note": "Cooperation study" },
-        { "name": "San Pablo", "n": 28, "note": "Cooperation study" },
-        { "name": "Upano Valley (risk / SSS cohorts)", "n": 167, "note": "Combined risk-time and ladder samples coded UV / Upano Valley" }
+        { "name": "Yamanunka", "n": 39, "note": "Upano Valley in study2_data.csv; also cooperation battery" },
+        { "name": "Sintinis", "n": 29, "note": "Upano Valley (risk/time Study 2)" },
+        { "name": "Pablo Sexo", "n": 24, "note": "Upano Valley (risk/time Study 2)" },
+        { "name": "San Pablo", "n": 28, "note": "Cooperation battery Ecuador sample" },
+        { "name": "Upano Valley (SSS / fullsample codes)", "n": 83, "note": "MacArthur Ladder society code Upano Valley" }
       ],
-      "blurb": "Upano Valley Shuar communities—closer to roads and markets than Cross-Cutucú—participated in cooperation games, risk and delay choices, and subjective social status ratings. Village names in the cooperation data include Yamanunka and San Pablo.",
+      "blurb": "Upano Valley Shuar communities—closer to roads and markets than Cross-Cutucú—participated in cooperation games, risk and delay choices, and subjective social status ratings. Study 2 village codes place Yamanunka, Sintinis, and Pablo Sexo in the Upano Valley; San Pablo appears in the cooperation battery.",
       "studyIds": [
         "cooperative-behaviors",
         "risk-time-preferences",
@@ -220,9 +223,11 @@
       "society": "More remote Shuar communities (Cross-Cutucú)",
       "tasks": ["Risk preference", "Time preference", "MacArthur Ladder / SCI"],
       "venues": [
-        { "name": "Cross-Cutucú communities (incl. Panints, Sintinis, Pablo Sexo)", "n": 129 }
+        { "name": "Panints", "n": 43, "note": "Cross-Cutucú in study2_data.csv" },
+        { "name": "San Ramon", "n": 28, "note": "Cross-Cutucú (risk/time Study 2)" },
+        { "name": "Cross-Cutucú (SSS / fullsample codes)", "n": 58, "note": "MacArthur Ladder society code Cross Cutucu" }
       ],
-      "blurb": "Cross-Cutucú Shuar communities east of the Cutucú mountains provided the remote market-integration contrast for risk, time preference, and subjective social status—often compared directly with Upano Valley peers in the same papers.",
+      "blurb": "Cross-Cutucú Shuar communities east of the Cutucú mountains provided the remote market-integration contrast for risk, time preference, and subjective social status. Study 2 places Panints and San Ramon in Cross-Cutucú (not Sintinis or Pablo Sexo, which are Upano Valley).",
       "studyIds": ["risk-time-preferences", "subjective-social-status"]
     },
     {
