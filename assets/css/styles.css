@@ -689,6 +689,78 @@ h2 {
   gap: 0.35rem;
 }
 
+/* Age × Group size factorial: two age clusters, each with dyad + triad */
+.chart-bar-row-interaction {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  align-items: stretch;
+  max-width: none;
+}
+
+.chart-age-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.2rem 0.15rem 0;
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.chart-age-cluster.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-age-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sage-ink);
+  line-height: 1.2;
+}
+
+.chart-age-bars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: 100%;
+  align-items: end;
+}
+
+.chart-bar-row-interaction .chart-bar-track {
+  width: 0.95rem;
+  height: 4.1rem;
+}
+
+.chart-bar-row-interaction .chart-bar-pct {
+  font-size: 0.58rem;
+}
+
+.chart-bar-row-interaction .chart-bar-name {
+  font-size: 0.5rem;
+}
+
+.chart-factor-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  transition: opacity 0.32s ease;
+}
+
+.chart-glimpse.is-fading .chart-factor-hint {
+  opacity: 0;
+}
+
 .chart-bar-item {
   display: flex;
   flex-direction: column;
@@ -738,6 +810,8 @@ h2 {
 .chart-bar-fill.bar-b { background: #3d7a56; }
 .chart-bar-fill.bar-c { background: #e08c3c; }
 .chart-bar-fill.bar-d { background: #d85f27; }
+.chart-bar-fill.bar-dyad { background: #3d7a56; }
+.chart-bar-fill.bar-triad { background: #d85f27; }
 
 .chart-bar-name {
   font-size: 0.56rem;
