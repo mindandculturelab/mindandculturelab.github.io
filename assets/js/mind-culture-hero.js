@@ -13,27 +13,23 @@
   var visible = true;
   var rafId = 0;
 
-  // Smooth pointer parallax state (-1..1)
   var pointer = { tx: 0, ty: 0, x: 0, y: 0, active: false };
 
-  // Palette harmonized with Mind & Culture Lab identity
+  // Brand stripe colors from mindandculturelab.com / og-image
   var PALETTE = {
-    sageDeep: [30, 71, 48],
-    sageInk: [40, 92, 63],
+    sageDeep: [36, 84, 58],
+    sageInk: [47, 107, 74],
     sage: [90, 162, 118],
-    terracotta: [230, 130, 30],
-    sienna: [217, 80, 4],
+    terracotta: [238, 135, 31],
+    sienna: [232, 84, 0],
+    lilac: [207, 188, 249],
     violet: [124, 99, 201],
     gold: [218, 165, 62],
-    ivory: [250, 248, 243]
+    ivory: [250, 248, 243],
+    ink: [28, 26, 23]
   };
 
-  var SOCIETY_COLORS = [
-    PALETTE.sageInk,
-    PALETTE.terracotta,
-    PALETTE.sienna,
-    PALETTE.violet
-  ];
+  var HUB_COLORS = [PALETTE.sageInk, PALETTE.terracotta, PALETTE.lilac, PALETTE.sienna];
 
   function rgba(rgb, a) {
     return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a.toFixed(3) + ")";
@@ -51,15 +47,27 @@
     ];
   }
 
-  // 1. Build 3D inner neural constellation ("The Developing Mind")
+  function cubicPoint(p0, p1, p2, p3, t) {
+    var u = 1 - t;
+    var uu = u * u;
+    var uuu = uu * u;
+    var tt = t * t;
+    var ttt = tt * t;
+    return {
+      x: uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x,
+      y: uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y
+    };
+  }
+
+  // Inner neural constellation (cool element kept inside the logo star)
   var mindNodes = [];
   var GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-  var MIND_COUNT = 26;
+  var MIND_COUNT = 22;
   for (var i = 0; i < MIND_COUNT; i += 1) {
     var yNorm = 1 - (i / (MIND_COUNT - 1)) * 2;
     var rSlice = Math.sqrt(Math.max(0, 1 - yNorm * yNorm));
     var theta = GOLDEN_ANGLE * i;
-    var shell = i < 6 ? 0.42 : 0.72 + (i % 3) * 0.13;
+    var shell = i < 5 ? 0.38 : 0.68 + (i % 3) * 0.12;
     mindNodes.push({
       bx: Math.cos(theta) * rSlice * shell,
       by: yNorm * shell,
@@ -80,62 +88,45 @@
       var dy = mindNodes[a].by - mindNodes[b].by;
       var dz = mindNodes[a].bz - mindNodes[b].bz;
       var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (dist < 0.76) {
-        mindEdges.push({ a: a, b: b, dist: dist });
-      }
+      if (dist < 0.78) mindEdges.push({ a: a, b: b });
     }
   }
 
-  // 2. Build 4 cardinal cultural hubs + perimeter tapestry nodes ("Culture")
+  // Four interlocking corner hubs (logo geometry at NE / SE / SW / NW)
   var hubs = [];
   for (var q = 0; q < 4; q += 1) {
-    var baseAngle = Math.PI * 0.25 + q * (Math.PI * 0.5);
-    var satellites = [];
-    for (var s = 0; s < 6; s += 1) {
-      satellites.push({
-        angleOffset: (s / 6) * Math.PI * 2,
-        orbit: s % 2 === 0 ? 1.0 : 1.24,
-        size: s % 2 === 0 ? 2.8 : 2.1,
-        phase: q * 1.3 + s * 0.9
+    var sats = [];
+    for (var s = 0; s < 5; s += 1) {
+      sats.push({
+        angleOffset: (s / 5) * Math.PI * 2,
+        orbit: s % 2 === 0 ? 1.0 : 1.18,
+        size: s % 2 === 0 ? 2.4 : 1.9,
+        phase: q * 1.2 + s * 0.85
       });
     }
     hubs.push({
       index: q,
-      baseAngle: baseAngle,
-      color: SOCIETY_COLORS[q],
+      // Logo places circles at diagonal cardinals
+      baseAngle: Math.PI * 0.25 + q * (Math.PI * 0.5),
+      color: HUB_COLORS[q],
       bloom: 0.2,
       ripple: 0,
-      satellites: satellites,
+      satellites: sats,
       x: 0,
       y: 0
     });
   }
 
-  // Cubic Bezier evaluator
-  function cubicPoint(p0, p1, p2, p3, t) {
-    var u = 1 - t;
-    var uu = u * u;
-    var uuu = uu * u;
-    var tt = t * t;
-    var ttt = tt * t;
-    return {
-      x: uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x,
-      y: uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y
-    };
-  }
-
-  // 3. Bidirectional signal particles
-  // dir = 1: Mind -> Culture (sage/gold); dir = -1: Culture -> Mind (terracotta/violet)
+  // Bidirectional signal particles along logo sweep arcs
   var signals = [];
-  var SIGNAL_COUNT = 36;
-  for (var p = 0; p < SIGNAL_COUNT; p += 1) {
+  for (var p = 0; p < 32; p += 1) {
     signals.push({
       quadrant: p % 4,
       dir: p % 2 === 0 ? 1 : -1,
-      t: (p / SIGNAL_COUNT) % 1,
-      speed: 0.18 + (p % 5) * 0.028,
-      lane: ((p % 3) - 1) * 0.45,
-      size: 2.1 + (p % 3) * 0.65
+      t: (p / 32) % 1,
+      speed: 0.16 + (p % 5) * 0.026,
+      lane: ((p % 3) - 1) * 0.35,
+      size: 2.0 + (p % 3) * 0.55
     });
   }
 
@@ -156,7 +147,6 @@
     pointer.ty = ((e.clientY - r.top) / Math.max(1, r.height)) * 2 - 1;
     pointer.active = true;
   });
-
   container.addEventListener("pointerleave", function () {
     pointer.tx = 0;
     pointer.ty = 0;
@@ -164,70 +154,97 @@
   });
 
   if (typeof ResizeObserver !== "undefined") {
-    var ro = new ResizeObserver(function () {
+    new ResizeObserver(function () {
       resize();
       if (reducedMotion) renderFrame(2.4, 0.016);
-    });
-    ro.observe(canvas);
+    }).observe(canvas);
   } else {
     window.addEventListener("resize", resize);
   }
 
   if (typeof IntersectionObserver !== "undefined") {
-    var io = new IntersectionObserver(
+    new IntersectionObserver(
       function (entries) {
         visible = entries.some(function (en) {
           return en.isIntersecting;
         });
       },
       { threshold: 0.05 }
-    );
-    io.observe(canvas);
+    ).observe(canvas);
   }
 
-  function getConduitControlPoints(cx, cy, R, q, rot, laneOffset) {
+  /** Logo-faithful sweep from concave star tip → interlocking corner circle */
+  function getLogoArc(cx, cy, R, q, rot, lane) {
     var a = Math.PI * 0.25 + q * (Math.PI * 0.5) + rot;
-    var aPrev = a - Math.PI * 0.34;
-    var aNext = a + Math.PI * 0.34;
-    var perpX = -Math.sin(a) * laneOffset * R * 0.028;
-    var perpY = Math.cos(a) * laneOffset * R * 0.028;
+    var tipR = R * 0.28;
+    var hubR = R * 0.72;
+    var hubCircleR = R * 0.165;
+    var perpX = -Math.sin(a) * lane * R * 0.03;
+    var perpY = Math.cos(a) * lane * R * 0.03;
 
-    // Outward curve (Mind star tip -> sweeping right lobe -> Cultural Hub)
-    var innerR = R * 0.16;
-    var hubR = R * 0.67;
+    // Star tip (slightly inset from concave point)
     var p0 = {
-      x: cx + Math.cos(a - 0.22) * innerR + perpX * 0.4,
-      y: cy + Math.sin(a - 0.22) * innerR + perpY * 0.4
+      x: cx + Math.cos(a) * tipR + perpX * 0.3,
+      y: cy + Math.sin(a) * tipR + perpY * 0.3
     };
+    // Logo sweep: curve ahead of the radial, then back into the corner circle
+    var sweep = 0.55;
     var p1 = {
-      x: cx + Math.cos(aPrev) * R * 0.46 + perpX,
-      y: cy + Math.sin(aPrev) * R * 0.46 + perpY
+      x: cx + Math.cos(a - sweep) * R * 0.52 + perpX,
+      y: cy + Math.sin(a - sweep) * R * 0.52 + perpY
     };
     var p2 = {
-      x: cx + Math.cos(a - 0.16) * R * 0.82 + perpX,
-      y: cy + Math.sin(a - 0.16) * R * 0.82 + perpY
+      x: cx + Math.cos(a - 0.12) * R * 0.78 + perpX,
+      y: cy + Math.sin(a - 0.12) * R * 0.78 + perpY
     };
-    var p3 = {
+    var hub = {
       x: cx + Math.cos(a) * hubR,
       y: cy + Math.sin(a) * hubR
     };
+    var p3 = {
+      x: hub.x - Math.cos(a) * hubCircleR * 0.55,
+      y: hub.y - Math.sin(a) * hubCircleR * 0.55
+    };
 
-    // Inward counter-weaving curve (Cultural Hub -> sweeping left lobe -> Mind star core)
-    var q0 = p3;
+    // Counter-weave return path (other lobe of the logo line)
     var q1 = {
-      x: cx + Math.cos(a + 0.18) * R * 0.82 - perpX,
-      y: cy + Math.sin(a + 0.18) * R * 0.82 - perpY
+      x: cx + Math.cos(a + 0.14) * R * 0.78 - perpX,
+      y: cy + Math.sin(a + 0.14) * R * 0.78 - perpY
     };
     var q2 = {
-      x: cx + Math.cos(aNext) * R * 0.45 - perpX,
-      y: cy + Math.sin(aNext) * R * 0.45 - perpY
+      x: cx + Math.cos(a + sweep) * R * 0.5 - perpX,
+      y: cy + Math.sin(a + sweep) * R * 0.5 - perpY
     };
     var q3 = {
-      x: cx + Math.cos(a + 0.22) * innerR - perpX * 0.4,
-      y: cy + Math.sin(a + 0.22) * innerR - perpY * 0.4
+      x: cx + Math.cos(a) * tipR * 0.92 - perpX * 0.3,
+      y: cy + Math.sin(a) * tipR * 0.92 - perpY * 0.3
     };
 
-    return { out: [p0, p1, p2, p3], back: [q0, q1, q2, q3], hub: p3, angle: a };
+    return {
+      out: [p0, p1, p2, p3],
+      back: [p3, q1, q2, q3],
+      hub: hub,
+      angle: a,
+      hubCircleR: hubCircleR
+    };
+  }
+
+  function drawConcaveStar(cx, cy, tipR, midR, rot) {
+    ctx.beginPath();
+    for (var qs = 0; qs < 4; qs += 1) {
+      var tipA = rot + qs * (Math.PI * 0.5);
+      var nextTipA = tipA + Math.PI * 0.5;
+      var ctrlA = tipA + Math.PI * 0.25;
+      var sx = cx + Math.cos(tipA) * tipR;
+      var sy = cy + Math.sin(tipA) * tipR;
+      var ex = cx + Math.cos(nextTipA) * tipR;
+      var ey = cy + Math.sin(nextTipA) * tipR;
+      var mx = cx + Math.cos(ctrlA) * midR;
+      var my = cy + Math.sin(ctrlA) * midR;
+      if (qs === 0) ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(mx, my, ex, ey);
+    }
+    ctx.closePath();
   }
 
   var lastTime = performance.now();
@@ -238,178 +255,168 @@
     pointer.x = lerp(pointer.x, pointer.tx, 0.065);
     pointer.y = lerp(pointer.y, pointer.ty, 0.065);
 
-    var cx = width * 0.5 + pointer.x * width * 0.018;
-    var cy = height * 0.5 + pointer.y * height * 0.018;
-    var R = Math.min(width, height) * 0.445;
+    var cx = width * 0.5 + pointer.x * width * 0.016;
+    var cy = height * 0.5 + pointer.y * height * 0.016;
+    var R = Math.min(width, height) * 0.44;
+    var slowRot = timeSec * 0.06;
 
-    // Soft frameless radial glow (fades completely to 0 before canvas bounds)
-    var aura = ctx.createRadialGradient(cx, cy, R * 0.04, cx, cy, R * 1.06);
-    aura.addColorStop(0, "rgba(90, 162, 118, 0.13)");
-    aura.addColorStop(0.48, "rgba(230, 130, 30, 0.065)");
-    aura.addColorStop(0.82, "rgba(124, 99, 201, 0.03)");
-    aura.addColorStop(1, "rgba(245, 242, 235, 0)");
+    // Soft aura
+    var aura = ctx.createRadialGradient(cx, cy, R * 0.05, cx, cy, R * 1.08);
+    aura.addColorStop(0, "rgba(90, 162, 118, 0.12)");
+    aura.addColorStop(0.45, "rgba(238, 135, 31, 0.06)");
+    aura.addColorStop(0.78, "rgba(207, 188, 249, 0.04)");
+    aura.addColorStop(1, "rgba(244, 240, 232, 0)");
     ctx.fillStyle = aura;
     ctx.beginPath();
-    ctx.arc(cx, cy, R * 1.06, 0, Math.PI * 2);
+    ctx.arc(cx, cy, R * 1.08, 0, Math.PI * 2);
     ctx.fill();
 
-    var slowRot = timeSec * 0.085;
+    // Update hub positions from logo geometry
+    var arcs = [];
+    for (var q = 0; q < 4; q += 1) {
+      var arc = getLogoArc(cx, cy, R, q, slowRot, 0);
+      arcs.push(arc);
+      hubs[q].x = arc.hub.x;
+      hubs[q].y = arc.hub.y;
+      hubs[q].bloom = Math.max(0.16, hubs[q].bloom - dt * 0.5);
+      hubs[q].ripple = (hubs[q].ripple + dt * 0.4) % 1;
+    }
 
-    // Outer delicate cultural tapestry rings & woven arcs
+    var ringR = arcs[0].hubCircleR;
+    var outerR = R * 0.72;
+
+    // --- Logo outer ring broken into 4 arcs between interlocking circles ---
     ctx.save();
-    ctx.strokeStyle = rgba(PALETTE.sageInk, 0.085);
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 6]);
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * 0.86, -slowRot * 0.6, Math.PI * 2 - slowRot * 0.6);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.strokeStyle = rgba(PALETTE.terracotta, 0.11);
-    ctx.lineWidth = 1.1;
-    ctx.beginPath();
-    ctx.arc(cx, cy, R * 0.67, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.strokeStyle = rgba(PALETTE.ink, 0.78);
+    ctx.lineWidth = 2.15;
+    ctx.lineCap = "round";
+    for (var qa = 0; qa < 4; qa += 1) {
+      var a0 = arcs[qa].angle;
+      var a1 = arcs[(qa + 1) % 4].angle;
+      if (a1 < a0) a1 += Math.PI * 2;
+      // Leave gaps where corner circles sit
+      var gap = Math.asin(Math.min(0.95, (ringR * 0.92) / outerR));
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR, a0 + gap, a1 - gap);
+      ctx.stroke();
+    }
     ctx.restore();
 
-    // Compute conduits for the 4 quadrants (the interlocking Mind & Culture Lab knot)
-    var conduits = [];
-    for (var q = 0; q < 4; q += 1) {
-      var cData = getConduitControlPoints(cx, cy, R, q, slowRot, 0);
-      conduits.push(cData);
-      hubs[q].x = cData.hub.x;
-      hubs[q].y = cData.hub.y;
-      hubs[q].bloom = Math.max(0.18, hubs[q].bloom - dt * 0.55);
-      hubs[q].ripple = (hubs[q].ripple + dt * 0.42) % 1;
-    }
+    // Subtle dashed cultural orbit inside the logo ring
+    ctx.save();
+    ctx.strokeStyle = rgba(PALETTE.sageInk, 0.12);
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 7]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 0.48, -slowRot, Math.PI * 2 - slowRot);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
 
-    // Inter-society perimeter cultural bridges (linking the 4 cardinal communities)
-    for (var qc = 0; qc < 4; qc += 1) {
-      var hA = hubs[qc];
-      var hB = hubs[(qc + 1) % 4];
-      var midAngle = conduits[qc].angle + Math.PI * 0.25;
-      var ctrlR = R * (0.93 + Math.sin(timeSec * 1.1 + qc) * 0.025);
-      var ctrlX = cx + Math.cos(midAngle) * ctrlR;
-      var ctrlY = cy + Math.sin(midAngle) * ctrlR;
-
-      var gradBridge = ctx.createLinearGradient(hA.x, hA.y, hB.x, hB.y);
-      gradBridge.addColorStop(0, rgba(hA.color, 0.34));
-      gradBridge.addColorStop(0.5, rgba(PALETTE.gold, 0.22));
-      gradBridge.addColorStop(1, rgba(hB.color, 0.34));
-
-      ctx.strokeStyle = gradBridge;
-      ctx.lineWidth = 1.6;
+    // Inter-society bridges along the outer ring (cool element)
+    for (var qb = 0; qb < 4; qb += 1) {
+      var hA = hubs[qb];
+      var hB = hubs[(qb + 1) % 4];
+      var midA = arcs[qb].angle + Math.PI * 0.25;
+      var ctrl = {
+        x: cx + Math.cos(midA) * (outerR + ringR * 0.35),
+        y: cy + Math.sin(midA) * (outerR + ringR * 0.35)
+      };
+      var g = ctx.createLinearGradient(hA.x, hA.y, hB.x, hB.y);
+      g.addColorStop(0, rgba(hA.color, 0.28));
+      g.addColorStop(0.5, rgba(PALETTE.gold, 0.18));
+      g.addColorStop(1, rgba(hB.color, 0.28));
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.35;
       ctx.beginPath();
       ctx.moveTo(hA.x, hA.y);
-      ctx.quadraticCurveTo(ctrlX, ctrlY, hB.x, hB.y);
-      ctx.stroke();
-
-      // Secondary inner harmonic cultural arc
-      var ctrlInnerX = cx + Math.cos(midAngle) * R * 0.52;
-      var ctrlInnerY = cy + Math.sin(midAngle) * R * 0.52;
-      ctx.strokeStyle = rgba(hA.color, 0.14);
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(hA.x, hA.y);
-      ctx.quadraticCurveTo(ctrlInnerX, ctrlInnerY, hB.x, hB.y);
+      ctx.quadraticCurveTo(ctrl.x, ctrl.y, hB.x, hB.y);
       ctx.stroke();
     }
 
-    // Draw multi-strand interlocking Lab Knot ribbons (Mind <-> Culture conduits)
-    var STRANDS = [-1.1, -0.55, 0, 0.55, 1.1];
+    // --- Logo sweep lines (star ↔ corner circles), multi-strand ---
+    var STRANDS = [-0.85, 0, 0.85];
     for (var qk = 0; qk < 4; qk += 1) {
       var hubColor = hubs[qk].color;
       for (var si = 0; si < STRANDS.length; si += 1) {
-        var lane = STRANDS[si];
-        var strandC = getConduitControlPoints(cx, cy, R, qk, slowRot, lane);
-        var isCenter = si === 2;
+        var strand = getLogoArc(cx, cy, R, qk, slowRot, STRANDS[si]);
+        var isCenter = si === 1;
 
-        // Outward Mind -> Culture ribbon strand
         var outGrad = ctx.createLinearGradient(
-          strandC.out[0].x,
-          strandC.out[0].y,
-          strandC.out[3].x,
-          strandC.out[3].y
+          strand.out[0].x,
+          strand.out[0].y,
+          strand.out[3].x,
+          strand.out[3].y
         );
-        outGrad.addColorStop(0, rgba(PALETTE.sageInk, isCenter ? 0.62 : 0.22));
-        outGrad.addColorStop(0.55, rgba(PALETTE.sage, isCenter ? 0.52 : 0.2));
-        outGrad.addColorStop(1, rgba(hubColor, isCenter ? 0.58 : 0.22));
+        outGrad.addColorStop(0, rgba(PALETTE.ink, isCenter ? 0.72 : 0.22));
+        outGrad.addColorStop(0.5, rgba(PALETTE.sageInk, isCenter ? 0.55 : 0.18));
+        outGrad.addColorStop(1, rgba(hubColor, isCenter ? 0.7 : 0.22));
 
         ctx.strokeStyle = outGrad;
-        ctx.lineWidth = isCenter ? 2.1 : 1.05;
+        ctx.lineWidth = isCenter ? 2.05 : 1.0;
+        ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.moveTo(strandC.out[0].x, strandC.out[0].y);
+        ctx.moveTo(strand.out[0].x, strand.out[0].y);
         ctx.bezierCurveTo(
-          strandC.out[1].x,
-          strandC.out[1].y,
-          strandC.out[2].x,
-          strandC.out[2].y,
-          strandC.out[3].x,
-          strandC.out[3].y
+          strand.out[1].x,
+          strand.out[1].y,
+          strand.out[2].x,
+          strand.out[2].y,
+          strand.out[3].x,
+          strand.out[3].y
         );
         ctx.stroke();
 
-        // Inward Culture -> Mind counter-weaving ribbon strand
         var inGrad = ctx.createLinearGradient(
-          strandC.back[0].x,
-          strandC.back[0].y,
-          strandC.back[3].x,
-          strandC.back[3].y
+          strand.back[0].x,
+          strand.back[0].y,
+          strand.back[3].x,
+          strand.back[3].y
         );
-        inGrad.addColorStop(0, rgba(hubColor, isCenter ? 0.56 : 0.2));
-        inGrad.addColorStop(0.5, rgba(PALETTE.terracotta, isCenter ? 0.44 : 0.17));
-        inGrad.addColorStop(1, rgba(PALETTE.sageInk, isCenter ? 0.58 : 0.22));
+        inGrad.addColorStop(0, rgba(hubColor, isCenter ? 0.55 : 0.16));
+        inGrad.addColorStop(0.55, rgba(PALETTE.terracotta, isCenter ? 0.4 : 0.14));
+        inGrad.addColorStop(1, rgba(PALETTE.ink, isCenter ? 0.65 : 0.2));
 
         ctx.strokeStyle = inGrad;
-        ctx.lineWidth = isCenter ? 1.9 : 0.95;
+        ctx.lineWidth = isCenter ? 1.7 : 0.9;
         ctx.beginPath();
-        ctx.moveTo(strandC.back[0].x, strandC.back[0].y);
+        ctx.moveTo(strand.back[0].x, strand.back[0].y);
         ctx.bezierCurveTo(
-          strandC.back[1].x,
-          strandC.back[1].y,
-          strandC.back[2].x,
-          strandC.back[2].y,
-          strandC.back[3].x,
-          strandC.back[3].y
+          strand.back[1].x,
+          strand.back[1].y,
+          strand.back[2].x,
+          strand.back[2].y,
+          strand.back[3].x,
+          strand.back[3].y
         );
         ctx.stroke();
       }
     }
 
-    // Central concave 4-pointed Lab Star framing the Mind Core
-    ctx.save();
-    var starR = R * 0.31;
-    var starMidR = R * 0.135;
-    ctx.beginPath();
-    for (var qs = 0; qs < 4; qs += 1) {
-      var tipA = slowRot + qs * (Math.PI * 0.5);
-      var nextTipA = tipA + Math.PI * 0.5;
-      var ctrlA = tipA + Math.PI * 0.25;
-      var sx = cx + Math.cos(tipA) * starR;
-      var sy = cy + Math.sin(tipA) * starR;
-      var ex = cx + Math.cos(nextTipA) * starR;
-      var ey = cy + Math.sin(nextTipA) * starR;
-      var mx = cx + Math.cos(ctrlA) * starMidR;
-      var my = cy + Math.sin(ctrlA) * starMidR;
-      if (qs === 0) ctx.moveTo(sx, sy);
-      ctx.quadraticCurveTo(mx, my, ex, ey);
-    }
-    ctx.closePath();
-    var coreFill = ctx.createRadialGradient(cx, cy, 0, cx, cy, starR);
-    coreFill.addColorStop(0, "rgba(255, 255, 255, 0.72)");
-    coreFill.addColorStop(0.75, "rgba(230, 241, 235, 0.34)");
-    coreFill.addColorStop(1, "rgba(40, 92, 63, 0.06)");
+    // --- Central logo star (concave 4-point) ---
+    var starTip = R * 0.3;
+    var starMid = R * 0.11;
+    drawConcaveStar(cx, cy, starTip, starMid, slowRot);
+    var coreFill = ctx.createRadialGradient(cx, cy, 0, cx, cy, starTip);
+    coreFill.addColorStop(0, "rgba(255, 255, 255, 0.82)");
+    coreFill.addColorStop(0.65, "rgba(231, 242, 235, 0.4)");
+    coreFill.addColorStop(1, "rgba(47, 107, 74, 0.08)");
     ctx.fillStyle = coreFill;
     ctx.fill();
-    ctx.strokeStyle = rgba(PALETTE.sageInk, 0.32);
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = rgba(PALETTE.ink, 0.82);
+    ctx.lineWidth = 2.05;
     ctx.stroke();
-    ctx.restore();
 
-    // Project & draw 3D Inner Neural Constellation ("The Developing Mind")
-    var mindR = R * 0.255;
-    var rotY = timeSec * 0.34 + pointer.x * 0.55;
-    var rotX = Math.sin(timeSec * 0.23) * 0.24 - pointer.y * 0.45;
+    // Tiny inner star sparkle (logo crosshair feel)
+    drawConcaveStar(cx, cy, R * 0.09, R * 0.028, slowRot + Math.PI * 0.25);
+    ctx.strokeStyle = rgba(PALETTE.sageInk, 0.45);
+    ctx.lineWidth = 1.15;
+    ctx.stroke();
+
+    // --- 3D mind constellation inside the star ---
+    var mindR = R * 0.2;
+    var rotY = timeSec * 0.32 + pointer.x * 0.5;
+    var rotX = Math.sin(timeSec * 0.22) * 0.22 - pointer.y * 0.4;
     var cosY = Math.cos(rotY);
     var sinY = Math.sin(rotY);
     var cosX = Math.cos(rotX);
@@ -417,7 +424,7 @@
 
     for (var ni = 0; ni < MIND_COUNT; ni += 1) {
       var nd = mindNodes[ni];
-      var pulse = 1 + Math.sin(timeSec * 1.9 + nd.phase) * 0.06;
+      var pulse = 1 + Math.sin(timeSec * 1.85 + nd.phase) * 0.055;
       var x1 = nd.bx * pulse * cosY - nd.bz * pulse * sinY;
       var z1 = nd.bx * pulse * sinY + nd.bz * pulse * cosY;
       var y2 = nd.by * pulse * cosX - z1 * sinX;
@@ -426,186 +433,170 @@
       nd.px = cx + x1 * mindR * persp;
       nd.py = cy + y2 * mindR * persp;
       nd.pz = z2;
-      nd.energy = Math.max(0.22, nd.energy - dt * 0.48);
+      nd.energy = Math.max(0.2, nd.energy - dt * 0.48);
       nd.cultureTint = Math.max(0, nd.cultureTint - dt * 0.42);
     }
 
-    // Draw synaptic filaments
     for (var ei = 0; ei < mindEdges.length; ei += 1) {
       var edge = mindEdges[ei];
       var n1 = mindNodes[edge.a];
       var n2 = mindNodes[edge.b];
-      var depthAlpha = 0.16 + ((n1.pz + n2.pz + 2) * 0.25) * 0.28;
-      var boost = (n1.energy + n2.energy) * 0.35;
+      var depthAlpha = 0.14 + ((n1.pz + n2.pz + 2) * 0.25) * 0.26;
+      var boost = (n1.energy + n2.energy) * 0.32;
       var cMix = Math.min(1, (n1.cultureTint + n2.cultureTint) * 0.5);
       var lineCol = mixRgb(PALETTE.sageInk, PALETTE.terracotta, cMix * 0.75);
-
-      ctx.strokeStyle = rgba(lineCol, Math.min(0.82, depthAlpha + boost * 0.32));
-      ctx.lineWidth = 0.9 + boost * 1.1;
+      ctx.strokeStyle = rgba(lineCol, Math.min(0.78, depthAlpha + boost * 0.3));
+      ctx.lineWidth = 0.85 + boost;
       ctx.beginPath();
-      var midNx = (n1.px + n2.px) * 0.5 + (n1.py - n2.py) * 0.08;
-      var midNy = (n1.py + n2.py) * 0.5 + (n2.px - n1.px) * 0.08;
       ctx.moveTo(n1.px, n1.py);
-      ctx.quadraticCurveTo(midNx, midNy, n2.px, n2.py);
+      ctx.quadraticCurveTo(
+        (n1.px + n2.px) * 0.5 + (n1.py - n2.py) * 0.08,
+        (n1.py + n2.py) * 0.5 + (n2.px - n1.px) * 0.08,
+        n2.px,
+        n2.py
+      );
       ctx.stroke();
     }
 
-    // Sort mind nodes back-to-front for crisp 2.5D depth
     var sortedMind = mindNodes.slice().sort(function (u, v) {
       return u.pz - v.pz;
     });
     for (var sm = 0; sm < sortedMind.length; sm += 1) {
       var mn = sortedMind[sm];
-      var zScale = 0.72 + (mn.pz + 1) * 0.32;
-      var nodeRadius = (2.2 + mn.energy * 2.4) * zScale;
+      var zScale = 0.72 + (mn.pz + 1) * 0.3;
+      var nodeRadius = (2.0 + mn.energy * 2.2) * zScale;
       var nodeCol = mixRgb(PALETTE.sageInk, PALETTE.terracotta, Math.min(1, mn.cultureTint));
-
       if (mn.energy > 0.45) {
-        ctx.fillStyle = rgba(nodeCol, (mn.energy - 0.35) * 0.28);
+        ctx.fillStyle = rgba(nodeCol, (mn.energy - 0.35) * 0.26);
         ctx.beginPath();
-        ctx.arc(mn.px, mn.py, nodeRadius * 2.5, 0, Math.PI * 2);
+        ctx.arc(mn.px, mn.py, nodeRadius * 2.3, 0, Math.PI * 2);
         ctx.fill();
       }
-
-      ctx.fillStyle = rgba(nodeCol, 0.88);
+      ctx.fillStyle = rgba(nodeCol, 0.9);
       ctx.beginPath();
       ctx.arc(mn.px, mn.py, nodeRadius, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = rgba(PALETTE.ivory, 0.85);
       ctx.beginPath();
-      ctx.arc(mn.px - nodeRadius * 0.25, mn.py - nodeRadius * 0.25, nodeRadius * 0.34, 0, Math.PI * 2);
+      ctx.arc(mn.px - nodeRadius * 0.25, mn.py - nodeRadius * 0.25, nodeRadius * 0.32, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Update & render bidirectional signals along the knot conduits
+    // --- Signal particles on logo arcs ---
     for (var sp = 0; sp < signals.length; sp += 1) {
       var sig = signals[sp];
-      if (!reducedMotion) {
-        sig.t += dt * sig.speed;
-      }
+      if (!reducedMotion) sig.t += dt * sig.speed;
       if (sig.t >= 1) {
         sig.t -= 1;
         if (sig.dir === 1) {
-          // Mind pulse arrived at Cultural Hub -> bloom culture!
-          hubs[sig.quadrant].bloom = Math.min(1, hubs[sig.quadrant].bloom + 0.42);
+          hubs[sig.quadrant].bloom = Math.min(1, hubs[sig.quadrant].bloom + 0.4);
         } else {
-          // Cultural wave arrived at Mind Core -> reshape & ignite inner synapses!
-          var targetIdx = (sig.quadrant * 6 + sp) % MIND_COUNT;
-          mindNodes[targetIdx].energy = 1.0;
-          mindNodes[targetIdx].cultureTint = 1.0;
-          mindNodes[(targetIdx + 3) % MIND_COUNT].energy = 0.85;
-          mindNodes[(targetIdx + 3) % MIND_COUNT].cultureTint = 0.8;
+          var targetIdx = (sig.quadrant * 5 + sp) % MIND_COUNT;
+          mindNodes[targetIdx].energy = 1;
+          mindNodes[targetIdx].cultureTint = 1;
+          mindNodes[(targetIdx + 2) % MIND_COUNT].energy = 0.82;
+          mindNodes[(targetIdx + 2) % MIND_COUNT].cultureTint = 0.75;
         }
       }
 
-      var laneC = getConduitControlPoints(cx, cy, R, sig.quadrant, slowRot, sig.lane);
+      var laneC = getLogoArc(cx, cy, R, sig.quadrant, slowRot, sig.lane);
       var pts = sig.dir === 1 ? laneC.out : laneC.back;
       var pos = cubicPoint(pts[0], pts[1], pts[2], pts[3], sig.t);
-      var tailT = Math.max(0, sig.t - 0.065);
-      var tailPos = cubicPoint(pts[0], pts[1], pts[2], pts[3], tailT);
-
+      var tailPos = cubicPoint(pts[0], pts[1], pts[2], pts[3], Math.max(0, sig.t - 0.06));
       var sigColor =
         sig.dir === 1
-          ? mixRgb(PALETTE.sage, PALETTE.gold, sig.t * 0.65)
-          : mixRgb(hubs[sig.quadrant].color, PALETTE.terracotta, 0.5);
-
+          ? mixRgb(PALETTE.sage, PALETTE.gold, sig.t * 0.6)
+          : mixRgb(hubs[sig.quadrant].color, PALETTE.terracotta, 0.45);
       var fade = Math.sin(sig.t * Math.PI);
 
-      // Luminous comet trail
       var trailGrad = ctx.createLinearGradient(tailPos.x, tailPos.y, pos.x, pos.y);
       trailGrad.addColorStop(0, rgba(sigColor, 0));
-      trailGrad.addColorStop(1, rgba(sigColor, 0.78 * fade));
+      trailGrad.addColorStop(1, rgba(sigColor, 0.75 * fade));
       ctx.strokeStyle = trailGrad;
-      ctx.lineWidth = sig.size * 1.15;
+      ctx.lineWidth = sig.size * 1.1;
       ctx.lineCap = "round";
       ctx.beginPath();
       ctx.moveTo(tailPos.x, tailPos.y);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
 
-      // Glowing particle head
-      ctx.fillStyle = rgba(sigColor, 0.24 * fade);
+      ctx.fillStyle = rgba(sigColor, 0.22 * fade);
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, sig.size * 2.6, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, sig.size * 2.4, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.fillStyle = rgba(sigColor, 0.95 * fade);
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, sig.size, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Draw the 4 Cardinal Cultural Community Rings & Social Satellites
-    var ringR = R * 0.115;
+    // --- Four interlocking corner circles (logo) ---
     for (var qh = 0; qh < 4; qh += 1) {
       var hub = hubs[qh];
       var hCol = hub.color;
 
-      // Pointer proximity resonance
       if (pointer.active) {
         var pxCanvas = (pointer.x + 1) * 0.5 * width;
         var pyCanvas = (pointer.y + 1) * 0.5 * height;
-        var dHub = Math.hypot(pxCanvas - hub.x, pyCanvas - hub.y);
-        if (dHub < R * 0.28) {
+        if (Math.hypot(pxCanvas - hub.x, pyCanvas - hub.y) < R * 0.26) {
           hub.bloom = Math.min(1, hub.bloom + 0.08);
         }
       }
 
-      // Expanding harmonic cultural ripple
-      var ripRadius = ringR * (1.15 + hub.ripple * 1.45);
-      ctx.strokeStyle = rgba(hCol, (1 - hub.ripple) * 0.28 * (0.5 + hub.bloom));
-      ctx.lineWidth = 1.25;
+      // Ripple
+      ctx.strokeStyle = rgba(hCol, (1 - hub.ripple) * 0.26 * (0.5 + hub.bloom));
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.arc(hub.x, hub.y, ripRadius, 0, Math.PI * 2);
+      ctx.arc(hub.x, hub.y, ringR * (1.12 + hub.ripple * 1.35), 0, Math.PI * 2);
       ctx.stroke();
 
-      // Community circle halo
-      var hubGlow = ctx.createRadialGradient(hub.x, hub.y, ringR * 0.15, hub.x, hub.y, ringR * 1.85);
+      // Halo
+      var hubGlow = ctx.createRadialGradient(hub.x, hub.y, ringR * 0.2, hub.x, hub.y, ringR * 1.7);
       hubGlow.addColorStop(0, rgba(PALETTE.ivory, 0.95));
-      hubGlow.addColorStop(0.55, rgba(hCol, 0.14 + hub.bloom * 0.16));
+      hubGlow.addColorStop(0.55, rgba(hCol, 0.16 + hub.bloom * 0.14));
       hubGlow.addColorStop(1, rgba(hCol, 0));
       ctx.fillStyle = hubGlow;
       ctx.beginPath();
-      ctx.arc(hub.x, hub.y, ringR * 1.85, 0, Math.PI * 2);
+      ctx.arc(hub.x, hub.y, ringR * 1.7, 0, Math.PI * 2);
       ctx.fill();
 
-      // Crisp Lab-emblem corner circle
-      ctx.fillStyle = rgba(PALETTE.ivory, 0.92);
-      ctx.strokeStyle = rgba(hCol, 0.78);
-      ctx.lineWidth = 2.4 + hub.bloom * 1.1;
+      // Solid logo circle
+      ctx.fillStyle = rgba(PALETTE.ivory, 0.96);
       ctx.beginPath();
       ctx.arc(hub.x, hub.y, ringR, 0, Math.PI * 2);
       ctx.fill();
+      ctx.strokeStyle = rgba(PALETTE.ink, 0.88);
+      ctx.lineWidth = 2.15 + hub.bloom * 0.6;
       ctx.stroke();
 
-      // Inner cultural motif dot
-      ctx.fillStyle = rgba(hCol, 0.85);
+      // Colored inner ring (brand accent inside logo circle)
+      ctx.strokeStyle = rgba(hCol, 0.75);
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(hub.x, hub.y, 3.6 + hub.bloom * 1.8, 0, Math.PI * 2);
+      ctx.arc(hub.x, hub.y, ringR * 0.62, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = rgba(hCol, 0.88);
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, 3.2 + hub.bloom * 1.6, 0, Math.PI * 2);
       ctx.fill();
 
-      // Orbiting community members / social lattice around each cultural ring
+      // Orbiting social satellites (cool element)
       for (var st = 0; st < hub.satellites.length; st += 1) {
         var sat = hub.satellites[st];
-        var satA = sat.angleOffset + timeSec * (st % 2 === 0 ? 0.38 : -0.28) + qh * 0.6;
-        var satOrbitR = ringR * (1.42 * sat.orbit);
+        var satA = sat.angleOffset + timeSec * (st % 2 === 0 ? 0.36 : -0.26) + qh * 0.5;
+        var satOrbitR = ringR * (1.38 * sat.orbit);
         var sxPos = hub.x + Math.cos(satA) * satOrbitR;
         var syPos = hub.y + Math.sin(satA) * satOrbitR;
-
-        ctx.strokeStyle = rgba(hCol, 0.22 + hub.bloom * 0.18);
-        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = rgba(hCol, 0.2 + hub.bloom * 0.16);
+        ctx.lineWidth = 0.85;
         ctx.beginPath();
-        ctx.moveTo(
-          hub.x + Math.cos(satA) * ringR,
-          hub.y + Math.sin(satA) * ringR
-        );
+        ctx.moveTo(hub.x + Math.cos(satA) * ringR, hub.y + Math.sin(satA) * ringR);
         ctx.lineTo(sxPos, syPos);
         ctx.stroke();
-
         ctx.fillStyle = rgba(hCol, 0.82);
         ctx.beginPath();
-        ctx.arc(sxPos, syPos, sat.size + hub.bloom * 0.7, 0, Math.PI * 2);
+        ctx.arc(sxPos, syPos, sat.size + hub.bloom * 0.6, 0, Math.PI * 2);
         ctx.fill();
       }
     }
