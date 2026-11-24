@@ -821,7 +821,7 @@ function makeFigure1DiagramCard(activeMode) {
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = "#1e1c19";
-    ctx.font = "700 18px 'Fira Sans', sans-serif";
+    ctx.font = "700 18px 'Source Sans 3', sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("?", cx + 28, cy - 10);
     ctx.restore();
@@ -852,7 +852,7 @@ function makeFigure1DiagramCard(activeMode) {
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#285c3f";
-  ctx.font = "700 18px 'Fira Sans', sans-serif";
+  ctx.font = "700 18px 'Source Sans 3', sans-serif";
   ctx.fillText("1. Roll-Then-Guess (Epistemic · 60.5%)", 42, 48);
   drawDieIcon(122, 104);
   drawArrow(196, 304, 104);
@@ -867,7 +867,7 @@ function makeFigure1DiagramCard(activeMode) {
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#9d5420";
-  ctx.font = "700 18px 'Fira Sans', sans-serif";
+  ctx.font = "700 18px 'Source Sans 3', sans-serif";
   ctx.fillText("2. Guess-Then-Roll (Physical · 39.5%)", 42, 216);
   drawChildBubbleIcon(122, 268);
   drawArrow(196, 304, 272);
@@ -1466,7 +1466,7 @@ function drawDdmCanvas(ctx, cond, progress) {
   ctx.stroke();
 
   ctx.fillStyle = "#285c3f";
-  ctx.font = "700 17px 'Fira Sans', sans-serif";
+  ctx.font = "700 17px 'Source Sans 3', sans-serif";
   ctx.fillText("Upper boundary: ACCEPT (Green Handle)", 70, 38);
   ctx.fillStyle = "#c94a3d";
   ctx.fillText("Lower boundary: REJECT (Red Handle)", 70, 274);
@@ -1481,7 +1481,7 @@ function drawDdmCanvas(ctx, cond, progress) {
   ctx.setLineDash([]);
 
   ctx.fillStyle = "#59534a";
-  ctx.font = "600 14px 'Fira Sans', sans-serif";
+  ctx.font = "600 14px 'Source Sans 3', sans-serif";
   ctx.fillText("t (non-decision)", 68, 168);
   ctx.fillText("z (bias)", 134, 144);
   ctx.fillText("a (threshold)", 400, 154);

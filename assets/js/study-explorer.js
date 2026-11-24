@@ -157,7 +157,7 @@
           "font-size": "12.5",
           "font-weight": "600",
           fill: "#1c1a17",
-          "font-family": "Fira Sans, Helvetica, sans-serif"
+          "font-family": "Source Sans 3, Helvetica, sans-serif"
         });
         cursorX += Math.max(115, s.label.length * 7.4 + 38);
       });
@@ -181,7 +181,7 @@
         "text-anchor": "end",
         "font-size": "12.5",
         fill: "#5e584f",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
+        "font-family": "Source Sans 3, Helvetica, sans-serif"
       });
     });
 
@@ -236,7 +236,7 @@
             "font-size": series.length > 2 ? "10.5" : (series.length === 2 ? "11.5" : "13"),
             "font-weight": "700",
             fill: "#1c1a17",
-            "font-family": "Fira Sans, Helvetica, sans-serif"
+            "font-family": "Source Sans 3, Helvetica, sans-serif"
           });
         }
       });
@@ -249,7 +249,7 @@
           "font-size": groupCount > 6 ? "11.5" : "12.5",
           "font-weight": lineIdx === 0 ? "600" : "500",
           fill: lineIdx === 0 ? "#1c1a17" : "#5e584f",
-          "font-family": "Fira Sans, Helvetica, sans-serif"
+          "font-family": "Source Sans 3, Helvetica, sans-serif"
         });
       });
     });

@@ -203,7 +203,7 @@
         "text-anchor": "end",
         "font-size": "13",
         fill: "#5e584f",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
+        "font-family": "Source Sans 3, Helvetica, sans-serif"
       });
     });
     items.forEach(function (item, index) {
@@ -228,7 +228,7 @@
         "font-size": "14",
         "font-weight": "700",
         fill: "#1c1a17",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
+        "font-family": "Source Sans 3, Helvetica, sans-serif"
       });
       labelFor(item).forEach(function (line, lineIndex) {
         text(svg, line, {
@@ -238,7 +238,7 @@
           "font-size": "13",
           "font-weight": lineIndex === 0 ? "600" : "500",
           fill: lineIndex === 0 ? "#1c1a17" : "#5e584f",
-          "font-family": "Fira Sans, Helvetica, sans-serif"
+          "font-family": "Source Sans 3, Helvetica, sans-serif"
         });
       });
     });
@@ -283,7 +283,7 @@
         "font-size": "13",
         "font-weight": "600",
         fill: "#1c1a17",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
+        "font-family": "Source Sans 3, Helvetica, sans-serif"
       });
     });
     [0, 25, 50, 75, 100].forEach(function (tick) {
@@ -302,7 +302,7 @@
         "text-anchor": "end",
         "font-size": "13",
         fill: "#5e584f",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
+        "font-family": "Source Sans 3, Helvetica, sans-serif"
       });
     });
     items.forEach(function (item, index) {
@@ -334,7 +334,7 @@
         "font-size": "12.5",
         "font-weight": "700",
         fill: "#2f6b4a",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
+        "font-family": "Source Sans 3, Helvetica, sans-serif"
       });
       [ageLabel(item.age), sizeLabel(item.size)].forEach(function (line, lineIndex) {
         text(svg, line, {
@@ -344,7 +344,7 @@
           "font-size": "13",
           "font-weight": lineIndex === 0 ? "600" : "500",
           fill: lineIndex === 0 ? "#1c1a17" : "#5e584f",
-          "font-family": "Fira Sans, Helvetica, sans-serif"
+          "font-family": "Source Sans 3, Helvetica, sans-serif"
         });
       });
     });

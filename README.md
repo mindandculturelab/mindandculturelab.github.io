@@ -1,82 +1,49 @@
-# Personal Website Templates
+# Mind & Culture Lab
 
-Ready-to-edit personal websites. Your live URL is **`https://YOUR-USERNAME.github.io`**.
+Open companion site for the [Mind & Culture Lab](https://www.mindandculturelab.com/) at Duke University — datasets, interactive explorers, 3D task walkthroughs, and field sites.
 
-**Start here:** [Step by step: fork, open in Cursor, publish](WALKTHROUGH.md)
+**Live:** [mindandculturelab.github.io](https://mindandculturelab.github.io/)
 
-When you create your copy, name the repository **`YOUR-USERNAME.github.io`**. That is what makes the short URL work.
-
-## Choose a template
-
-Preview looks at [gallery/index.html](gallery/index.html). The published starter opens there too. Then put one on the homepage:
+## Preview locally
 
 ```bash
-./use-template.sh editorial
-./use-template.sh midnight
-./use-template.sh scholar
-./use-template.sh studio
-./use-template.sh letter
-./use-template.sh atlas
-./use-template.sh frame
-./use-template.sh newsprint
-./use-template.sh blueprint
-./use-template.sh quartz
-./use-template.sh ledger
-./use-template.sh nova
-./use-template.sh archive
-./use-template.sh workbench
-./use-template.sh summit
+python3 -m http.server 8765
 ```
 
-| Template | Best if you want |
+Open `http://localhost:8765/`.
+
+## Site map
+
+| Path | Purpose |
 |---|---|
-| Editorial | A warm magazine-style portfolio |
-| Midnight | A dark, technical developer site |
-| Scholar | An academic CV homepage |
-| Studio | Bold type and visual project blocks |
-| Letter | A quiet one-column page |
-| Atlas | A Swiss grid for product and systems work |
-| Frame | A visual portfolio of large picture frames |
-| Newsprint | A newspaper masthead for writing |
-| Blueprint | Technical drawings for engineering |
-| Quartz | Minimal luxury with lots of space |
-| Ledger | A tabular CV for data and finance |
-| Nova | A colorful dark site for creative tech |
-| Archive | A museum catalog for history and curation |
-| Workbench | An industrial maker / hardware look |
-| Summit | Outdoor field notes and landscape |
+| `/` | Homepage — brand, featured studies, about, contact |
+| `/data/` | Browse open data by researcher, topic, or study |
+| `/experience/` | Interactive 3D task procedures |
+| `/sites/` | Field-site globe |
+| `/studies/` | Study index and individual study pages |
 
-## Your website URL
+## Edit checklist
 
-Edit [`site-config.js`](site-config.js):
+1. `site-config.js` — public site URL
+2. `index.html` — homepage copy and featured studies
+3. `data/studies.json` / `data/sites.json` — catalogs for explorers and the globe
+4. `studies/<id>/` — study page, files, and optional `data/` explorer
+5. `sitemap.xml` — keep in sync when adding public pages
 
-```js
-siteUrl: "https://YOUR-USERNAME.github.io",
-template: "editorial"
+## Shared chrome
+
+Header and footer markup is generated from one script so nav links stay consistent:
+
+```bash
+python3 scripts/sync-site-chrome.py
 ```
 
-Then publish with GitHub Pages from `main` / `/ (root)`. Share:
+Run that after changing shared navigation or when adding a new HTML page that should use the standard chrome.
 
-`https://YOUR-USERNAME.github.io`
+## Stack
 
-## What to edit
-
-1. `site-config.js` — your public URL
-2. Root `index.html` — name, about, projects, contact
-3. `assets/images/favicon.svg` — initials
-
-## Project map
-
-```text
-.
-├── WALKTHROUGH.md             # Fork and Cursor steps
-├── site-config.js             # Your public URL
-├── index.html                 # Your homepage
-├── use-template.sh            # Put a look on the homepage
-├── gallery/                   # Preview all fifteen looks
-└── templates/                 # Fifteen self-contained site looks
-```
+Static HTML, CSS, and vanilla JS on GitHub Pages. Three.js powers the globe and 3D procedures. No build step is required to publish.
 
 ## License
 
-MIT. Copy, edit, and republish this starter.
+MIT.

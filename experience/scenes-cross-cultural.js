@@ -786,7 +786,7 @@ function makeSciBoardTexture(activeTier) {
   ctx.strokeRect(4, 4, 504, 372);
 
   ctx.fillStyle = "#1d1b18";
-  ctx.font = "700 20px 'Fira Sans', sans-serif";
+  ctx.font = "700 20px 'Source Sans 3', sans-serif";
   ctx.fillText("Compared to most families, my family has:", 26, 42);
 
   const rows = [
@@ -813,7 +813,7 @@ function makeSciBoardTexture(activeTier) {
       ctx.stroke();
 
       ctx.fillStyle = isPick ? "#1f4a32" : "#3f3b35";
-      ctx.font = (isPick ? "700 " : "500 ") + "15px 'Fira Sans', sans-serif";
+      ctx.font = (isPick ? "700 " : "500 ") + "15px 'Source Sans 3', sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(label, x + 73, y + 27);

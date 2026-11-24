@@ -7,16 +7,7 @@
   }
 
   function inferredSiteUrl() {
-    var path = window.location.pathname.replace(/\/index\.html$/, "");
-    var idx = path.indexOf("/templates/");
-    if (idx === -1) {
-      idx = path.indexOf("/gallery");
-    }
-    var base = idx === -1 ? path.replace(/\/$/, "") : path.slice(0, idx);
-    if (base === "/" || base === "") {
-      return window.location.origin;
-    }
-    return window.location.origin + base;
+    return window.location.origin;
   }
 
   var configured = trimSlash(config.siteUrl);
@@ -31,14 +22,7 @@
   }
 
   var shareUrl = siteUrl + "/";
-  var onNestedPage = /\/(templates|gallery)\//.test(window.location.pathname);
-  var ogImage = onNestedPage
-    ? pageUrl + "assets/images/og-image.svg"
-    : siteUrl + "/assets/images/og-image.svg";
-
-  if (window.location.pathname.indexOf("/gallery") !== -1) {
-    ogImage = siteUrl + "/assets/images/og-image.svg";
-  }
+  var ogImage = siteUrl + "/assets/images/og-image.svg";
 
   window.SITE_URLS = {
     siteUrl: siteUrl,
@@ -69,8 +53,7 @@
   }
 
   function applyVisibleUrl() {
-    var fields = document.querySelectorAll("[data-site-url]");
-    fields.forEach(function (field) {
+    document.querySelectorAll("[data-site-url]").forEach(function (field) {
       if (field.tagName === "INPUT" || field.tagName === "TEXTAREA") {
         field.value = shareUrl;
       } else {
@@ -78,16 +61,11 @@
       }
     });
 
-    var links = document.querySelectorAll("[data-site-url-link]");
-    links.forEach(function (link) {
+    document.querySelectorAll("[data-site-url-link]").forEach(function (link) {
       link.setAttribute("href", shareUrl);
       if (!link.textContent.trim() || link.getAttribute("data-site-url-link") === "text") {
         link.textContent = shareUrl;
       }
-    });
-
-    document.querySelectorAll('a[href="/gallery/"], a[href="/gallery"]').forEach(function (link) {
-      link.setAttribute("href", siteUrl + "/gallery/");
     });
   }
 

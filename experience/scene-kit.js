@@ -97,7 +97,7 @@ export function makeSpeechSprite(message, borderHex = "#285c3f", bgHex = "rgba(2
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = "#1c1a17";
-  ctx.font = "700 29px 'Fira Sans', sans-serif";
+  ctx.font = "700 29px 'Source Sans 3', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(message, 192, 55);
@@ -116,7 +116,7 @@ export function makeNoteSprite(symbol = "♪", hex = "#285c3f") {
   c.height = 96;
   const ctx = c.getContext("2d");
   ctx.fillStyle = hex;
-  ctx.font = "700 62px 'Fira Sans', sans-serif";
+  ctx.font = "700 62px 'Source Sans 3', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(symbol, 48, 50);
