@@ -477,7 +477,7 @@ function minZoomToFitEarth() {
   // inside both axes of the stage — never zoom in until the sphere clips.
   const aspect = Math.max(camera.aspect || 1, 0.01);
   const vHalf = Math.tan((CAM_FOV * Math.PI) / 360);
-  const need = GLOBE_R * 1.14;
+  const need = GLOBE_R * 1.06;
   const minDist = Math.max(need / vHalf, need / (aspect * vHalf));
   return minDist / BASE_DIST;
 }

@@ -1218,8 +1218,8 @@ h2 {
 
 .sites-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.1rem 1.75rem;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 1.1rem 1.5rem;
   /* Top-align globe with the Testing sites panel (not vertically centered) */
   align-items: start;
   min-height: 0;
@@ -1239,8 +1239,8 @@ h2 {
   border: 0;
   border-radius: 0;
   /* Fixed stage height — avoids resize thrash when the panel expands */
-  height: min(58vh, 560px);
-  min-height: 320px;
+  height: min(68vh, 640px);
+  min-height: 380px;
   overflow: hidden;
   box-shadow: none;
   cursor: grab;
@@ -2832,8 +2832,8 @@ main > .section + .contact-band {
   }
 
   .sites-stage {
-    min-height: min(42vh, 380px);
-    height: min(42vh, 380px);
+    min-height: min(50vh, 440px);
+    height: min(50vh, 440px);
   }
 
   .experience-stage {
