@@ -414,6 +414,30 @@ export function makeCandy(colorHex, radius = 0.026) {
   return m;
 }
 
+/** Seat a single participant at the near edge of the table, facing the apparatus. */
+export function seatChildForPov(childSeat, z = 0.7) {
+  childSeat.position.set(0, 0, z);
+  childSeat.rotation.y = Math.PI;
+}
+
+/**
+ * First-person framing from the seated child's eyes.
+ * Hides the participant mesh so the lens sits in their seat without clipping a head/torso.
+ */
+export function enableChildPov(child) {
+  if (child) {
+    child.visible = false;
+  }
+}
+
+/** Default child-eye cameras looking onto a tabletop apparatus. */
+export const childPov = {
+  overview: { pos: [0.05, 1.14, 0.58], look: [0, 0.66, -0.02] },
+  left: { pos: [-0.06, 1.12, 0.55], look: [-0.28, 0.66, -0.02] },
+  right: { pos: [0.14, 1.12, 0.55], look: [0.28, 0.66, -0.02] },
+  close: { pos: [0.02, 1.08, 0.48], look: [0, 0.68, 0.02] }
+};
+
 export function tagInspectable(rootObj, id, title, description, focusPos, focusLook, onTrigger) {
   const entry = {
     id: id,

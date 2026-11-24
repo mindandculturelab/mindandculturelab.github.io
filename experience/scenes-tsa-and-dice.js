@@ -8,7 +8,10 @@ import {
   makeSpeechSprite,
   makeNoteSprite,
   makeCandy,
-  tagInspectable
+  tagInspectable,
+  seatChildForPov,
+  enableChildPov,
+  childPov
 } from "./scene-kit.js";
 
 function makeAnimalDisc(kind, radius = 0.046) {
@@ -898,10 +901,9 @@ export function buildEpistemicProcedure() {
   const table = makeCompactTable(1.24, 0.92, 0.62);
   root.add(table);
 
-  // Child sits west of the table so elevated cameras never shoot through the head
+  // Single-child task: seat at the near edge and frame from the child's eyes
   const childSeat = new THREE.Group();
-  childSeat.position.set(-0.92, 0, 0.12);
-  childSeat.rotation.y = Math.PI * 0.58;
+  seatChildForPov(childSeat, 0.7);
   childSeat.add(makeChair(0.95));
   const child = makeChild({
     gender: "girl",
@@ -912,15 +914,17 @@ export function buildEpistemicProcedure() {
     hairStyle: "long",
     blush: 0xb56b55
   }, 0.85);
+  enableChildPov(child);
   childSeat.add(child);
-  const guessBubble = makeSpeechSprite("“I guess 4!”", "#cf7a40", "#fff7d6");
-  guessBubble.position.set(0, 1.38, 0);
-  guessBubble.visible = false;
-  childSeat.add(guessBubble);
   root.add(childSeat);
 
+  const guessBubble = makeSpeechSprite("“I guess 4!”", "#cf7a40", "#fff7d6");
+  guessBubble.position.set(0.08, 0.92, 0.18);
+  guessBubble.visible = false;
+  root.add(guessBubble);
+
   const expSeat = new THREE.Group();
-  expSeat.position.set(0.42, 0, -0.92);
+  expSeat.position.set(0, 0, -0.72);
   expSeat.add(makeChair(1.05));
   const experimenter = makeChild({ shirt: 0x5c738a, pants: 0x333c47, skin: 0xf0cab0, hair: 0x5a3e28, hairStyle: "parted" }, 0.98);
   expSeat.add(experimenter);
@@ -991,7 +995,7 @@ export function buildEpistemicProcedure() {
       "opaque-cup",
       "Opaque Concealing Cup",
       "Shaken and kept upside-down on the table so the die's outcome is physically determined inside the world while remaining completely unknown to the participant (epistemic uncertainty).",
-      [-0.55, 1.28, 0.68],
+      [-0.22, 1.12, 0.52],
       [-0.18, 0.68, -0.05],
       function (nowSec) { cupPeekUntil = nowSec + 2.2; }
     ),
@@ -1000,7 +1004,7 @@ export function buildEpistemicProcedure() {
       "six-sided-die",
       "Six-Sided White Die (1–6)",
       "Counted aloud from 1 to 6 with every participant before testing. Remarkably, Tsimané youth in Bolivia who had never seen dice before showed the exact same 65% preference for Roll-Then-Guess as U.S. children (64%).",
-      [-0.45, 1.15, 0.58],
+      [-0.18, 1.08, 0.48],
       [-0.18, 0.66, 0.02],
       function () { die.rotation.x += Math.PI / 2; die.rotation.z += Math.PI / 2; }
     ),
@@ -1009,7 +1013,7 @@ export function buildEpistemicProcedure() {
       "figure1-card",
       "Figure 1 Counterbalanced Sequence Card",
       "Presented in counterbalanced order (Version A vs. Version B): Roll-Then-Guess shows the die rolled first followed by the yellow speech-bubble guess; Guess-Then-Roll shows the guess first followed by the die roll.",
-      [0.32, 1.32, 0.65],
+      [0.22, 1.1, 0.5],
       [0.25, 0.63, 0.03]
     ),
     tagInspectable(
@@ -1017,7 +1021,7 @@ export function buildEpistemicProcedure() {
       "reward-tray",
       "Prize Tray (Stickers & Candies)",
       "Makes the critical test trial a real, incentive-compatible game of chance: matching the hidden number wins an immediate prize, contrasting live decisions against prior hypothetical adult vignettes.",
-      [-0.72, 1.22, 0.32],
+      [-0.35, 1.1, 0.42],
       [-0.44, 0.64, -0.18]
     )
   );
@@ -1029,7 +1033,7 @@ export function buildEpistemicProcedure() {
       badge: "USA (N = 56) · Bolivia Tsimané (N = 54) · Iran (N = 100)",
       body: "The researcher asks whether the participant has ever seen a die before, counts the dots from 1 to 6 across all six faces together, rolls the die openly twice, and invites the participant to roll twice.",
       why: "Hands-on familiarization ensures participants with zero prior exposure to dice (100% of Bolivian Tsimané children) understand equiprobable 1–6 outcomes just as clearly as urban peers.",
-      camera: { pos: [0.95, 2.85, 1.85], look: [0, 0.55, 0] },
+      camera: childPov.overview,
       covered: false,
       bubble: false
     },
@@ -1039,7 +1043,7 @@ export function buildEpistemicProcedure() {
       badge: "79% passed on first try · 20% on second try",
       body: "The researcher shakes the die inside the opaque cup, flips it upside-down on the mat so the rolled number stays hidden, and verifies comprehension of the matching rule for winning a prize.",
       why: "Keeping the inverted cup directly in view makes the distinction between a determined-but-hidden outcome and an unrolled future outcome concrete.",
-      camera: { pos: [0.55, 2.75, 1.95], look: [-0.18, 0.55, 0] },
+      camera: childPov.left,
       covered: true,
       bubble: false
     },
@@ -1049,7 +1053,7 @@ export function buildEpistemicProcedure() {
       badge: "Counterbalanced diagram (Figure 1)",
       body: "Using the printed two-panel diagram on the table, the researcher explains Roll-Then-Guess (top) and Guess-Then-Roll (bottom), then plays one practice round of each version in random order.",
       why: "Experiencing both timing sequences firsthand before the critical choice eliminates order confounds and verbal ambiguity across languages.",
-      camera: { pos: [1.15, 2.75, 1.55], look: [0.12, 0.55, 0.02] },
+      camera: childPov.right,
       covered: false,
       bubble: false
     },
@@ -1059,7 +1063,7 @@ export function buildEpistemicProcedure() {
       badge: "60.5% chose Epistemic (Roll-Then-Guess), p < .001",
       body: "For the real prize game, the participant chooses which version to play. Toggle between Epistemic and Physical above or click 'Play dice round' to watch the exact sequence difference!",
       why: "Across ages 6–19 in the US (64%), Bolivia (65%), and Iran (56%), youth favored Roll-Then-Guess with no developmental shift toward physical uncertainty.",
-      camera: { pos: [0.9, 2.9, 1.9], look: [0, 0.55, 0.02] },
+      camera: childPov.close,
       covered: true,
       bubble: true,
       autoPlay: true

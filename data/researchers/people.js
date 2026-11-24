@@ -198,6 +198,7 @@
     }
 
     var list = document.createElement("ul");
+    list.className = "person-study-list";
     var led = studiesFor(name);
     if (!led.length) {
       addText(body, "p", "person-education", "No open studies listed yet.");

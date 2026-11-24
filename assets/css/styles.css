@@ -1661,16 +1661,18 @@ h2 {
   color: #fff;
 }
 
-.person-card-featured ul {
+.person-card-featured ul,
+.person-study-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 0.4rem 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
   margin-top: 0.95rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--line);
 }
 
-.person-card-featured li {
+.person-card-featured li,
+.person-study-list li {
   margin-top: 0;
 }
 
