@@ -327,7 +327,7 @@ function selectSite(id, fromUser) {
     titleEl.textContent = "Testing sites";
     regionEl.textContent = "";
     metaEl.hidden = true;
-    bodyEl.textContent = "Click to learn more about each site";
+    bodyEl.textContent = "Click a pin or name to learn more.";
     statEl.hidden = true;
     venuesEl.hidden = true;
     venuesEl.replaceChildren();
