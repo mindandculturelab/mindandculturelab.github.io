@@ -760,7 +760,7 @@ export function buildRiskTimeProcedure() {
   return {
     id: "risk-time-preferences",
     tabTag: "Amir et al. (2020 · JEP:G)",
-    tabName: "Risk and Time Preference Tasks",
+    tabName: "Marble-Draw Risk & Intertemporal Choice",
     eyebrow: "Tasks · Amir, Jordan, McAuliffe, … & Dunham (2020)",
     studyTitle: "The Developmental Origins of Risk and Time Preferences Across Diverse Societies",
     studyHref: "../studies/risk-time-preferences/",

@@ -198,7 +198,7 @@ export function buildSearchProcedure() {
   return {
     id: "search",
     tabTag: "Rivero · Explore–Exploit",
-    tabName: "Grid Search Task",
+    tabName: "SEARCH Grid Search",
     eyebrow: "Tasks · Goals Shape Children's Explore-Exploit Tendencies",
     studyTitle: "Goals Shape Children's Explore-Exploit Tendencies",
     studyHref: "../studies/search/",

@@ -360,7 +360,7 @@ export function buildTsaProcedure() {
     tagInspectable(
       boxGroup,
       "square-box",
-      "Square Coordination Box (40 × 40 cm)",
+      "Pure Coordination Task box (40 × 40 cm)",
       "Velcroed to the center of the compact toddler table so children cannot twist it to peek at peers' sides. Each vertical wall has a concealed magnetic socket; only when all active partners place matching keys does the hinged glass lid unlock to release two brass coins per child.",
       [0.48, 1.48, 1.18],
       [0, 0.72, 0],
@@ -402,8 +402,8 @@ export function buildTsaProcedure() {
   const steps = [
     {
       short: "1. Apparatus",
-      title: "Compact table & square coordination box",
-      badge: "Square box · 2 coins per child",
+      title: "Compact table & Pure Coordination Task box",
+      badge: "40 × 40 cm box · 2 coins per child",
       body: "Same-aged 2- or 3-year-olds sit right around a child-sized square table—across from each other in dyads, or on three sides in triads. A square wooden box is velcroed to the center with a clear hinged glass lid showing two brass coins per partner, and the music box stands nearby.",
       why: "Keeping the table compact lets toddlers comfortably reach both their keys and their own vertical side of the square box, while Velcro prevents rotating the box to peek.",
       camera: { pos: [0.18, 2.35, 2.65], look: [0.08, 0.68, -0.06] },
@@ -523,7 +523,7 @@ export function buildTsaProcedure() {
   return {
     id: "tsa",
     tabTag: "Ages 2–3 · Dyads & Triads",
-    tabName: "Square Coordination Box",
+    tabName: "Pure Coordination Task",
     eyebrow: "Tasks · Rivero, Vasil, & Tomasello (2026)",
     studyTitle: "Two- and Three-Year-Olds Coordinate Decisions in Dyads and Triads",
     studyHref: "../studies/tsa/",
@@ -1090,7 +1090,7 @@ export function buildEpistemicProcedure() {
   return {
     id: "epistemic-uncertainty",
     tabTag: "Julia Smith & Dorsa Amir (2025)",
-    tabName: "Dice Task",
+    tabName: "Epistemic vs. Physical Uncertainty",
     eyebrow: "Tasks · Smith, Mohamadpour, Engelmann, … & Amir (2025)",
     studyTitle: "No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures",
     studyHref: "../studies/epistemic-uncertainty/",
