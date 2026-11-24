@@ -39,6 +39,7 @@ const studyLink = document.querySelector("[data-study-link]");
 const dataLink = document.querySelector("[data-data-link]");
 const paperLink = document.querySelector("[data-paper-link]");
 const repoLink = document.querySelector("[data-repo-link]");
+const searchFlatHost = document.querySelector("[data-search-flat-host]");
 
 // WebGL Studio Setup
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -204,7 +205,39 @@ function setThumbExtrasVisible(root, visible) {
   });
 }
 
+function isFlat2d(proc) {
+  return proc && proc.mode === "flat2d";
+}
+
+function syncFlatStage(proc) {
+  const flat = isFlat2d(proc);
+  stage.classList.toggle("is-flat-search", flat);
+  if (searchFlatHost) {
+    searchFlatHost.setAttribute("aria-hidden", flat ? "false" : "true");
+  }
+  if (!searchFlatHost) return;
+  if (flat) {
+    if (typeof proc.mount === "function" && !searchFlatHost.dataset.mounted) {
+      proc.mount(searchFlatHost);
+      searchFlatHost.dataset.mounted = "1";
+    }
+  } else {
+    procedures.forEach(function (p) {
+      if (typeof p.unmount === "function") p.unmount();
+    });
+    searchFlatHost.innerHTML = "";
+    delete searchFlatHost.dataset.mounted;
+  }
+}
+
 function captureProcedureThumb(proc) {
+  if (proc.thumbSrc && tabThumbs[proc.id]) {
+    tabThumbs[proc.id].src = proc.thumbSrc;
+    return proc.thumbSrc;
+  }
+  if (isFlat2d(proc)) {
+    return proc.thumbSrc || "";
+  }
   procedures.forEach(function (p) {
     p.root.visible = false;
   });
@@ -270,7 +303,7 @@ function populateTabThumbs() {
   procedures.forEach(function (proc) {
     try {
       const dataUrl = captureProcedureThumb(proc);
-      if (tabThumbs[proc.id]) {
+      if (dataUrl && tabThumbs[proc.id] && !proc.thumbSrc) {
         tabThumbs[proc.id].src = dataUrl;
       }
     } catch (err) {
@@ -280,7 +313,8 @@ function populateTabThumbs() {
   procedures.forEach(function (p) {
     p.root.visible = false;
   });
-  previouslyActive.root.visible = true;
+  previouslyActive.root.visible = !isFlat2d(previouslyActive);
+  syncFlatStage(previouslyActive);
   resize();
   renderFrame(true);
 }
@@ -334,8 +368,16 @@ function applyStep(idx) {
 function selectProcedure(studyId, updateUrl) {
   const nextProc = procMap[studyId] || procedures[0];
   activeProc.root.visible = false;
+  if (typeof activeProc.unmount === "function") {
+    activeProc.unmount();
+  }
+  if (searchFlatHost) {
+    searchFlatHost.innerHTML = "";
+    delete searchFlatHost.dataset.mounted;
+  }
   activeProc = nextProc;
-  activeProc.root.visible = true;
+  activeProc.root.visible = !isFlat2d(activeProc);
+  syncFlatStage(activeProc);
 
   Object.keys(tabButtons).forEach(function (id) {
     tabButtons[id].setAttribute("aria-selected", id === activeProc.id ? "true" : "false");
@@ -470,6 +512,7 @@ function pickInspectable(event) {
 }
 
 stage.addEventListener("pointerdown", function (event) {
+  if (isFlat2d(activeProc)) return;
   if (event.target.closest("button")) return;
   dragging = true;
   downX = event.clientX;
@@ -481,6 +524,10 @@ stage.addEventListener("pointerdown", function (event) {
 });
 
 stage.addEventListener("pointermove", function (event) {
+  if (isFlat2d(activeProc)) {
+    stage.classList.remove("is-hovering-object");
+    return;
+  }
   if (!dragging) {
     const hovered = pickInspectable(event);
     stage.classList.toggle("is-hovering-object", Boolean(hovered));
@@ -524,6 +571,7 @@ stage.addEventListener("pointercancel", function () {
 stage.addEventListener(
   "wheel",
   function (event) {
+    if (isFlat2d(activeProc)) return;
     event.preventDefault();
     userZoom = Math.max(0.66, Math.min(1.42, userZoom + event.deltaY * 0.0008));
   },
@@ -542,6 +590,11 @@ window.addEventListener("resize", resize);
 resize();
 
 function renderFrame(snapCamera) {
+  activeProc.update(nowSeconds);
+  if (isFlat2d(activeProc)) {
+    return;
+  }
+
   offsetVec.copy(basePos).sub(lookTarget);
   const spherical = new THREE.Spherical().setFromVector3(offsetVec);
   spherical.theta += userAzimuth;
@@ -559,7 +612,6 @@ function renderFrame(snapCamera) {
   camera.position.copy(currentPos);
   camera.lookAt(currentLook);
 
-  activeProc.update(nowSeconds);
   renderer.render(scene, camera);
 }
 

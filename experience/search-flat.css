@@ -1,0 +1,260 @@
+/* SEARCH-App Volcano Escape — flat iPad recreation */
+.search-flat-host {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.search-flat-host:not(:empty) {
+  pointer-events: auto;
+}
+
+.search-ipad {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.1rem 1.25rem 1.35rem;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.9), transparent 55%),
+    linear-gradient(165deg, #f4f1ea 0%, #ebe4d8 100%);
+  pointer-events: auto;
+}
+
+.experience-stage.is-flat-search .search-ipad {
+  display: flex;
+}
+
+.experience-stage.is-flat-search canvas,
+.experience-stage.is-flat-search .experience-hint {
+  display: none !important;
+}
+
+.experience-stage.is-flat-search .stage-badge,
+.experience-stage.is-flat-search .experience-actions-bar {
+  z-index: 4;
+}
+
+.experience-stage.is-flat-search {
+  cursor: default;
+  touch-action: auto;
+}
+
+.experience-stage.is-flat-search:active {
+  cursor: default;
+}
+
+.search-ipad-bezel {
+  width: min(100%, 920px);
+  aspect-ratio: 4 / 3;
+  max-height: 100%;
+  padding: 14px;
+  border-radius: 28px;
+  background: linear-gradient(160deg, #3a3a3c 0%, #1c1c1e 55%, #0e0e10 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 22px 48px rgba(26, 26, 26, 0.22);
+}
+
+.search-ipad-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #111;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  color: #eee;
+  font-family: var(--sans);
+}
+
+.search-ipad-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.7rem;
+  background: #1a1a1a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.search-ipad-topbar strong {
+  color: #ff9f40;
+  font-weight: 700;
+}
+
+.search-ipad-play {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(110px, 28%);
+  gap: 8px;
+  align-items: stretch;
+  min-height: 0;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.search-ipad-clicks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  min-height: 0;
+}
+
+.search-ipad-clicks-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 0.35rem;
+}
+
+.search-ipad-clicks-track {
+  flex: 1;
+  width: 22px;
+  min-height: 80px;
+  border-radius: 999px;
+  background: #2e2e2e;
+  border: 2px solid #4a4a4a;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.search-ipad-clicks-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  background: linear-gradient(to top, #ff5a00, #ff9f40);
+  transition: height 0.25s ease;
+}
+
+.search-ipad-grid-wrap {
+  background: #000;
+  padding: 5px;
+  border-radius: 4px;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.search-ipad-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: min(100%, 100%);
+  aspect-ratio: 1 / 1;
+  max-height: 100%;
+  border: 2px solid #fff;
+  box-sizing: border-box;
+}
+
+.search-ipad-cell {
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.search-ipad-cell.is-revealed {
+  background: #141414;
+}
+
+.search-ipad-cell img {
+  position: absolute;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+.search-ipad-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 0;
+}
+
+.search-ipad-volcano {
+  flex: 0 0 auto;
+  height: 34%;
+  min-height: 72px;
+  display: grid;
+  place-items: end center;
+}
+
+.search-ipad-volcano img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 6px 16px rgba(255, 90, 0, 0.12));
+}
+
+.search-ipad-volcano.is-hidden {
+  visibility: hidden;
+}
+
+.search-ipad-bin {
+  flex: 1 1 0;
+  min-height: 0;
+  margin-top: -4px;
+  border: 2px solid #4a4a4a;
+  border-radius: 4px;
+  background: #1c1c1c;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 6px 4px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.search-ipad-bin.is-escape {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.search-ipad-bin img {
+  width: auto;
+  height: auto;
+  max-width: 78%;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .search-ipad {
+    padding: 0.7rem;
+  }
+
+  .search-ipad-bezel {
+    border-radius: 18px;
+    padding: 8px;
+    aspect-ratio: 3 / 4;
+  }
+
+  .search-ipad-play {
+    grid-template-columns: 22px minmax(0, 1fr) minmax(72px, 30%);
+    gap: 5px;
+    padding: 5px;
+  }
+}
