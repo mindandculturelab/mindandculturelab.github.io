@@ -6,6 +6,7 @@ const kickerEl = document.querySelector("[data-site-kicker]");
 const titleEl = document.querySelector("[data-site-title]");
 const regionEl = document.querySelector("[data-site-region]");
 const bodyEl = document.querySelector("[data-site-body]");
+const metaEl = document.querySelector("[data-site-meta]");
 const statEl = document.querySelector("[data-site-stat]");
 const venuesEl = document.querySelector("[data-site-venues]");
 const studiesEl = document.querySelector("[data-site-studies]");
@@ -13,6 +14,7 @@ const chipsHost = document.querySelector("[data-site-chips]");
 
 const GLOBE_R = 1.55;
 const PIN_BASE = 0.045;
+const EARTH_URL = "../assets/images/globe/earth-2k.jpg";
 
 function latLngToVec3(lat, lng, radius) {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -24,63 +26,80 @@ function latLngToVec3(lat, lng, radius) {
   );
 }
 
-function makeEarthTexture() {
+/** Recolor a geographically accurate equirectangular Earth map into the lab's sage/cream palette. */
+function stylizeEarthTexture(image) {
   const c = document.createElement("canvas");
-  c.width = 1024;
-  c.height = 512;
-  const ctx = c.getContext("2d");
-  const g = ctx.createLinearGradient(0, 0, 0, 512);
-  g.addColorStop(0, "#dce8e2");
-  g.addColorStop(0.35, "#c5d9ce");
-  g.addColorStop(0.55, "#b7cfc0");
-  g.addColorStop(0.78, "#c9b89a");
-  g.addColorStop(1, "#e4d7c2");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 1024, 512);
+  c.width = image.width;
+  c.height = image.height;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(image, 0, 0);
+  const img = ctx.getImageData(0, 0, c.width, c.height);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i];
+    const g = d[i + 1];
+    const b = d[i + 2];
+    const luma = (r + g + b) / 3;
+    const isIce = luma > 205 && Math.abs(r - g) < 20 && Math.abs(g - b) < 28;
+    const isOcean = b > r + 6 && b > g - 8 && b > 65;
+    if (isIce) {
+      d[i] = 236;
+      d[i + 1] = 232;
+      d[i + 2] = 222;
+    } else if (isOcean) {
+      const t = luma / 255;
+      d[i] = Math.round(198 + 22 * t);
+      d[i + 1] = Math.round(214 + 12 * t);
+      d[i + 2] = Math.round(210 + 6 * t);
+    } else {
+      const shade = Math.max(0.28, Math.min(1, luma / 175));
+      d[i] = Math.round(62 + 70 * shade);
+      d[i + 1] = Math.round(98 + 58 * shade);
+      d[i + 2] = Math.round(72 + 36 * shade);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
 
-  // Soft continent blobs (stylized, not geographic)
-  const land = [
-    [180, 160, 90, 70],
-    [280, 200, 110, 55],
-    [420, 180, 70, 90],
-    [520, 240, 140, 60],
-    [700, 170, 100, 80],
-    [820, 280, 90, 50],
-    [160, 340, 80, 40],
-    [600, 360, 120, 45]
-  ];
-  land.forEach(function (b) {
-    ctx.fillStyle = "rgba(74, 118, 90, 0.55)";
-    ctx.beginPath();
-    ctx.ellipse(b[0], b[1], b[2], b[3], 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "rgba(40, 92, 63, 0.18)";
-    ctx.beginPath();
-    ctx.ellipse(b[0] + 8, b[1] + 6, b[2] * 0.7, b[3] * 0.65, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  // Latitude / longitude hairlines
-  ctx.strokeStyle = "rgba(255, 252, 245, 0.22)";
+  // Soft lat/long hairlines for geographic reading
+  ctx.strokeStyle = "rgba(255, 252, 245, 0.12)";
   ctx.lineWidth = 1;
-  for (let i = 1; i < 8; i += 1) {
-    const y = (i / 8) * 512;
+  for (let i = 1; i < 12; i += 1) {
+    const y = (i / 12) * c.height;
     ctx.beginPath();
     ctx.moveTo(0, y);
-    ctx.lineTo(1024, y);
+    ctx.lineTo(c.width, y);
     ctx.stroke();
   }
-  for (let i = 1; i < 12; i += 1) {
-    const x = (i / 12) * 1024;
+  for (let i = 1; i < 24; i += 1) {
+    const x = (i / 24) * c.width;
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x, 512);
+    ctx.lineTo(x, c.height);
     ctx.stroke();
   }
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
   return tex;
+}
+
+function loadEarthTexture() {
+  return new Promise(function (resolve, reject) {
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = function () {
+      try {
+        resolve(stylizeEarthTexture(img));
+      } catch (err) {
+        reject(err);
+      }
+    };
+    img.onerror = function () {
+      reject(new Error("Could not load Earth texture"));
+    };
+    img.src = EARTH_URL;
+  });
 }
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -96,11 +115,11 @@ scene.fog = new THREE.Fog(0xf5f2eb, 7.5, 14);
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
 camera.position.set(0, 0.35, 4.2);
 
-scene.add(new THREE.AmbientLight(0xfff8ef, 0.72));
-const key = new THREE.DirectionalLight(0xfff4e6, 1.15);
+scene.add(new THREE.AmbientLight(0xfff8ef, 0.78));
+const key = new THREE.DirectionalLight(0xfff4e6, 1.2);
 key.position.set(3.2, 2.4, 2.8);
 scene.add(key);
-const fill = new THREE.DirectionalLight(0xd6e4f0, 0.35);
+const fill = new THREE.DirectionalLight(0xd6e4f0, 0.38);
 fill.position.set(-2.8, 0.6, -1.8);
 scene.add(fill);
 
@@ -108,11 +127,11 @@ const globeGroup = new THREE.Group();
 scene.add(globeGroup);
 
 const earthMat = new THREE.MeshStandardMaterial({
-  map: makeEarthTexture(),
+  color: 0xc5d4c8,
   roughness: 0.92,
   metalness: 0.04
 });
-const earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 64, 48), earthMat);
+const earth = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 96, 64), earthMat);
 globeGroup.add(earth);
 
 const atmosphere = new THREE.Mesh(
@@ -223,6 +242,52 @@ function shortStudyName(study) {
   return n.slice(0, 61) + "…";
 }
 
+function formatCoord(site) {
+  const latHem = site.lat >= 0 ? "N" : "S";
+  const lngHem = site.lng >= 0 ? "E" : "W";
+  return Math.abs(site.lat).toFixed(2) + "°" + latHem + " · " + Math.abs(site.lng).toFixed(2) + "°" + lngHem;
+}
+
+function renderVenues(site) {
+  venuesEl.replaceChildren();
+  const venues = site.venues || [];
+  if (!venues.length) {
+    venuesEl.hidden = true;
+    return;
+  }
+  venuesEl.hidden = false;
+  const heading = document.createElement("p");
+  heading.className = "sites-venues-label";
+  heading.textContent = "Testing venues";
+  venuesEl.appendChild(heading);
+
+  const ul = document.createElement("ul");
+  ul.className = "sites-venue-list";
+  venues.forEach(function (v) {
+    const name = typeof v === "string" ? v : v.name;
+    const n = typeof v === "object" && v.n != null ? v.n : null;
+    const note = typeof v === "object" ? v.note : null;
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    strong.textContent = name;
+    li.appendChild(strong);
+    if (n != null) {
+      const count = document.createElement("span");
+      count.className = "sites-venue-n";
+      count.textContent = "n ≈ " + Number(n).toLocaleString();
+      li.appendChild(count);
+    }
+    if (note) {
+      const noteEl = document.createElement("span");
+      noteEl.className = "sites-venue-note";
+      noteEl.textContent = note;
+      li.appendChild(noteEl);
+    }
+    ul.appendChild(li);
+  });
+  venuesEl.appendChild(ul);
+}
+
 function selectSite(id, fromUser) {
   selectedId = id;
   const site = sites.find(function (s) {
@@ -245,17 +310,31 @@ function selectSite(id, fromUser) {
     kickerEl.textContent = "Select a site";
     titleEl.textContent = "Our testing & field sites";
     regionEl.textContent = "";
+    metaEl.hidden = true;
     bodyEl.textContent =
-      "Pins mark communities and venues across the Americas, Africa, the Middle East, and South Asia. Sample sizes combine open datasets linked from each study page.";
+      "Pins sit on real geographic coordinates. Click any pin—or a name below—to see the communities, venues, ages, tasks, and studies behind that sample.";
     statEl.hidden = true;
     venuesEl.hidden = true;
+    venuesEl.replaceChildren();
     studiesEl.replaceChildren();
     return;
   }
 
   kickerEl.textContent = "Field site";
   titleEl.textContent = site.name;
-  regionEl.textContent = site.region;
+  regionEl.textContent = site.region + " · " + formatCoord(site);
+
+  const metaBits = [];
+  if (site.society) metaBits.push(site.society);
+  if (site.ages) metaBits.push("Ages " + site.ages);
+  if (site.tasks && site.tasks.length) metaBits.push(site.tasks.join(" · "));
+  if (metaBits.length) {
+    metaEl.textContent = metaBits.join(" · ");
+    metaEl.hidden = false;
+  } else {
+    metaEl.hidden = true;
+  }
+
   bodyEl.textContent = site.blurb;
 
   let stat = "About " + site.sampleN.toLocaleString() + " participants in open datasets";
@@ -263,14 +342,14 @@ function selectSite(id, fromUser) {
   statEl.textContent = stat;
   statEl.hidden = false;
 
-  if (site.venues && site.venues.length) {
-    venuesEl.textContent = "Venues: " + site.venues.join(" · ");
-    venuesEl.hidden = false;
-  } else {
-    venuesEl.hidden = true;
-  }
+  renderVenues(site);
 
   studiesEl.replaceChildren();
+  const listLabel = document.createElement("p");
+  listLabel.className = "sites-venues-label";
+  listLabel.textContent = "Studies from this site";
+  studiesEl.appendChild(listLabel);
+
   const list = document.createElement("ul");
   list.className = "sites-study-list";
   (site.studyIds || []).forEach(function (sid) {
@@ -280,6 +359,12 @@ function selectSite(id, fromUser) {
     link.href = "../studies/" + sid + "/";
     link.textContent = shortStudyName(study) || sid;
     li.appendChild(link);
+    if (study && study.ageLabel) {
+      const age = document.createElement("span");
+      age.className = "sites-venue-note";
+      age.textContent = "Ages " + study.ageLabel;
+      li.appendChild(age);
+    }
     if (study && (study.explorer || study.procedure)) {
       const extras = document.createElement("span");
       extras.className = "sites-study-links";
@@ -396,11 +481,7 @@ function frame(ms) {
   }
 
   const radius = 4.15 * userZoom;
-  camOffset.setFromSphericalCoords(
-    radius,
-    Math.PI / 2 - userPolar,
-    userAzimuth
-  );
+  camOffset.setFromSphericalCoords(radius, Math.PI / 2 - userPolar, userAzimuth);
   camera.position.copy(camOffset);
   camera.lookAt(lookAt);
 
@@ -409,6 +490,7 @@ function frame(ms) {
 }
 
 Promise.all([
+  loadEarthTexture(),
   fetch("../data/sites.json").then(function (r) {
     return r.json();
   }),
@@ -416,9 +498,14 @@ Promise.all([
     return r.json();
   })
 ])
-  .then(function (pair) {
-    sites = pair[0].sites || [];
-    (pair[1].studies || []).forEach(function (s) {
+  .then(function (triple) {
+    const tex = triple[0];
+    earthMat.map = tex;
+    earthMat.color.set(0xffffff);
+    earthMat.needsUpdate = true;
+
+    sites = triple[1].sites || [];
+    (triple[2].studies || []).forEach(function (s) {
       studiesById[s.id] = s;
     });
 
@@ -435,6 +522,7 @@ Promise.all([
       chip.setAttribute("role", "listitem");
       chip.setAttribute("aria-pressed", "false");
       chip.textContent = site.name;
+      chip.title = site.region;
       chip.addEventListener("click", function () {
         selectSite(site.id, true);
       });
@@ -443,9 +531,12 @@ Promise.all([
     });
 
     const startId = new URLSearchParams(window.location.search).get("site");
-    if (startId && sites.some(function (s) {
-      return s.id === startId;
-    })) {
+    if (
+      startId &&
+      sites.some(function (s) {
+        return s.id === startId;
+      })
+    ) {
       selectSite(startId, true);
     } else {
       selectSite(null, false);
@@ -456,4 +547,6 @@ Promise.all([
   })
   .catch(function (err) {
     bodyEl.textContent = "Could not load field sites. " + String(err);
+    resize();
+    requestAnimationFrame(frame);
   });
