@@ -69,7 +69,18 @@ export function buildCoopBatteryProcedure() {
   const childSeat = new THREE.Group();
   childSeat.position.set(0, 0, 0.72);
   childSeat.rotation.y = Math.PI;
-  childSeat.add(makeChair(0.95), makeChild({ shirt: 0x568265, pants: 0x3e4c59, skin: 0xdca27c, hair: 0x241a15, hairStyle: "curls" }, 0.86));
+  childSeat.add(
+    makeChair(0.95),
+    makeChild({
+      gender: "girl",
+      shirt: 0xc45b7a,
+      pants: 0x6b4a8a,
+      skin: 0x6b3f2a,
+      hair: 0x1a1210,
+      hairStyle: "puffs",
+      blush: 0xa85a45
+    }, 0.86)
+  );
   root.add(childSeat);
 
   // Station A (front-left): Fairness Inequity Game mini-apparatus (4-1 candies + Green/Red handles)
@@ -326,13 +337,27 @@ export function buildForgivenessProcedure() {
   const childSeat = new THREE.Group();
   childSeat.position.set(0, 0, 0.64);
   childSeat.rotation.y = Math.PI;
-  const child = makeChild({ shirt: 0x568265, pants: 0x3e4c59, skin: 0xf0c8a8, hair: 0x452f20, hairStyle: "bangs" }, 0.86);
+  const child = makeChild({
+    gender: "girl",
+    shirt: 0xe08c3c,
+    pants: 0x568265,
+    skin: 0xf0c8a8,
+    hair: 0xc4a05a,
+    hairStyle: "ponytail",
+    hairTie: 0xc45b7a
+  }, 0.86);
   childSeat.add(makeChair(0.95), child);
   root.add(childSeat);
 
   const expGroup = new THREE.Group();
   expGroup.position.set(0, 0, -0.82);
-  const expPerson = makeChild({ shirt: 0x5c738a, pants: 0x333c47, skin: 0xeac09e, hair: 0x2c1f17, hairStyle: "parted" }, 0.98);
+  const expPerson = makeChild({
+    shirt: 0x5c738a,
+    pants: 0x333c47,
+    skin: 0xd4a074,
+    hair: 0x2c1f17,
+    hairStyle: "parted"
+  }, 0.98);
   expGroup.add(expPerson);
   root.add(expGroup);
 
@@ -567,7 +592,17 @@ export function buildRiskTimeProcedure() {
   const childSeat = new THREE.Group();
   childSeat.position.set(0, 0, 0.66);
   childSeat.rotation.y = Math.PI;
-  childSeat.add(makeChair(0.95), makeChild({ shirt: 0xcf7a40, pants: 0x3e4c59, skin: 0xdca078, hair: 0x221914, hairStyle: "parted" }, 0.86));
+  childSeat.add(
+    makeChair(0.95),
+    makeChild({
+      shirt: 0xcf7a40,
+      pants: 0x3e4c59,
+      skin: 0xa86b42,
+      hair: 0x1a1210,
+      hairStyle: "curls",
+      blush: 0xb56b55
+    }, 0.86)
+  );
   root.add(childSeat);
 
   // LEFT SIDE: Risk Preference Station — Clear 50/50 Marble Jar (1 Green + 1 Red marble) + Safe vs. Risky plates
@@ -837,7 +872,18 @@ export function buildLadderProcedure() {
   const childSeat = new THREE.Group();
   childSeat.position.set(0, 0, 0.68);
   childSeat.rotation.y = Math.PI;
-  childSeat.add(makeChair(0.95), makeChild({ shirt: 0x568265, pants: 0x3e4c59, skin: 0xe8be9b, hair: 0x2c1f17, hairStyle: "curls" }, 0.86));
+  childSeat.add(
+    makeChair(0.95),
+    makeChild({
+      gender: "girl",
+      shirt: 0x68a078,
+      pants: 0x8b5a9e,
+      skin: 0xc9926a,
+      hair: 0x4a2f1c,
+      hairStyle: "long",
+      blush: 0xc47860
+    }, 0.86)
+  );
   root.add(childSeat);
 
   // LEFT: Sculptural 3D 10-Rung MacArthur Ladder standing on a wooden base (Figure 1: Rung 1 = Top, Rung 10 = Bottom!)

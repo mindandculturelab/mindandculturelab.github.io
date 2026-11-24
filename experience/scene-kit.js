@@ -200,21 +200,37 @@ export function makeChild(spec, scale = 0.84) {
   group.userData.isActor = true;
   group.userData.thumbHide = true;
   const skin = new THREE.MeshStandardMaterial({ color: spec.skin || 0xeac09e, roughness: 0.52 });
-  const blush = new THREE.MeshStandardMaterial({ color: 0xe39b8d, roughness: 0.68 });
+  const blush = new THREE.MeshStandardMaterial({
+    color: spec.blush || 0xe39b8d,
+    roughness: 0.68,
+    transparent: true,
+    opacity: spec.blushOpacity != null ? spec.blushOpacity : 0.85
+  });
   const shirt = new THREE.MeshStandardMaterial({ color: spec.shirt || 0x568265, roughness: 0.72 });
-  const pants = new THREE.MeshStandardMaterial({ color: spec.pants || 0x414e5c, roughness: 0.8 });
+  const bottom = new THREE.MeshStandardMaterial({ color: spec.pants || 0x414e5c, roughness: 0.8 });
   const hairMat = new THREE.MeshStandardMaterial({ color: spec.hair || 0x36261d, roughness: 0.78 });
-  const shoeMat = new THREE.MeshStandardMaterial({ color: 0xf4f0e8, roughness: 0.62 });
+  const shoeMat = new THREE.MeshStandardMaterial({ color: spec.shoes || 0xf4f0e8, roughness: 0.62 });
   const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25 });
-  const irisMat = new THREE.MeshStandardMaterial({ color: 0x261c16, roughness: 0.2 });
+  const irisMat = new THREE.MeshStandardMaterial({ color: spec.iris || 0x261c16, roughness: 0.2 });
+  const wearsSkirt = spec.outfit === "skirt" || spec.gender === "girl";
 
-  const hips = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 16), pants);
-  hips.scale.set(1.1, 0.66, 0.94);
+  const hips = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 16), bottom);
+  hips.scale.set(wearsSkirt ? 1.22 : 1.1, 0.66, wearsSkirt ? 1.05 : 0.94);
   hips.position.set(0, 0.48, -0.02);
   hips.castShadow = true;
 
+  if (wearsSkirt) {
+    const skirt = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.28, 0.34, 0.22, 20, 1, true),
+      bottom
+    );
+    skirt.position.set(0, 0.4, 0);
+    skirt.castShadow = true;
+    group.add(skirt);
+  }
+
   [-1, 1].forEach(function (side) {
-    const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.068, 0.18, 6, 12), pants);
+    const thigh = new THREE.Mesh(new THREE.CapsuleGeometry(0.068, 0.18, 6, 12), wearsSkirt ? skin : bottom);
     thigh.rotation.x = Math.PI / 2.15;
     thigh.position.set(side * 0.105, 0.46, 0.13);
     thigh.castShadow = true;
@@ -271,6 +287,51 @@ export function makeChild(spec, scale = 0.84) {
       puff.position.set(p[0], p[1], p[2]);
       head.add(puff);
     });
+  } else if (spec.hairStyle === "puffs") {
+    // Twin hair puffs — reads clearly as a little girl silhouette
+    [-1, 1].forEach(function (side) {
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(0.095, 14, 12), hairMat);
+      puff.position.set(side * 0.17, 0.12, -0.02);
+      puff.castShadow = true;
+      head.add(puff);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.028, 0.06, 8), hairMat);
+      stem.position.set(side * 0.12, 0.06, -0.01);
+      stem.rotation.z = -side * 0.55;
+      head.add(stem);
+    });
+  } else if (spec.hairStyle === "ponytail") {
+    const fringe = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), hairMat);
+    fringe.scale.set(1.2, 0.38, 0.5);
+    fringe.position.set(0.02, 0.12, 0.14);
+    head.add(fringe);
+    const tail = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.16, 6, 12), hairMat);
+    tail.position.set(0, 0.02, -0.2);
+    tail.rotation.x = 0.55;
+    tail.castShadow = true;
+    head.add(tail);
+    const tie = new THREE.Mesh(
+      new THREE.TorusGeometry(0.035, 0.012, 8, 14),
+      new THREE.MeshStandardMaterial({ color: spec.hairTie || 0xc45b7a, roughness: 0.55 })
+    );
+    tie.position.set(0, 0.08, -0.14);
+    tie.rotation.y = Math.PI / 2;
+    head.add(tie);
+  } else if (spec.hairStyle === "long") {
+    const fringe = new THREE.Mesh(new THREE.SphereGeometry(0.135, 16, 12), hairMat);
+    fringe.scale.set(1.25, 0.4, 0.54);
+    fringe.position.set(0, 0.12, 0.14);
+    head.add(fringe);
+    [-1, 1].forEach(function (side) {
+      const lock = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.2, 6, 12), hairMat);
+      lock.position.set(side * 0.14, -0.06, -0.02);
+      lock.rotation.z = side * 0.12;
+      lock.castShadow = true;
+      head.add(lock);
+    });
+    const back = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), hairMat);
+    back.scale.set(1.05, 1.15, 0.7);
+    back.position.set(0, -0.02, -0.12);
+    head.add(back);
   } else {
     const fringe = new THREE.Mesh(new THREE.SphereGeometry(0.135, 16, 12), hairMat);
     fringe.scale.set(1.25, 0.4, 0.54);

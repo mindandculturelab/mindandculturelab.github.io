@@ -165,11 +165,12 @@ export function buildTsaProcedure() {
     west: {
       pos: [-0.68, 0, 0],
       rot: Math.PI / 2,
-      shirt: 0x568265, // botanical sage
+      shirt: 0x568265,
       pants: 0x3e4c59,
-      skin: 0xeac09e,
-      hair: 0x36261d,
-      hairStyle: "parted",
+      skin: 0x8d5524,
+      hair: 0x1a1210,
+      hairStyle: "curls",
+      blush: 0xb56b55,
       attachWorld: [-0.21, 0.72, 0],
       attachRot: [0, 0, Math.PI / 2],
       bubble: "“Blue!”",
@@ -178,11 +179,13 @@ export function buildTsaProcedure() {
     north: {
       pos: [0, 0, -0.68],
       rot: 0,
-      shirt: 0xcf7a40, // warm ochre-terracotta
-      pants: 0x485464,
-      skin: 0xf2ccb0,
-      hair: 0x825934,
-      hairStyle: "bangs",
+      gender: "girl",
+      shirt: 0xc45b7a,
+      pants: 0x6b4a8a,
+      skin: 0xf0c8a8,
+      hair: 0x4a2f1c,
+      hairStyle: "ponytail",
+      hairTie: 0xe08c3c,
       attachWorld: [0, 0.72, -0.21],
       attachRot: [Math.PI / 2, 0, 0],
       bubble: "“Let’s do blue!”",
@@ -191,11 +194,13 @@ export function buildTsaProcedure() {
     east: {
       pos: [0.68, 0, 0],
       rot: -Math.PI / 2,
-      shirt: 0x5c738a, // dusty slate
-      pants: 0x3d4652,
-      skin: 0xd9a17c,
-      hair: 0x241a15,
-      hairStyle: "curls",
+      gender: "girl",
+      shirt: 0x5c738a,
+      pants: 0x355f7a,
+      skin: 0xc9926a,
+      hair: 0x1a1210,
+      hairStyle: "puffs",
+      blush: 0xc47860,
       attachWorld: [0.21, 0.72, 0],
       attachRot: [0, 0, -Math.PI / 2],
       bubble: "“Okay, blue!”",
@@ -891,7 +896,15 @@ export function buildEpistemicProcedure() {
   childSeat.position.set(0, 0, 0.64);
   childSeat.rotation.y = Math.PI;
   childSeat.add(makeChair(0.95));
-  const child = makeChild({ shirt: 0x568265, pants: 0x3e4c59, skin: 0xe8be9b, hair: 0x2a1e17, hairStyle: "curls" }, 0.85);
+  const child = makeChild({
+    gender: "girl",
+    shirt: 0x68a078,
+    pants: 0x8b5a9e,
+    skin: 0xa86b42,
+    hair: 0x1a1210,
+    hairStyle: "long",
+    blush: 0xb56b55
+  }, 0.85);
   childSeat.add(child);
   const guessBubble = makeSpeechSprite("“I guess 4!”", "#cf7a40", "#fff7d6");
   guessBubble.position.set(0, 1.38, 0);
@@ -1171,12 +1184,33 @@ export function buildTrustProcedure() {
   const actorSeat = new THREE.Group();
   actorSeat.position.set(-0.84, 0, 0);
   actorSeat.rotation.y = Math.PI / 2;
-  actorSeat.add(makeChair(0.95), makeChild({ shirt: 0x568265, pants: 0x3e4c59, skin: 0xf0c8a8, hair: 0x3a281c, hairStyle: "parted" }, 0.86));
+  actorSeat.add(
+    makeChair(0.95),
+    makeChild({
+      gender: "girl",
+      shirt: 0xe08c3c,
+      pants: 0x6b4a8a,
+      skin: 0xf2ccb0,
+      hair: 0xc4a05a,
+      hairStyle: "ponytail",
+      hairTie: 0x568265
+    }, 0.86)
+  );
   root.add(actorSeat);
 
   const peerSeat = new THREE.Group();
   peerSeat.position.set(0.05, 0, -0.66);
-  peerSeat.add(makeChair(0.95), makeChild({ shirt: 0xcf7a40, pants: 0x455060, skin: 0xdca47e, hair: 0x241a15, hairStyle: "curls" }, 0.86));
+  peerSeat.add(
+    makeChair(0.95),
+    makeChild({
+      shirt: 0x568265,
+      pants: 0x3e4c59,
+      skin: 0x6b3f2a,
+      hair: 0x1a1210,
+      hairStyle: "curls",
+      blush: 0xa85a45
+    }, 0.86)
+  );
   const peerBubble = makeSpeechSprite("“Use my rod piece!”", "#285c3f");
   peerBubble.position.set(0, 1.36, 0);
   peerBubble.visible = false;
@@ -1520,14 +1554,32 @@ export function buildInequityProcedure() {
   const actorGroup = new THREE.Group();
   actorGroup.position.set(-0.82, 0, 0.06);
   actorGroup.rotation.y = Math.PI / 2;
-  const actorChild = makeChild({ shirt: 0x568265, pants: 0x3e4c59, skin: 0xeac09e, hair: 0x36261d, hairStyle: "parted" }, 0.86);
+  const actorChild = makeChild({
+    shirt: 0x568265,
+    pants: 0x3e4c59,
+    skin: 0xc9926a,
+    hair: 0x2a1e17,
+    hairStyle: "parted",
+    blush: 0xc47860
+  }, 0.86);
   actorGroup.add(makeChair(0.95), actorChild);
   root.add(actorGroup);
 
   const recipGroup = new THREE.Group();
   recipGroup.position.set(0.82, 0, 0.06);
   recipGroup.rotation.y = -Math.PI / 2;
-  recipGroup.add(makeChair(0.95), makeChild({ shirt: 0x5c738a, pants: 0x3d4652, skin: 0xdca17a, hair: 0x221813, hairStyle: "curls" }, 0.86));
+  recipGroup.add(
+    makeChair(0.95),
+    makeChild({
+      gender: "girl",
+      shirt: 0x5c738a,
+      pants: 0xc45b7a,
+      skin: 0x8d5524,
+      hair: 0x1a1210,
+      hairStyle: "puffs",
+      blush: 0xb56b55
+    }, 0.86)
+  );
   root.add(recipGroup);
 
   // Figure 2: Wooden Inequity Game Platform + 3 Colored Bowls + 2 Pivoting Seesaw Trays + Green & Red Handles
