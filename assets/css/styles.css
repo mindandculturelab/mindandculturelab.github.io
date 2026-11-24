@@ -588,14 +588,6 @@ h2 {
   top: 18%;
 }
 
-.glimpse-caption {
-  margin: 0;
-  max-width: 16rem;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.4;
-}
-
 /* Mini chart glimpse — circular composition */
 .glimpse-charts {
   cursor: pointer;

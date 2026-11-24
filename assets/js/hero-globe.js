@@ -150,8 +150,9 @@ if (!stage) {
   let pinEntries = [];
   let userAzimuth = 0.55;
   let userPolar = 0.06;
-  // Stage is expanded so pins can stick out; keep the globe visually filling the ring.
-  let userZoom = 0.86;
+  // Stage is expanded so pins can stick out; camera distance keeps the globe
+  // exactly the diameter of the black ring (stage is 128% of the orb).
+  const cameraDistance = 4.35 * 1.28;
   let autoSpin = 0.12;
   let dragging = false;
   let downX = 0;
@@ -273,15 +274,6 @@ if (!stage) {
     autoSpin = 0.08;
   });
 
-  stage.addEventListener(
-    "wheel",
-    function (event) {
-      event.preventDefault();
-      userZoom = Math.max(0.72, Math.min(1.35, userZoom + event.deltaY * 0.0009));
-    },
-    { passive: false }
-  );
-
   function resize() {
     const w = stage.clientWidth;
     const h = stage.clientHeight;
@@ -314,8 +306,7 @@ if (!stage) {
       userAzimuth += autoSpin * 0.012;
     }
 
-    const radius = 4.35 * userZoom;
-    camOffset.setFromSphericalCoords(radius, Math.PI / 2 - userPolar, userAzimuth);
+    camOffset.setFromSphericalCoords(cameraDistance, Math.PI / 2 - userPolar, userAzimuth);
     camera.position.copy(camOffset);
     camera.lookAt(lookAt);
 
