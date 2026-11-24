@@ -227,6 +227,17 @@ a {
   padding: 3.4rem 0 2.6rem;
 }
 
+.hero-experience {
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
+  align-items: start;
+}
+
+.hero-experience h1 {
+  white-space: nowrap;
+  font-size: clamp(1.35rem, 5.1vw, 3.85rem);
+}
+
 .eyebrow {
   margin: 0 0 0.65rem;
   color: var(--sage-ink);
