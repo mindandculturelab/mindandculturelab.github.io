@@ -100,6 +100,15 @@ rugBorder.rotation.x = -Math.PI / 2;
 rugBorder.position.y = 0.013;
 scene.add(rugBorder);
 
+// Simple white back wall — used for clean apparatus thumbnails
+const thumbWall = new THREE.Mesh(
+  new THREE.PlaneGeometry(12, 6),
+  new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.96 })
+);
+thumbWall.position.set(0, 2.2, -2.4);
+thumbWall.visible = false;
+scene.add(thumbWall);
+
 // Instantiate all 8 diagram-faithful study scenes
 const procedures = [
   buildTsaProcedure(),
@@ -219,9 +228,33 @@ function captureProcedureThumb(proc) {
     proc.update(0);
   }
   setThumbExtrasVisible(proc.root, false);
+  // Quiet studio for thumbs: wood floor + white wall, no rug/busy backdrop
+  const prevBg = scene.background ? scene.background.getHex() : 0xf5f2eb;
+  const prevFogNear = scene.fog ? scene.fog.near : 9;
+  const prevFogFar = scene.fog ? scene.fog.far : 18;
+  const rugWas = rug.visible;
+  const borderWas = rugBorder.visible;
+  rug.visible = false;
+  rugBorder.visible = false;
+  thumbWall.visible = true;
+  scene.background = new THREE.Color(0xffffff);
+  if (scene.fog) {
+    scene.fog.color.set(0xffffff);
+    scene.fog.near = 14;
+    scene.fog.far = 28;
+  }
   renderer.render(scene, camera);
   const dataUrl = renderer.domElement.toDataURL("image/jpeg", 0.84);
   setThumbExtrasVisible(proc.root, true);
+  rug.visible = rugWas;
+  rugBorder.visible = borderWas;
+  thumbWall.visible = false;
+  scene.background = new THREE.Color(prevBg);
+  if (scene.fog) {
+    scene.fog.color.set(prevBg);
+    scene.fog.near = prevFogNear;
+    scene.fog.far = prevFogFar;
+  }
   if (typeof proc.setStep === "function") {
     proc.setStep(0, 0);
   }

@@ -153,10 +153,11 @@ if (!stage) {
   let userAzimuth = 0.55;
   let userPolar = 0.06;
   // Stage is expanded (inset -14% → 128% of orb) so pins can stick out.
-  // Distance fits the earth sphere to the black ring; slight pad keeps soft glow inside.
+  // Pull the camera back so the globe sits inside the black circle with a
+  // visible ring of the orb still showing around it.
   const ORB_FRACTION = 1 / 1.28;
   const cameraDistance =
-    (GLOBE_R * 1.04) / (ORB_FRACTION * Math.tan((38 * Math.PI) / 360));
+    (GLOBE_R * 1.16) / (ORB_FRACTION * Math.tan((38 * Math.PI) / 360));
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let autoSpin = reduceMotion ? 0 : 0.12;
   let dragging = false;
