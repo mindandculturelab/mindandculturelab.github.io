@@ -101,10 +101,10 @@
     },
     {
       "id": "tsa",
-      "name": "How Two- and Three-Year-Olds Coordinate Decisions in Dyads and Triads",
+      "name": "Two- and Three-Year-Olds Coordinate Decisions in Dyads and Triads",
       "leads": ["Alissa Rivero"],
       "topic": "Cooperation",
-      "keywords": ["cooperation"],
+      "keywords": ["cooperation", "decision-making"],
       "ageLabel": "2–3",
       "ageMin": 2,
       "ageMax": 3,
@@ -112,12 +112,142 @@
       "stats": null,
       "figures": [],
       "downloads": [
+        { "label": "Published paper (PDF)", "href": "files/Rivero-et-al-2026-dyad-triad.pdf" },
+        { "label": "Poster (PDF)", "href": "files/dyad-triad-poster.pdf" },
         { "label": "Analysis script", "href": "files/tsa_script.Rmd" },
         { "label": "Group data", "href": "files/tsa_data.xlsx" },
         { "label": "Reliability coding", "href": "files/tsa_reliability_expanded.xlsx" },
         { "label": "Communication coding", "href": "files/tsa_comm.xlsx" }
       ],
       "explorer": "data/",
+      "citation": "Rivero, A., Vasil, J., & Tomasello, M. (2026). Two- and three-year-olds coordinate decisions in dyads and triads. Child Development. https://doi.org/10.1093/chidev/aacag167"
+    },
+    {
+      "id": "cooperative-behaviors",
+      "name": "The Emergence of Cooperative Behaviors, Norms, and Strategies Across Five Diverse Societies",
+      "leads": ["Dorsa Amir"],
+      "topic": "Moral Development & Cooperation",
+      "keywords": ["cooperation", "morality", "generosity", "decision-making"],
+      "ageLabel": "5–13 and 18+",
+      "ageMin": 5,
+      "ageMax": 13,
+      "ranges": [
+        { "min": 5, "max": 13 },
+        { "min": 18, "max": null }
+      ],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF data & code", "href": "https://osf.io/d64qn/" },
+        { "label": "PsyArXiv preprint", "href": "https://osf.io/preprints/psyarxiv/f7ud4_v1/" }
+      ],
+      "citation": null
+    },
+    {
+      "id": "epistemic-uncertainty",
+      "name": "Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures",
+      "leads": ["Dorsa Amir"],
+      "topic": "Exploration & Innovation",
+      "keywords": ["exploration", "decision-making"],
+      "ageLabel": "5–12 and 18+",
+      "ageMin": 5,
+      "ageMax": 12,
+      "ranges": [
+        { "min": 5, "max": 12 },
+        { "min": 18, "max": null }
+      ],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF data & code", "href": "https://osf.io/8fa54/" }
+      ],
+      "citation": null
+    },
+    {
+      "id": "trustworthiness-generosity",
+      "name": "Trustworthiness is Distinct from Generosity in Children",
+      "leads": ["Dorsa Amir"],
+      "topic": "Moral Development & Cooperation",
+      "keywords": ["generosity", "cooperation", "decision-making"],
+      "ageLabel": "5–8",
+      "ageMin": 5,
+      "ageMax": 8,
+      "ranges": [{ "min": 5, "max": 8 }],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF data & code", "href": "https://osf.io/rwpd8/" },
+        { "label": "OSF preprint", "href": "https://osf.io/c2by7_v1/" }
+      ],
+      "citation": null
+    },
+    {
+      "id": "accidental-harms",
+      "name": "Children Are More Forgiving of Accidental Harms Across Development",
+      "leads": ["Dorsa Amir"],
+      "topic": "Moral Development & Cooperation",
+      "keywords": ["morality", "cooperation"],
+      "ageLabel": "5–10",
+      "ageMin": 5,
+      "ageMax": 10,
+      "ranges": [{ "min": 5, "max": 10 }],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF project", "href": "https://osf.io/se89d/" },
+        { "label": "OSF preprint", "href": "https://osf.io/2rzfs_v1/" }
+      ],
+      "citation": null
+    },
+    {
+      "id": "inequity-aversion",
+      "name": "Computational Signatures of Inequity Aversion in Children Across Seven Societies",
+      "leads": ["Dorsa Amir"],
+      "topic": "Moral Development & Cooperation",
+      "keywords": ["morality", "generosity", "decision-making"],
+      "ageLabel": "4–15",
+      "ageMin": 4,
+      "ageMax": 15,
+      "ranges": [{ "min": 4, "max": 15 }],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF data & DDM files", "href": "https://osf.io/t98f7/" }
+      ],
+      "citation": null
+    },
+    {
+      "id": "risk-time-preferences",
+      "name": "The Developmental Origins of Risk and Time Preferences Across Diverse Societies",
+      "leads": ["Dorsa Amir"],
+      "topic": "Decision Making",
+      "keywords": ["decision-making", "exploration"],
+      "ageLabel": "5–17",
+      "ageMin": 5,
+      "ageMax": 17,
+      "ranges": [{ "min": 5, "max": 17 }],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF data & code", "href": "https://osf.io/8bsfm/" }
+      ],
+      "citation": null
+    },
+    {
+      "id": "subjective-social-status",
+      "name": "Measuring Subjective Social Status in Children of Diverse Societies",
+      "leads": ["Dorsa Amir"],
+      "topic": "Social Cognition",
+      "keywords": ["decision-making"],
+      "ageLabel": "4–12",
+      "ageMin": 4,
+      "ageMax": 12,
+      "ranges": [{ "min": 4, "max": 12 }],
+      "stats": null,
+      "figures": [],
+      "downloads": [
+        { "label": "OSF data & code", "href": "https://osf.io/by29z/" }
+      ],
       "citation": null
     }
   ]

@@ -1,10 +1,31 @@
 (function () {
-  var order = ["Alissa Rivero", "Julia Bainbridge", "Gita Paladugu", "Serena Spada", "Julia Smith"];
+  var order = [
+    "Dorsa Amir",
+    "Alissa Rivero",
+    "Julia Bainbridge",
+    "Gita Paladugu",
+    "Serena Spada",
+    "Julia Smith"
+  ];
   var photos = {
+    "Dorsa Amir": "../../assets/images/researchers/dorsa-amir.png",
     "Alissa Rivero": "../../assets/images/researchers/alissa-rivero.jpg",
     "Julia Bainbridge": "../../assets/images/researchers/julia-bainbridge.png",
     "Gita Paladugu": "../../assets/images/researchers/gita-paladugu.png",
     "Serena Spada": "../../assets/images/researchers/serena-spada.png"
+  };
+  var details = {
+    "Dorsa Amir": {
+      role: "Assistant Professor of Psychology & Neuroscience, Duke University · Principal Investigator",
+      education: "PhD in Anthropology, Yale University",
+      links: [
+        { label: "OSF", href: "https://osf.io/ndcmw/" },
+        { label: "Website", href: "https://www.dorsaamir.com/" },
+        { label: "Google Scholar", href: "https://scholar.google.com/citations?user=0r5bdCYAAAAJ" },
+        { label: "ORCID", href: "https://orcid.org/0000-0003-0255-0228" },
+        { label: "ResearchGate", href: "https://www.researchgate.net/profile/Dorsa_Amir" }
+      ]
+    }
   };
   var root = document.querySelector("[data-people]");
   var count = document.querySelector("[data-count]");
@@ -34,7 +55,13 @@
   function render() {
     var query = search.value.trim().toLowerCase();
     var names = order.filter(function (name) {
-      return !query || name.toLowerCase().indexOf(query) !== -1;
+      if (!query) return true;
+      var info = details[name];
+      var haystack = [name, info && info.role, info && info.education]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.indexOf(query) !== -1;
     });
     root.replaceChildren();
     if (!names.length) {
@@ -43,8 +70,9 @@
     }
     count.textContent = names.length === 1 ? "1 researcher" : names.length + " researchers";
     names.forEach(function (name) {
+      var info = details[name];
       var card = document.createElement("article");
-      card.className = "person-card";
+      card.className = info ? "person-card person-card-featured" : "person-card";
       if (photos[name]) {
         var image = document.createElement("img");
         image.className = "portrait";
@@ -62,6 +90,25 @@
       }
       var body = document.createElement("div");
       addText(body, "h2", "", name);
+      if (info && info.role) {
+        addText(body, "p", "person-role", info.role);
+      }
+      if (info && info.education) {
+        addText(body, "p", "person-education", info.education);
+      }
+      if (info && info.links && info.links.length) {
+        var linkRow = document.createElement("p");
+        linkRow.className = "person-links";
+        info.links.forEach(function (entry) {
+          var ext = document.createElement("a");
+          ext.href = entry.href;
+          ext.textContent = entry.label;
+          ext.target = "_blank";
+          ext.rel = "noopener";
+          linkRow.appendChild(ext);
+        });
+        body.appendChild(linkRow);
+      }
       var list = document.createElement("ul");
       studiesFor(name).forEach(function (study) {
         var item = document.createElement("li");

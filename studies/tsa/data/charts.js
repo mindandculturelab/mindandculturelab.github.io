@@ -7,12 +7,17 @@
   var views = document.getElementById("views");
   var columns = [
     ["group", "Group"],
-    ["age", "Age"],
+    ["age", "Age band"],
+    ["meanAge", "Mean age"],
     ["size", "Group size"],
     ["location", "Location"],
     ["familiarity", "Familiarity"],
     ["trial", "Trial"],
-    ["success", "Success"]
+    ["success", "Success"],
+    ["strategy", "Strategy"],
+    ["key", "Matched key"],
+    ["communication", "Peer key comm."],
+    ["prompts", "Prompts"]
   ];
 
   function svgEl(name, attrs) {
@@ -90,14 +95,17 @@
     return size === "dyad" ? "Dyads" : "Triads";
   }
 
-  function percent(successes, total) {
+  function percent(count, total) {
     if (!total) return "0%";
-    return Math.round((successes / total) * 100) + "%";
+    var pct = (count / total) * 100;
+    return (Math.round(pct * 10) / 10).toString().replace(/\.0$/, "") + "%";
   }
 
-  function meanLabel(value) {
-    var rounded = Math.round(value * 10) / 10;
-    return (Math.round(rounded) === rounded ? String(rounded) : rounded.toFixed(1));
+  function meanLabel(value, digits) {
+    var d = digits === undefined ? 1 : digits;
+    var factor = Math.pow(10, d);
+    var rounded = Math.round(value * factor) / factor;
+    return rounded.toFixed(d).replace(/\.0+$/, "");
   }
 
   function cells(rows) {
@@ -109,10 +117,16 @@
         });
         if (!matching.length) return;
         var successes = matching.reduce(function (sum, row) { return sum + row.success; }, 0);
+        var collab = matching.filter(function (row) { return row.strategy === "collaborative"; }).length;
+        var indiv = matching.filter(function (row) { return row.strategy === "individualistic"; }).length;
+        var unsucc = matching.filter(function (row) { return row.strategy === "unsuccessful"; }).length;
         list.push({
           age: age,
           size: size,
           successes: successes,
+          collab: collab,
+          indiv: indiv,
+          unsucc: unsucc,
           trials: matching.length,
           groups: groupsOf(matching).length
         });
@@ -155,150 +169,12 @@
     return wrap;
   }
 
-  function drawDots(groups) {
-    var host = document.getElementById("dots");
-    var tableHost = document.getElementById("dots-table");
-    clear(host);
-    clear(tableHost);
-    var ages = [2, 3].filter(function (age) {
-      return groups.some(function (group) { return group.age === age; });
-    });
-    var sizes = ["dyad", "triad"].filter(function (size) {
-      return groups.some(function (group) { return group.size === size; });
-    });
-    var width = ages.length > 1 ? 760 : 420;
-    var height = 340;
-    var margin = { top: 36, right: 18, bottom: 46, left: 52 };
-    var gap = 28;
-    var plotWidth = width - margin.left - margin.right - gap * (ages.length - 1);
-    var panelWidth = plotWidth / ages.length;
-    var plotHeight = height - margin.top - margin.bottom;
-    var svg = svgEl("svg", {
-      class: "plot",
-      viewBox: "0 0 " + width + " " + height,
-      role: "img",
-      "aria-hidden": "true"
-    });
-    var yFor = function (value) {
-      return margin.top + plotHeight - (value / 4) * plotHeight;
-    };
-    for (var tick = 0; tick <= 4; tick += 1) {
-      svg.appendChild(svgEl("line", {
-        x1: margin.left,
-        x2: width - margin.right,
-        y1: yFor(tick),
-        y2: yFor(tick),
-        stroke: "rgba(28, 26, 23, 0.12)",
-        "stroke-width": "1"
-      }));
-      text(svg, String(tick), {
-        x: margin.left - 12,
-        y: yFor(tick) + 4,
-        "text-anchor": "end",
-        "font-size": "13",
-        fill: "#5e584f",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
-      });
-    }
-    text(svg, "Successes", {
-      x: 16,
-      y: margin.top + plotHeight / 2,
-      "text-anchor": "middle",
-      transform: "rotate(-90 16 " + (margin.top + plotHeight / 2) + ")",
-      "font-size": "13",
-      fill: "#5e584f",
-      "font-family": "Fira Sans, Helvetica, sans-serif"
-    });
-    ages.forEach(function (age, panel) {
-      var panelX = margin.left + panel * (panelWidth + gap);
-      text(svg, ageLabel(age), {
-        x: panelX + panelWidth / 2,
-        y: 20,
-        "text-anchor": "middle",
-        "font-size": "15",
-        "font-weight": "700",
-        fill: "#1c1a17",
-        "font-family": "Fira Sans, Helvetica, sans-serif"
-      });
-      var panelSizes = sizes.filter(function (size) {
-        return groups.some(function (group) {
-          return group.age === age && group.size === size;
-        });
-      });
-      panelSizes.forEach(function (size, index) {
-        var slot = panelWidth / panelSizes.length;
-        var center = panelX + slot * index + slot / 2;
-        var matching = groups.filter(function (group) {
-          return group.age === age && group.size === size;
-        });
-        var average = matching.reduce(function (sum, group) {
-          return sum + group.successes;
-        }, 0) / matching.length;
-        var bins = {};
-        matching.forEach(function (group) {
-          var key = String(group.successes);
-          if (!bins[key]) bins[key] = [];
-          bins[key].push(group);
-        });
-        Object.keys(bins).forEach(function (key) {
-          bins[key].sort(function (a, b) { return a.group - b.group; });
-          bins[key].forEach(function (group, dot) {
-            var count = bins[key].length;
-            var spread = Math.min(15, (slot * 0.62) / count);
-            var offset = (dot - (count - 1) / 2) * spread;
-            svg.appendChild(svgEl("circle", {
-              cx: center + offset,
-              cy: yFor(group.successes),
-              r: "7",
-              fill: "#5aa276",
-              stroke: "#ffffff",
-              "stroke-width": "1.5"
-            }));
-          });
-        });
-        var barWidth = Math.min(slot * 0.62, 92);
-        svg.appendChild(svgEl("line", {
-          x1: center - barWidth / 2,
-          x2: center + barWidth / 2,
-          y1: yFor(average),
-          y2: yFor(average),
-          stroke: "#1c1a17",
-          "stroke-width": "3",
-          "stroke-linecap": "round"
-        }));
-        text(svg, sizeLabel(size), {
-          x: center,
-          y: height - 16,
-          "text-anchor": "middle",
-          "font-size": "14",
-          "font-weight": "600",
-          fill: "#1c1a17",
-          "font-family": "Fira Sans, Helvetica, sans-serif"
-        });
-      });
-    });
-    host.appendChild(svg);
-    var rows = [];
-    ages.forEach(function (age) {
-      sizes.forEach(function (size) {
-        var matching = groups.filter(function (group) {
-          return group.age === age && group.size === size;
-        });
-        if (!matching.length) return;
-        var average = matching.reduce(function (sum, group) {
-          return sum + group.successes;
-        }, 0) / matching.length;
-        rows.push([ageLabel(age), sizeLabel(size), String(matching.length), meanLabel(average)]);
-      });
-    });
-    tableHost.appendChild(table(["Age", "Group size", "Groups", "Average successes"], rows));
-  }
-
   function drawBars(hostId, tableHostId, items, labelFor, colorFor) {
     var host = document.getElementById(hostId);
     var tableHost = document.getElementById(tableHostId);
     clear(host);
     clear(tableHost);
+    if (!items.length) return;
     var width = 760;
     var height = 320;
     var margin = { top: 28, right: 16, bottom: 72, left: 48 };
@@ -317,7 +193,8 @@
         x2: width - margin.right,
         y1: y,
         y2: y,
-        stroke: "rgba(28, 26, 23, 0.12)",
+        stroke: tick === 50 ? "rgba(28, 26, 23, 0.24)" : "rgba(28, 26, 23, 0.12)",
+        "stroke-dasharray": tick === 50 ? "5 4" : "none",
         "stroke-width": "1"
       }));
       text(svg, tick + "%", {
@@ -332,7 +209,7 @@
     items.forEach(function (item, index) {
       var slot = plotWidth / items.length;
       var center = margin.left + slot * index + slot / 2;
-      var barWidth = Math.min(64, slot * 0.5);
+      var barWidth = Math.min(68, slot * 0.5);
       var rate = item.trials ? item.successes / item.trials : 0;
       var barHeight = rate * plotHeight;
       var y = margin.top + plotHeight - barHeight;
@@ -368,17 +245,139 @@
     host.appendChild(svg);
   }
 
+  function drawStrategies(items) {
+    var host = document.getElementById("strategies");
+    var tableHost = document.getElementById("strategies-table");
+    clear(host);
+    clear(tableHost);
+    if (!items.length) return;
+    var width = 760;
+    var height = 340;
+    var margin = { top: 44, right: 16, bottom: 72, left: 48 };
+    var plotWidth = width - margin.left - margin.right;
+    var plotHeight = height - margin.top - margin.bottom;
+    var svg = svgEl("svg", {
+      class: "plot",
+      viewBox: "0 0 " + width + " " + height,
+      role: "img",
+      "aria-hidden": "true"
+    });
+    var legend = [
+      ["Collaborative", "#2f6b4a"],
+      ["Individualistic", "#9bc4ab"],
+      ["Unsuccessful", "#e3ddd2"]
+    ];
+    legend.forEach(function (entry, idx) {
+      var lx = margin.left + idx * 165;
+      svg.appendChild(svgEl("rect", {
+        x: lx,
+        y: 8,
+        width: 14,
+        height: 14,
+        rx: "3",
+        fill: entry[1]
+      }));
+      text(svg, entry[0], {
+        x: lx + 20,
+        y: 20,
+        "font-size": "13",
+        "font-weight": "600",
+        fill: "#1c1a17",
+        "font-family": "Fira Sans, Helvetica, sans-serif"
+      });
+    });
+    [0, 25, 50, 75, 100].forEach(function (tick) {
+      var y = margin.top + plotHeight - (tick / 100) * plotHeight;
+      svg.appendChild(svgEl("line", {
+        x1: margin.left,
+        x2: width - margin.right,
+        y1: y,
+        y2: y,
+        stroke: "rgba(28, 26, 23, 0.12)",
+        "stroke-width": "1"
+      }));
+      text(svg, tick + "%", {
+        x: margin.left - 10,
+        y: y + 4,
+        "text-anchor": "end",
+        "font-size": "13",
+        fill: "#5e584f",
+        "font-family": "Fira Sans, Helvetica, sans-serif"
+      });
+    });
+    items.forEach(function (item, index) {
+      var slot = plotWidth / items.length;
+      var center = margin.left + slot * index + slot / 2;
+      var barWidth = Math.min(72, slot * 0.52);
+      var parts = [
+        [item.collab, "#2f6b4a"],
+        [item.indiv, "#9bc4ab"],
+        [item.unsucc, "#e3ddd2"]
+      ];
+      var cursorY = margin.top + plotHeight;
+      parts.forEach(function (part) {
+        if (!part[0] || !item.trials) return;
+        var h = (part[0] / item.trials) * plotHeight;
+        cursorY -= h;
+        svg.appendChild(svgEl("rect", {
+          x: center - barWidth / 2,
+          y: cursorY,
+          width: barWidth,
+          height: Math.max(h, 0),
+          fill: part[1]
+        }));
+      });
+      text(svg, percent(item.collab, item.trials) + " collab.", {
+        x: center,
+        y: margin.top + plotHeight - ((item.collab + item.indiv + item.unsucc) / item.trials) * plotHeight - 8,
+        "text-anchor": "middle",
+        "font-size": "12.5",
+        "font-weight": "700",
+        fill: "#2f6b4a",
+        "font-family": "Fira Sans, Helvetica, sans-serif"
+      });
+      [ageLabel(item.age), sizeLabel(item.size)].forEach(function (line, lineIndex) {
+        text(svg, line, {
+          x: center,
+          y: height - 46 + lineIndex * 18,
+          "text-anchor": "middle",
+          "font-size": "13",
+          "font-weight": lineIndex === 0 ? "600" : "500",
+          fill: lineIndex === 0 ? "#1c1a17" : "#5e584f",
+          "font-family": "Fira Sans, Helvetica, sans-serif"
+        });
+      });
+    });
+    host.appendChild(svg);
+    tableHost.appendChild(table(
+      ["Age", "Group size", "Collaborative", "Individualistic", "Unsuccessful", "Total trials"],
+      items.map(function (item) {
+        return [
+          ageLabel(item.age),
+          sizeLabel(item.size),
+          percent(item.collab, item.trials) + " (" + item.collab + ")",
+          percent(item.indiv, item.trials) + " (" + item.indiv + ")",
+          percent(item.unsucc, item.trials) + " (" + item.unsucc + ")",
+          String(item.trials)
+        ];
+      })
+    ));
+  }
+
   function draw(rows) {
     var successes = rows.reduce(function (sum, row) { return sum + row.success; }, 0);
+    var collab = rows.filter(function (row) { return row.strategy === "collaborative"; }).length;
+    var commTotal = rows.reduce(function (sum, row) { return sum + (row.communication || 0); }, 0);
+    var promptTotal = rows.reduce(function (sum, row) { return sum + (row.prompts || 1); }, 0);
+    var commRate = promptTotal ? commTotal / promptTotal : 0;
     var groups = groupsOf(rows);
-    var perGroup = groups.reduce(function (sum, group) { return sum + group.successes; }, 0) / groups.length;
     summary.textContent = successes + " of " + rows.length + " trials successful · " + groups.length + (groups.length === 1 ? " group" : " groups");
     var stats = document.getElementById("stats");
     clear(stats);
     [
-      [percent(successes, rows.length), successes + " of " + rows.length + " trials successful"],
-      [String(groups.length), groups.length === 1 ? "group" : "groups"],
-      [meanLabel(perGroup), "successes per group, out of 4"]
+      [percent(successes, rows.length), successes + " of " + rows.length + " trials opened the box"],
+      [percent(collab, successes), successes ? collab + " of " + successes + " successes were collaborative" : "collaborative share of successes"],
+      [meanLabel(commRate, 2), "peer key communicative acts per 10s prompt (" + commTotal + " total)"]
     ].forEach(function (pair) {
       var block = document.createElement("p");
       block.className = "stat";
@@ -390,18 +389,23 @@
       block.appendChild(span);
       stats.appendChild(block);
     });
-    var rateItems = cells(rows);
+
+    var testRows = rows.filter(function (row) { return row.trial <= 3; });
+    var rateItems = cells(testRows);
     drawBars("rates", "rates-table", rateItems, function (item) {
       return [ageLabel(item.age), sizeLabel(item.size)];
-    }, function () {
-      return "#5aa276";
+    }, function (item) {
+      return item.age === 2 && item.size === "triad" ? "#a8c4b1" : "#5aa276";
     });
-    document.getElementById("rates-table").appendChild(table(
-      ["Age", "Group size", "Successful trials", "Trials", "Percent"],
-      rateItems.map(function (item) {
-        return [ageLabel(item.age), sizeLabel(item.size), String(item.successes), String(item.trials), percent(item.successes, item.trials)];
-      })
-    ));
+    if (rateItems.length) {
+      document.getElementById("rates-table").appendChild(table(
+        ["Age", "Group size", "Successful test trials", "Test trials", "Success rate"],
+        rateItems.map(function (item) {
+          return [ageLabel(item.age), sizeLabel(item.size), String(item.successes), String(item.trials), percent(item.successes, item.trials)];
+        })
+      ));
+    }
+
     var generalRows = rows.filter(function (row) { return row.trial === 4; });
     var generalItems = cells(generalRows);
     drawBars("general", "general-table", generalItems, function (item) {
@@ -409,19 +413,25 @@
     }, function () {
       return "#ee871f";
     });
-    document.getElementById("general-table").appendChild(table(
-      ["Age", "Group size", "Successful groups", "Groups", "Percent"],
-      generalItems.map(function (item) {
-        return [ageLabel(item.age), sizeLabel(item.size), String(item.successes), String(item.trials), percent(item.successes, item.trials)];
-      })
-    ));
+    if (generalItems.length) {
+      document.getElementById("general-table").appendChild(table(
+        ["Age", "Group size", "Successful groups", "Groups", "Percent"],
+        generalItems.map(function (item) {
+          return [ageLabel(item.age), sizeLabel(item.size), String(item.successes), String(item.trials), percent(item.successes, item.trials)];
+        })
+      ));
+    }
+
+    var allItems = cells(rows);
+    drawStrategies(allItems);
     drawSheet(rows);
   }
 
   function cellValue(row, key) {
-    if (key === "group") {
-      return String(row.group + 1);
-    }
+    if (key === "group") return String(row.group + 1);
+    if (key === "meanAge") return row.meanAge != null ? row.meanAge.toFixed(2) : "—";
+    if (key === "trial") return row.trial === 4 ? "4 (gen.)" : String(row.trial);
+    if (key === "key") return row.key || "—";
     return String(row[key]);
   }
 
@@ -431,6 +441,8 @@
     var sorted = rows.slice().sort(function (a, b) {
       var av = a[sortKey];
       var bv = b[sortKey];
+      if (av == null) av = "";
+      if (bv == null) bv = "";
       if (typeof av === "string") {
         av = av.toLowerCase();
         bv = String(bv).toLowerCase();

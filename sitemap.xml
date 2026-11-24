@@ -53,4 +53,36 @@
     <loc>https://mindandculturelab.github.io/studies/tsa/data/</loc>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/experience/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/cooperative-behaviors/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/epistemic-uncertainty/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/trustworthiness-generosity/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/accidental-harms/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/inequity-aversion/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/risk-time-preferences/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mindandculturelab.github.io/studies/subjective-social-status/</loc>
+    <priority>0.6</priority>
+  </url>
 </urlset>
