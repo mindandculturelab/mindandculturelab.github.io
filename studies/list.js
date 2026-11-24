@@ -29,6 +29,34 @@
     return haystack.indexOf(query) !== -1;
   }
 
+  function journalOf(study) {
+    var citation = study.citation;
+    if (!citation) {
+      return "";
+    }
+    if (typeof citation === "object" && citation.journal) {
+      return citation.journal;
+    }
+    if (typeof citation !== "string") {
+      return "";
+    }
+    var known = [
+      "Science Advances",
+      "Child Development",
+      "Developmental Science",
+      "Developmental Psychology",
+      "Journal of Experimental Child Psychology",
+      "Journal of Experimental Psychology: General",
+      "PLOS ONE"
+    ];
+    for (var i = 0; i < known.length; i += 1) {
+      if (citation.indexOf(known[i]) !== -1) {
+        return known[i];
+      }
+    }
+    return "";
+  }
+
   function render() {
     var query = search.value.trim().toLowerCase();
     var list = studies.filter(function (study) {
@@ -44,8 +72,13 @@
       var card = document.createElement("a");
       card.className = "card";
       card.href = study.id + "/";
+      var metaParts = [study.topic, "Ages " + study.ageLabel];
+      var journal = journalOf(study);
+      if (journal) {
+        metaParts.push(journal);
+      }
+      addText(card, "p", "meta", metaParts.join(" · "));
       addText(card, "h3", "", study.name);
-      addText(card, "p", "meta", study.topic + " · " + study.ageLabel);
       addText(card, "p", "", study.leads.join(", "));
       root.appendChild(card);
     });

@@ -49,16 +49,19 @@
     </header>
 
     <main id="main">
-      <section class="hero wrap" id="top">
-        <div>
-          <p class="eyebrow">Open data</p>
-          <h1>Topic</h1>
-        </div>
-        <p class="lede">These words name the questions behind the studies. Choose one to see the studies connected to it.</p>
-      </section>
+      <div class="interior-hero-backdrop">
+        <section class="hero wrap" id="top">
+          <div>
+            <p class="eyebrow">Open data · Topics</p>
+            <h1>Topics</h1>
+          </div>
+          <p class="lede">These words name the questions behind the studies. Choose one to see the studies connected to it.</p>
+        </section>
+      </div>
 
       <section class="wrap section" aria-label="Topics">
-        <ul class="keywords">
+        <h2 class="section-heading-sm">Choose a topic</h2>
+        <ul class="keywords" data-keywords>
           <li>
             <a class="keyword" href="#exploration" data-keyword="exploration">
               <strong>Exploration</strong>
@@ -91,16 +94,10 @@
           </li>
         </ul>
 
-        <form class="filters" data-filters>
+        <form class="filters filters-tri" data-filters>
           <label>
             Search
             <input type="search" name="q" data-search placeholder="Name, topic, or researcher" />
-          </label>
-          <label>
-            Topic
-            <select name="topic" data-topic>
-              <option value="">All topics</option>
-            </select>
           </label>
           <label>
             Age
@@ -116,9 +113,10 @@
           </label>
         </form>
 
+        <h2 class="section-heading-sm" id="matching-studies">Matching studies</h2>
         <p class="result-count" data-count aria-live="polite"></p>
         <div data-results></div>
-        <p><a href="../">All ways to look</a></p>
+        <p><a class="crumb-link" href="../">← All ways to look</a></p>
       </section>
     </main>
 
@@ -127,6 +125,11 @@
         <div class="footer-brand">
           <p class="footer-title">© <span data-year>2026</span> Mind &amp; Culture Lab · Duke University</p>
           <p class="footer-sub">Department of Psychology &amp; Neuroscience · Durham, North Carolina</p>
+          <p class="footer-contact">
+            <a href="mailto:dukemaclab@gmail.com">dukemaclab@gmail.com</a>
+            <span aria-hidden="true"> · </span>
+            <a href="../../index.html#contact">Contact</a>
+          </p>
         </div>
         <nav class="footer-nav" aria-label="Footer">
           <a href="../">Data</a>

@@ -8,13 +8,13 @@
   var results = document.querySelector("[data-results]");
   var count = document.querySelector("[data-count]");
   var searchInput = document.querySelector("[data-search]");
-  var topicSelect = document.querySelector("[data-topic]");
   var ageSelect = document.querySelector("[data-age]");
   var leadSelect = document.querySelector("[data-lead]");
   var viewButtons = document.querySelectorAll("[data-view]");
   var keywordLinks = document.querySelectorAll("[data-keyword]");
+  var keywordList = document.querySelector("[data-keywords]") || document.querySelector(".keywords");
 
-  if (!results || !searchInput || !topicSelect || !ageSelect || !leadSelect) {
+  if (!results || !searchInput || !ageSelect || !leadSelect) {
     return;
   }
 
@@ -83,12 +83,14 @@
         link.removeAttribute("aria-current");
       }
     });
+    if (keywordList) {
+      keywordList.classList.toggle("is-collapsed", Boolean(id));
+    }
   }
 
   function filters() {
     return {
       q: searchInput.value.trim().toLowerCase(),
-      topic: topicSelect.value,
       age: ageSelect.value,
       lead: leadSelect.value,
       keyword: activeKeyword()
@@ -96,7 +98,7 @@
   }
 
   function emptyMessage(state) {
-    if (state.keyword && !state.q && !state.topic && !state.age && !state.lead) {
+    if (state.keyword && !state.q && !state.age && !state.lead) {
       return "Nothing in the directory is tagged with this word yet.";
     }
     return "Nothing matches.";
@@ -104,9 +106,6 @@
 
   function matches(study, state) {
     if (state.keyword && (study.keywords || []).indexOf(state.keyword) === -1) {
-      return false;
-    }
-    if (state.topic && study.topic !== state.topic) {
       return false;
     }
     if (state.lead && study.leads.indexOf(state.lead) === -1) {
@@ -312,12 +311,11 @@
     });
   });
 
-  [searchInput, topicSelect, ageSelect, leadSelect].forEach(function (field) {
+  [searchInput, ageSelect, leadSelect].forEach(function (field) {
     field.addEventListener("input", render);
     field.addEventListener("change", render);
   });
 
-  var keywordList = document.querySelector(".keywords");
   if (keywordList) {
     keywordList.addEventListener("click", function (event) {
       var link = event.target.closest("[data-keyword]");
@@ -326,8 +324,8 @@
       }
       if (keywordId() === link.getAttribute("data-keyword")) {
         event.preventDefault();
+        history.replaceState(null, "", location.pathname + location.search);
         render();
-        scrollToResults();
       }
     });
   }
@@ -356,11 +354,6 @@
     })
     .then(function (data) {
       studies = data.studies || [];
-      fillSelect(
-        topicSelect,
-        unique(studies.map(function (study) { return study.topic; })),
-        "All topics"
-      );
       fillSelect(
         leadSelect,
         unique(studies.reduce(function (all, study) { return all.concat(study.leads); }, [])),

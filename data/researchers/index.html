@@ -49,13 +49,15 @@
     </header>
 
     <main id="main">
-      <section class="hero wrap" id="top">
-        <div>
-          <p class="eyebrow">Open data</p>
-          <h1>Researcher</h1>
-        </div>
-        <p class="lede">Each person here leads one or more of the studies. Choose a name to see those studies.</p>
-      </section>
+      <div class="interior-hero-backdrop">
+        <section class="hero wrap" id="top">
+          <div>
+            <p class="eyebrow">Open data · People</p>
+            <h1>Researchers</h1>
+          </div>
+          <p class="lede">Each person here leads one or more of the studies. Choose a name to see those studies.</p>
+        </section>
+      </div>
 
       <section class="wrap section" aria-label="Researchers">
         <form class="filters filters-search" id="researcher-search">
@@ -66,7 +68,7 @@
         </form>
         <p class="result-count" data-count aria-live="polite">Loading researchers.</p>
         <div class="people" data-people></div>
-        <p><a href="../">All ways to look</a></p>
+        <p><a class="crumb-link" href="../">← All ways to look</a></p>
       </section>
     </main>
 
@@ -75,6 +77,11 @@
         <div class="footer-brand">
           <p class="footer-title">© <span data-year>2026</span> Mind &amp; Culture Lab · Duke University</p>
           <p class="footer-sub">Department of Psychology &amp; Neuroscience · Durham, North Carolina</p>
+          <p class="footer-contact">
+            <a href="mailto:dukemaclab@gmail.com">dukemaclab@gmail.com</a>
+            <span aria-hidden="true"> · </span>
+            <a href="../../index.html#contact">Contact</a>
+          </p>
         </div>
         <nav class="footer-nav" aria-label="Footer">
           <a href="../">Data</a>
