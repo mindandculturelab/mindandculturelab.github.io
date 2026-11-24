@@ -184,12 +184,25 @@ function pinScaleForN(n) {
   return Math.min(1.55, Math.max(0.72, base));
 }
 
-function buildPin(site) {
+// mindandculturelab.com brand: terracotta · sage · lilac
+const PIN_PALETTE = [
+  { head: 0xe08c3c, stem: 0xb86a28, emissive: 0x8a4a12 },
+  { head: 0x68a078, stem: 0x3d7a56, emissive: 0x24543a },
+  { head: 0xc8b8f0, stem: 0x8b7bc4, emissive: 0x5a4a8a },
+  { head: 0xd85f27, stem: 0xa84618, emissive: 0x6a2c0c }
+];
+
+function pinStyleForIndex(index) {
+  return PIN_PALETTE[index % PIN_PALETTE.length];
+}
+
+function buildPin(site, index) {
   const g = new THREE.Group();
   const scale = pinScaleForN(site.sampleN);
+  const style = pinStyleForIndex(index || 0);
   const stem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.012 * scale, 0.018 * scale, 0.14 * scale, 10),
-    new THREE.MeshStandardMaterial({ color: 0x285c3f, roughness: 0.55 })
+    new THREE.MeshStandardMaterial({ color: style.stem, roughness: 0.55 })
   );
   stem.position.y = 0.07 * scale;
   g.add(stem);
@@ -197,9 +210,9 @@ function buildPin(site) {
   const head = new THREE.Mesh(
     new THREE.SphereGeometry(PIN_BASE * scale, 16, 12),
     new THREE.MeshStandardMaterial({
-      color: 0x5aa276,
-      emissive: 0x1e4730,
-      emissiveIntensity: 0.25,
+      color: style.head,
+      emissive: style.emissive,
+      emissiveIntensity: 0.28,
       roughness: 0.4
     })
   );
@@ -209,7 +222,7 @@ function buildPin(site) {
   const halo = new THREE.Mesh(
     new THREE.RingGeometry(0.05 * scale, 0.08 * scale, 24),
     new THREE.MeshBasicMaterial({
-      color: 0xd9842b,
+      color: 0xd85f27,
       transparent: true,
       opacity: 0,
       side: THREE.DoubleSide,
@@ -228,7 +241,8 @@ function buildPin(site) {
   g.userData.siteId = site.id;
   g.userData.head = head;
   g.userData.halo = halo;
-  g.userData.baseColor = 0x5aa276;
+  g.userData.baseColor = style.head;
+  g.userData.baseEmissive = style.emissive;
   return g;
 }
 
@@ -297,8 +311,9 @@ function selectSite(id, fromUser) {
 
   pinEntries.forEach(function (entry) {
     const on = entry.site.id === id;
-    entry.pin.userData.head.material.color.setHex(on ? 0xd9842b : entry.pin.userData.baseColor);
-    entry.pin.userData.head.material.emissiveIntensity = on ? 0.55 : 0.25;
+    entry.pin.userData.head.material.color.setHex(on ? 0xd85f27 : entry.pin.userData.baseColor);
+    entry.pin.userData.head.material.emissive.setHex(on ? 0xa84618 : entry.pin.userData.baseEmissive);
+    entry.pin.userData.head.material.emissiveIntensity = on ? 0.55 : 0.28;
     entry.pin.userData.halo.material.opacity = on ? 0.85 : 0;
     entry.pin.scale.setScalar(on ? 1.18 : 1);
   });
@@ -509,8 +524,8 @@ Promise.all([
 
     badgeEl.textContent = sites.length + " sites";
 
-    sites.forEach(function (site) {
-      const pin = buildPin(site);
+    sites.forEach(function (site, index) {
+      const pin = buildPin(site, index);
       pinsRoot.add(pin);
       pinEntries.push({ site: site, pin: pin });
 
