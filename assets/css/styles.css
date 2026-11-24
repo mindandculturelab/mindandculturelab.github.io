@@ -1487,6 +1487,98 @@ h2 {
   grid-template-columns: minmax(0, 28rem);
 }
 
+.people-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 1rem 0.85rem;
+  margin: 0 0 1.4rem;
+}
+
+.people-tile {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.55rem 0.4rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.16s ease;
+}
+
+.people-tile:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: var(--line);
+  transform: translateY(-2px);
+}
+
+.people-tile[aria-pressed="true"] {
+  background: var(--paper);
+  border-color: var(--sage-ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.people-tile-photo,
+.people-tile-initial {
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--sage-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.people-tile-initial {
+  display: grid;
+  place-items: center;
+  background: var(--sage-soft);
+  color: var(--sage-ink);
+  font-family: var(--display);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.people-tile-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.people-detail {
+  margin: 0 0 1.2rem;
+}
+
+.people-detail:not([hidden]) {
+  display: block;
+}
+
+.person-close {
+  appearance: none;
+  margin-top: 1rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.person-close:hover {
+  border-color: var(--sage-ink);
+  color: var(--sage-ink);
+  background: var(--sage-soft);
+}
+
 .people {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
