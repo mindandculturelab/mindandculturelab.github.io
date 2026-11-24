@@ -222,6 +222,21 @@ h1 {
   margin-top: 1.5rem;
 }
 
+@media (min-width: 980px) {
+  .hero-home .actions {
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  .hero-home .actions .button-huge {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    font-size: clamp(1.35rem, 2.1vw, 2.15rem);
+    padding: 1.45rem 1.2rem 1.55rem;
+  }
+}
+
 .button-large {
   padding: 1.25rem 2rem;
   font-size: 1.55rem;
@@ -879,9 +894,122 @@ h2 {
   outline-offset: 3px;
 }
 
+.experience {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 22rem);
+  gap: 1.25rem;
+  align-items: start;
+  margin-top: 0.5rem;
+}
+
+.experience-stage {
+  position: relative;
+  background: var(--paper);
+  border-radius: var(--radius);
+  min-height: 440px;
+  height: min(68vh, 640px);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.experience-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.experience-badge {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.9rem;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.experience-panel {
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 1.15rem 1.2rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.experience-panel h2 {
+  margin: 0.2rem 0 0.45rem;
+  font-size: 1.45rem;
+}
+
+.experience-kicker {
+  margin: 0;
+  color: var(--sage-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.experience-panel p {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+.experience-why {
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.experience-why strong {
+  color: var(--ink);
+}
+
+.segment {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.85rem 0 0;
+}
+
+.segment button {
+  flex: 1;
+  padding: 0.45rem 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segment button[aria-pressed="true"] {
+  background: var(--sage-ink);
+  color: #fff;
+}
+
+.experience-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.experience-nav .button {
+  padding: 0.55rem 0.95rem;
+  font-size: 1rem;
+}
+
+.experience-nav .button[disabled] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 @media (max-width: 860px) {
   .hero,
   .split,
+  .experience,
   .cards,
   .keywords,
   .filters,
