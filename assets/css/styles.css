@@ -1660,8 +1660,9 @@ main > .section + .contact-band {
 
 .site-footer {
   position: relative;
-  background: var(--ink);
-  color: #faf8f4;
+  background: #ffffff;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
 }
 
 .site-footer::before {
@@ -1688,13 +1689,13 @@ main > .section + .contact-band {
 
 .footer-title {
   font-weight: 600;
-  color: #f5f2eb;
+  color: var(--ink);
 }
 
 .footer-sub {
   margin-top: 0.15rem !important;
   font-size: 0.83rem;
-  color: rgba(245, 242, 235, 0.66);
+  color: var(--muted);
 }
 
 .footer-nav {
@@ -1704,14 +1705,14 @@ main > .section + .contact-band {
 }
 
 .footer-nav a {
-  color: rgba(245, 242, 235, 0.82);
+  color: var(--muted);
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
 }
 
 .footer-nav a:hover {
-  color: #ffffff;
+  color: var(--ink);
   text-decoration: underline;
 }
 
