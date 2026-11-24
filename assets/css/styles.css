@@ -13,6 +13,7 @@
   --terracotta-deep: #d85f27;
   --lilac: #c8b8f0;
   --lilac-bright: #e2aaf5;
+  --lilac-ink: #6b5a9e;
   --stripe-sage: #a7c5af;
   --stripe-orange: #e08c3c;
   --stripe-lilac: #c8b8f0;
@@ -25,6 +26,11 @@
   --sans: "Fira Sans", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
   --max: 1120px;
   --radius: 18px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --accent-1: var(--sage-ink);
+  --accent-2: var(--terracotta);
+  --accent-3: var(--lilac-ink);
   --brand-stripes: repeating-linear-gradient(
     90deg,
     var(--stripe-orange) 0 11px,
@@ -74,7 +80,7 @@ a {
   top: -3.5rem;
   z-index: 30;
   padding: 0.55rem 0.9rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--ink);
   color: #fff;
   font-weight: 600;
@@ -233,11 +239,15 @@ a {
   min-width: 0;
 }
 
-.hero h1,
 .hero-home h1,
 .missing h1 {
   white-space: nowrap;
   max-width: 100%;
+}
+
+.hero h1 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .eyebrow {
@@ -356,11 +366,16 @@ h2 {
   min-height: calc(100vh - 9rem);
 }
 
-/* Homepage Hero */
-.home-hero-backdrop {
+/* Homepage + interior hero bands */
+.home-hero-backdrop,
+.interior-hero-backdrop {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(250, 248, 244, 0.94) 100%);
   border-bottom: 1px solid var(--line);
+}
+
+.interior-hero-backdrop .hero {
+  padding-bottom: 2.2rem;
 }
 
 .hero-home {
@@ -2106,7 +2121,18 @@ main > .section + .contact-band {
 }
 
 /* 3D Procedure Experience */
+.experience-page-hero {
+  padding-bottom: 1.2rem;
+}
+
+.experience-page-lede {
+  margin-top: 0.85rem;
+  max-width: 36rem;
+  color: var(--muted);
+}
+
 .experience-picker-section {
+  padding-top: 0.4rem;
   padding-bottom: 1.2rem;
 }
 
@@ -2114,14 +2140,39 @@ main > .section + .contact-band {
   margin-bottom: 0;
 }
 
-.procedure-picker-label {
-  display: block;
-  margin-bottom: 0.65rem;
+.experience-sim-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1.5rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 1.05rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.experience-sim-study {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.experience-sim-study a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.22);
+}
+
+.experience-sim-study a:hover {
   color: var(--sage-ink);
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  border-bottom-color: var(--sage-ink);
+}
+
+.experience-sim-header .links {
+  margin: 0;
 }
 
 .procedure-tabs {

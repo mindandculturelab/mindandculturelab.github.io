@@ -105,6 +105,7 @@ export function makeSpeechSprite(message, borderHex = "#285c3f", bgHex = "rgba(2
   tex.colorSpace = THREE.SRGBColorSpace;
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
   sprite.scale.set(0.78, 0.28, 1);
+  sprite.userData.isActor = true;
   return sprite;
 }
 
@@ -193,6 +194,7 @@ export function makeChair(scale = 1) {
 
 export function makeChild(spec, scale = 0.84) {
   const group = new THREE.Group();
+  group.userData.isActor = true;
   const skin = new THREE.MeshStandardMaterial({ color: spec.skin || 0xeac09e, roughness: 0.52 });
   const blush = new THREE.MeshStandardMaterial({ color: 0xe39b8d, roughness: 0.68 });
   const shirt = new THREE.MeshStandardMaterial({ color: spec.shirt || 0x568265, roughness: 0.72 });

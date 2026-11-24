@@ -33,7 +33,6 @@ const inspectTitle = document.querySelector("[data-inspect-title]");
 const inspectBody = document.querySelector("[data-inspect-body]");
 const inspectClose = document.querySelector("[data-inspect-close]");
 
-const studyEyebrow = document.querySelector("[data-study-eyebrow]");
 const studyLink = document.querySelector("[data-study-link]");
 const dataLink = document.querySelector("[data-data-link]");
 const paperLink = document.querySelector("[data-paper-link]");
@@ -184,6 +183,14 @@ procedures.forEach(function (proc) {
   tabButtons[proc.id] = btn;
 });
 
+function setActorsVisible(root, visible) {
+  root.traverse(function (obj) {
+    if (obj.userData && obj.userData.isActor) {
+      obj.visible = visible;
+    }
+  });
+}
+
 function captureProcedureThumb(proc) {
   procedures.forEach(function (p) {
     p.root.visible = false;
@@ -204,8 +211,14 @@ function captureProcedureThumb(proc) {
   if (typeof proc.update === "function") {
     proc.update(0);
   }
+  setActorsVisible(proc.root, false);
   renderer.render(scene, camera);
-  return renderer.domElement.toDataURL("image/jpeg", 0.84);
+  const dataUrl = renderer.domElement.toDataURL("image/jpeg", 0.84);
+  setActorsVisible(proc.root, true);
+  if (typeof proc.setStep === "function") {
+    proc.setStep(0, 0);
+  }
+  return dataUrl;
 }
 
 function populateTabThumbs() {
@@ -284,8 +297,7 @@ function selectProcedure(studyId, updateUrl) {
     tabButtons[id].setAttribute("aria-selected", id === activeProc.id ? "true" : "false");
   });
 
-  // Update Hero links & title
-  studyEyebrow.textContent = activeProc.eyebrow;
+  // Update study header inside the white simulation band
   studyLink.textContent = activeProc.studyTitle;
   studyLink.href = activeProc.studyHref;
   dataLink.href = activeProc.dataHref;
