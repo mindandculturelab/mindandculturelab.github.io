@@ -4,16 +4,16 @@ const steps = [
   {
     title: "Seating",
     badge: "Around the table",
-    body: "Two or three children sit around the table. Each child has their own red key and blue key.",
-    why: "Group size is the comparison: dyads and triads. Children cannot see the color the others choose.",
-    camera: { pos: [0.2, 4.6, 5.4], look: [0, 0.5, 0] },
+    body: "Children are paired with other children the same age. A dyad is two partners, and a triad is three. Each child has a red key and a blue key.",
+    why: "The comparison is dyads versus triads within an age, so every partner is the same age. Children cannot see the color the others choose.",
+    camera: { pos: [0.15, 4.9, 5.5], look: [0, 0.75, 0] },
     mode: "color",
     focus: "all"
   },
   {
     title: "The box",
     badge: "Same color opens it",
-    body: "The box unlocks when every partner uses the same color key, red or blue. The tokens inside are the shared reward.",
+    body: "The box has a clear top. Inside are two coins for each child. It unlocks when every partner uses the same color key, red or blue.",
     why: "A shared payoff only if they match, so success requires coordinating a decision.",
     camera: { pos: [1.5, 2.35, 2.15], look: [0, 0.45, 0] },
     mode: "color",
@@ -58,9 +58,9 @@ const steps = [
 ];
 
 const seats = {
-  west: { pos: [-1.72, 0, 0.05], rot: Math.PI / 2, shirt: 0x6d8f72 },
-  north: { pos: [0, 0, -1.72], rot: 0, shirt: 0xc4b7a6 },
-  east: { pos: [1.72, 0, 0.05], rot: -Math.PI / 2, shirt: 0xd7d3cc }
+  west: { pos: [-1.62, 0, 0.02], rot: Math.PI / 2, shirt: 0x6d8f72, hair: 0x3a2a22 },
+  north: { pos: [0, 0, -1.62], rot: 0, shirt: 0xb7b3ac, hair: 0xc4a574 },
+  east: { pos: [1.62, 0, 0.02], rot: -Math.PI / 2, shirt: 0xf3f0ea, hair: 0x3a2a22 }
 };
 
 const stage = document.querySelector("[data-stage]");
@@ -76,11 +76,12 @@ const sizeButtons = document.querySelectorAll("[data-size]");
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 stage.insertBefore(renderer.domElement, badge);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf7f4ee);
-const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 40);
+const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 40);
 scene.add(new THREE.HemisphereLight(0xfff6ea, 0xc8bfb2, 1.15));
 const sun = new THREE.DirectionalLight(0xffffff, 1.35);
 sun.position.set(3, 6, 4);
@@ -105,61 +106,166 @@ table.add(top);
 scene.add(table);
 
 const box = new THREE.Group();
-const crate = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.22, 0.42), woodDark);
-crate.position.y = 0.89;
-box.add(crate);
-const rim = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.04, 0.46), new THREE.MeshStandardMaterial({ color: 0x6b4e32, roughness: 0.55 }));
-rim.position.y = 1.0;
-box.add(rim);
-for (let i = 0; i < 6; i += 1) {
-  const token = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.025, 20), tokenMat);
-  token.position.set((i % 3) * 0.16 - 0.16, 0.97, Math.floor(i / 3) * 0.14 - 0.07);
-  box.add(token);
-}
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x6b4e32, roughness: 0.55 });
+const floor = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.03, 0.46), wallMat);
+floor.position.y = 0.8;
+box.add(floor);
+[
+  [0, 0.9, -0.22, 0.66, 0.18, 0.03],
+  [0, 0.9, 0.22, 0.66, 0.18, 0.03],
+  [-0.315, 0.9, 0, 0.03, 0.18, 0.42],
+  [0.315, 0.9, 0, 0.03, 0.18, 0.42]
+].forEach(function (wall) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(wall[3], wall[4], wall[5]), wallMat);
+  mesh.position.set(wall[0], wall[1], wall[2]);
+  box.add(mesh);
+});
+const glass = new THREE.Mesh(
+  new THREE.BoxGeometry(0.6, 0.015, 0.42),
+  new THREE.MeshPhysicalMaterial({
+    color: 0xd7eef8,
+    roughness: 0.05,
+    metalness: 0,
+    transmission: 0.92,
+    thickness: 0.08,
+    transparent: true,
+    opacity: 0.22
+  })
+);
+glass.position.y = 1.0;
+box.add(glass);
+const coins = new THREE.Group();
+box.add(coins);
 scene.add(box);
+
+function layoutCoins(count) {
+  coins.clear();
+  const cols = Math.ceil(count / 2);
+  for (let i = 0; i < count; i += 1) {
+    const token = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.02, 24), tokenMat);
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    token.position.set((col - (cols - 1) / 2) * 0.14, 0.86, (row - 0.5) * 0.14);
+    coins.add(token);
+  }
+}
 
 const people = {};
 const screens = [];
 
-function makeChild(shirt) {
+function makeChild(shirt, hairColor) {
   const group = new THREE.Group();
-  const skin = new THREE.MeshStandardMaterial({ color: 0xf0c7a8, roughness: 0.55 });
-  const cloth = new THREE.MeshStandardMaterial({ color: shirt, roughness: 0.7 });
-  const hair = new THREE.MeshStandardMaterial({ color: 0x3d2b22, roughness: 0.85 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.36, 0.26), cloth);
-  body.position.y = 0.95;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 22, 16), skin);
-  head.position.y = 1.28;
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.175, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), hair);
-  cap.position.y = 1.33;
-  const armGeo = new THREE.BoxGeometry(0.1, 0.1, 0.28);
-  const left = new THREE.Mesh(armGeo, skin);
-  const right = new THREE.Mesh(armGeo, skin);
-  left.position.set(-0.24, 0.9, 0.12);
-  right.position.set(0.24, 0.9, 0.12);
-  group.add(body, head, cap, left, right);
+  const skin = new THREE.MeshStandardMaterial({ color: 0xf0c2a0, roughness: 0.48 });
+  const cloth = new THREE.MeshStandardMaterial({ color: shirt, roughness: 0.72 });
+  const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.8 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2b211c, roughness: 0.4 });
+  const torso = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 18), cloth);
+  torso.scale.set(1.2, 0.78, 0.7);
+  torso.position.set(0, 0.9, 0.02);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.08, 16), skin);
+  neck.position.set(0, 1.12, 0.04);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 28, 22), skin);
+  head.scale.set(1, 1.05, 0.95);
+  head.position.set(0, 1.4, 0.06);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.25, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), hairMat);
+  hair.position.set(0, 1.44, -0.02);
+  const earGeo = new THREE.SphereGeometry(0.05, 12, 10);
+  const earL = new THREE.Mesh(earGeo, skin);
+  const earR = new THREE.Mesh(earGeo, skin);
+  earL.position.set(-0.24, 1.38, 0.04);
+  earR.position.set(0.24, 1.38, 0.04);
+  const eyeGeo = new THREE.SphereGeometry(0.028, 12, 10);
+  const eyeL = new THREE.Mesh(eyeGeo, dark);
+  const eyeR = new THREE.Mesh(eyeGeo, dark);
+  eyeL.position.set(-0.09, 1.42, 0.31);
+  eyeR.position.set(0.09, 1.42, 0.31);
+  const smile = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.012, 8, 16, Math.PI), dark);
+  smile.position.set(0, 1.3, 0.29);
+  smile.rotation.z = Math.PI;
+  smile.rotation.x = 0.3;
+  function arm(side) {
+    const limb = new THREE.Group();
+    const upper = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 0.18, 4, 8), skin);
+    upper.position.set(side * 0.38, 0.96, 0.1);
+    upper.rotation.z = side * 0.35;
+    const fore = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.2, 4, 8), skin);
+    fore.position.set(side * 0.42, 0.82, 0.34);
+    fore.rotation.x = Math.PI / 2.4;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.075, 14, 12), skin);
+    hand.scale.set(1.2, 0.5, 0.9);
+    hand.position.set(side * 0.36, 0.8, 0.55);
+    limb.add(upper, fore, hand);
+    return limb;
+  }
+  group.add(torso, neck, head, hair, earL, earR, eyeL, eyeR, smile, arm(-1), arm(1));
   return group;
 }
 
-function makeAnimal(kind) {
-  const group = new THREE.Group();
+function animalDisc(kind) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f6f1e8";
+  ctx.beginPath();
+  ctx.arc(128, 128, 124, 0, Math.PI * 2);
+  ctx.fill();
   if (kind === "pig") {
-    const pink = new THREE.MeshStandardMaterial({ color: 0xf3a7b5, roughness: 0.45 });
-    const body = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 12), pink);
-    body.scale.set(1.15, 0.85, 0.8);
-    const snout = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 10), pink);
-    snout.position.set(0.09, -0.01, 0);
-    group.add(body, snout);
+    ctx.fillStyle = "#f3a0b0";
+    ctx.beginPath();
+    ctx.ellipse(128, 132, 70, 62, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(70, 78, 22, 28, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(186, 78, 22, 28, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e07d92";
+    ctx.beginPath();
+    ctx.ellipse(128, 150, 28, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#5c3b42";
+    ctx.beginPath();
+    ctx.arc(118, 150, 4, 0, Math.PI * 2);
+    ctx.arc(138, 150, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(104, 118, 5, 0, Math.PI * 2);
+    ctx.arc(152, 118, 5, 0, Math.PI * 2);
+    ctx.fill();
   } else {
-    const hide = new THREE.MeshStandardMaterial({ color: 0xf7f3ea, roughness: 0.55 });
-    const spot = new THREE.MeshStandardMaterial({ color: 0x6b4a32, roughness: 0.6 });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.1, 0.1), hide);
-    const patch = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), spot);
-    patch.position.set(0.02, 0.04, 0.03);
-    group.add(body, patch);
+    ctx.fillStyle = "#f7f4ee";
+    ctx.beginPath();
+    ctx.ellipse(128, 140, 72, 58, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#6b4a32";
+    ctx.beginPath();
+    ctx.ellipse(100, 130, 22, 16, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(156, 156, 18, 14, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#3d2b22";
+    ctx.beginPath();
+    ctx.ellipse(96, 78, 10, 22, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(160, 78, 10, 22, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2b211c";
+    ctx.beginPath();
+    ctx.arc(108, 132, 5, 0, Math.PI * 2);
+    ctx.arc(148, 132, 5, 0, Math.PI * 2);
+    ctx.fill();
   }
-  group.position.y = 0.86;
-  return group;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const side = new THREE.MeshStandardMaterial({ color: 0xf6f1e8, roughness: 0.45 });
+  const top = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.45 });
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.03, 24), [side, top, side]);
+  disc.position.y = 0.8;
+  return disc;
 }
 
 function addSeat(id, spec) {
@@ -167,23 +273,23 @@ function addSeat(id, spec) {
   root.position.set(spec.pos[0], 0, spec.pos[2]);
   root.rotation.y = spec.rot;
   const chair = new THREE.Group();
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.06, 0.42), woodDark);
-  seat.position.set(0, 0.48, -0.28);
-  const back = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.46, 0.06), woodDark);
-  back.position.set(0, 0.78, -0.48);
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.07, 0.58), woodDark);
+  seat.position.set(0, 0.5, -0.24);
+  const back = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.78, 0.07), woodDark);
+  back.position.set(0, 0.96, -0.5);
   chair.add(seat, back);
-  const child = makeChild(spec.shirt);
-  child.position.z = -0.22;
+  const child = makeChild(spec.shirt, spec.hair);
+  child.position.z = -0.08;
   const keys = new THREE.Group();
   const red = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.03, 20), redMat);
   const blue = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.03, 20), blueMat);
-  red.position.set(-0.12, 0.8, 0.95);
-  blue.position.set(0.12, 0.8, 0.95);
+  red.position.set(-0.14, 0.8, 0.92);
+  blue.position.set(0.14, 0.8, 0.92);
   keys.add(red, blue);
-  const pig = makeAnimal("pig");
-  const cow = makeAnimal("cow");
-  pig.position.set(-0.12, 0.86, 0.95);
-  cow.position.set(0.12, 0.86, 0.95);
+  const pig = animalDisc("pig");
+  const cow = animalDisc("cow");
+  pig.position.set(-0.14, 0.8, 0.92);
+  cow.position.set(0.14, 0.8, 0.92);
   pig.visible = false;
   cow.visible = false;
   const screen = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.02), screenMat);
@@ -232,7 +338,13 @@ function applyStep(index) {
     person.cow.visible = on && animals;
     person.screen.visible = on && current.focus === "hidden";
   });
+  layoutCoins(ids.length * 2);
   box.position.y = current.focus === "box" ? 0.06 : 0;
+  Object.keys(people).forEach(function (id) {
+    people[id].keys.position.y = 0;
+    people[id].pig.position.y = 0.8;
+    people[id].cow.position.y = 0.8;
+  });
 }
 
 function resize() {
@@ -296,8 +408,8 @@ function frame() {
       const person = people[id];
       const lift = Math.sin(performance.now() / 320 + person.root.position.x) * 0.03;
       person.keys.position.y = 0.04 + lift;
-      person.pig.position.y = 0.9 + lift;
-      person.cow.position.y = 0.9 + lift;
+      person.pig.position.y = 0.84 + lift;
+      person.cow.position.y = 0.84 + lift;
     });
   }
   renderer.render(scene, camera);

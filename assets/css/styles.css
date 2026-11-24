@@ -967,6 +967,11 @@ h2 {
   color: var(--ink);
 }
 
+.hero .segment {
+  max-width: 22rem;
+  margin-top: 0.45rem;
+}
+
 .segment {
   display: flex;
   gap: 0.4rem;
