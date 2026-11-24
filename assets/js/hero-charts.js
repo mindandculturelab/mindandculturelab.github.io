@@ -3,23 +3,23 @@
   if (!stage) return;
 
   // Color test-trial success from Rivero, Vasil, & Tomasello (2026).
-  // Condition is the Age × Group size factorial; the third view builds that 2×2.
+  // Interaction view lights Age × Group size in the pill row (no third button).
   const views = [
     {
       id: "age",
-      pill: "Age",
       title: "Success by age",
       kind: "bars",
+      activePills: ["age"],
       bars: [
         { key: "a", label: "2 years", pct: 65 },
-        { key: "c", label: "3 years", pct: 93 }
+        { key: "b", label: "3 years", pct: 93 }
       ]
     },
     {
       id: "size",
-      pill: "Group size",
       title: "Success by group size",
       kind: "bars",
+      activePills: ["size"],
       bars: [
         { key: "a", label: "Dyads", pct: 90 },
         { key: "b", label: "Triads", pct: 68 }
@@ -27,9 +27,9 @@
     },
     {
       id: "interaction",
-      pill: "Age × Size",
       title: "Age × Group size",
       kind: "interaction",
+      activePills: ["age", "size"],
       ages: [
         {
           label: "2 years",
@@ -59,7 +59,11 @@
   stage.innerHTML = [
     '<div class="chart-glimpse">',
     '  <div class="chart-panel chart-bars">',
-    '    <div class="chart-group-pills" role="presentation" data-chart-pills></div>',
+    '    <div class="chart-group-pills" role="presentation" data-chart-pills>',
+    '      <span class="chart-group-pill" data-pill="age">Age</span>',
+    '      <span class="chart-pill-times" data-chart-times aria-hidden="true">×</span>',
+    '      <span class="chart-group-pill" data-pill="size">Group size</span>',
+    "    </div>",
     '    <p class="chart-label" data-chart-title></p>',
     '    <div class="chart-bar-row" data-chart-bars></div>',
     '    <p class="chart-factor-hint" data-chart-hint hidden></p>',
@@ -69,23 +73,14 @@
 
   const glimpse = stage.querySelector(".chart-glimpse");
   const pillsHost = stage.querySelector("[data-chart-pills]");
+  const timesEl = stage.querySelector("[data-chart-times]");
   const titleEl = stage.querySelector("[data-chart-title]");
   const barsHost = stage.querySelector("[data-chart-bars]");
   const hintEl = stage.querySelector("[data-chart-hint]");
-
-  pillsHost.innerHTML = views
-    .map(function (view, index) {
-      return (
-        '<span class="chart-group-pill" data-pill-index="' +
-        index +
-        '">' +
-        view.pill +
-        "</span>"
-      );
-    })
-    .join("");
-
-  const pillEls = pillsHost.querySelectorAll(".chart-group-pill");
+  const pillEls = {
+    age: pillsHost.querySelector('[data-pill="age"]'),
+    size: pillsHost.querySelector('[data-pill="size"]')
+  };
 
   let viewIndex = 0;
   let cycleTimer = 0;
@@ -144,10 +139,14 @@
     }
   }
 
-  function setActivePill(index) {
-    pillEls.forEach(function (pill, i) {
-      pill.classList.toggle("is-active", i === index);
+  function setActivePills(view) {
+    const active = view.activePills || [];
+    Object.keys(pillEls).forEach(function (key) {
+      pillEls[key].classList.toggle("is-active", active.indexOf(key) !== -1);
     });
+    const crossed = view.kind === "interaction";
+    timesEl.classList.toggle("is-visible", crossed);
+    pillsHost.classList.toggle("is-crossed", crossed);
   }
 
   function flatPcts(view) {
@@ -174,8 +173,6 @@
       return;
     }
 
-    // Build the factorial in motion: age clusters appear, then dyads, then triads —
-    // so the Age × Size crossing is readable as it assembles.
     barsHost.querySelectorAll(".chart-age-cluster").forEach(function (cluster, i) {
       cluster.classList.add("is-revealed");
       cluster.style.transitionDelay = i * 90 + "ms";
@@ -193,7 +190,7 @@
     const gen = ++transitionGen;
     window.clearTimeout(transitionTimer);
     window.clearTimeout(staggerTimer);
-    setActivePill(index);
+    setActivePills(view);
 
     if (!animate) {
       glimpse.classList.remove("is-fading");
@@ -243,7 +240,7 @@
     started = true;
     const view = views[viewIndex];
     renderBars(view, false);
-    setActivePill(viewIndex);
+    setActivePills(view);
     titleEl.textContent = view.title;
     window.requestAnimationFrame(function () {
       window.requestAnimationFrame(function () {
@@ -256,7 +253,7 @@
   if (reduceMotion) {
     showView(2, false);
   } else if (typeof IntersectionObserver !== "undefined") {
-    setActivePill(0);
+    setActivePills(views[0]);
     titleEl.textContent = views[0].title;
     renderBars(views[0], false);
     const io = new IntersectionObserver(
