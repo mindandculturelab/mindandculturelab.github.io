@@ -7,9 +7,9 @@
     year.textContent = String(new Date().getFullYear());
   }
 
-  // Fit only short brand titles; long study heroes wrap naturally.
-  const headlines = document.querySelectorAll(".hero-home h1, .missing h1");
-  const minHeadlinePx = 12;
+  // Keep every hero title on one line by shrinking to fit available width.
+  const headlines = document.querySelectorAll(".hero h1, .hero-home h1, .missing h1");
+  const minHeadlinePx = 14;
 
   const fitHeadline = function (el) {
     el.style.fontSize = "";

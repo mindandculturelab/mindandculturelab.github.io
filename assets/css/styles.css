@@ -239,15 +239,11 @@ a {
   min-width: 0;
 }
 
+.hero h1,
 .hero-home h1,
 .missing h1 {
   white-space: nowrap;
   max-width: 100%;
-}
-
-.hero h1 {
-  max-width: 100%;
-  overflow-wrap: anywhere;
 }
 
 .eyebrow {
@@ -2655,10 +2651,6 @@ main > .section + .contact-band {
 
   .site-chips {
     order: -1;
-  }
-
-  .hero h1 {
-    white-space: normal;
   }
 
   .filters,
