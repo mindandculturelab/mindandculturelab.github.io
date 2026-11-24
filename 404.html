@@ -3,29 +3,53 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Page not found — Your Name</title>
+    <title>Page not found — Mind &amp; Culture Lab</title>
     <meta name="robots" content="noindex" />
-    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#285c3f" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/images/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" sizes="180x180" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/css/styles.css" />
   </head>
   <body>
     <header class="site-header">
       <div class="wrap bar">
-        <a class="logo" href="index.html">
-          <img src="assets/images/maclab-mark.png" alt="Mind & Culture Lab" width="280" height="254" />
+        <a class="logo" href="/">
+          <img src="/assets/images/maclab-mark.png" alt="" width="280" height="254" />
+          <span>Mind &amp; Culture Lab</span>
         </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/data/">Data</a>
+          <a href="/experience/">Procedures</a>
+          <a href="/studies/">Studies</a>
+          <a href="/#about">About</a>
+          <a href="/#contact">Contact</a>
+        </nav>
       </div>
       <div class="stripe" aria-hidden="true"></div>
     </header>
     <main class="wrap missing">
-      <h1>Unset.</h1>
-      <p class="accent-rule" aria-hidden="true"></p>
-      <p class="lede">This page was left blank on purpose, or by accident.</p>
-      <p><a href="index.html">Back to Quartz</a></p>
-      <p><a href="gallery/">All templates</a></p>
+      <div>
+        <p class="eyebrow">404 · Page Not Found</p>
+        <h1>We couldn’t find that page.</h1>
+        <p class="accent-rule" aria-hidden="true"></p>
+        <p class="lede">The link may have moved, or the study URL may have changed.</p>
+        <p class="actions">
+          <a class="button" href="/">Return to homepage</a>
+          <a class="button button-secondary" href="/data/">Explore our data</a>
+        </p>
+      </div>
     </main>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <p>© <span data-year>2026</span> Mind &amp; Culture Lab</p>
+        <p>Duke University</p>
+      </div>
+    </footer>
+    <script src="/assets/js/main.js"></script>
   </body>
 </html>
