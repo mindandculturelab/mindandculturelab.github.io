@@ -523,7 +523,7 @@ export function buildTsaProcedure() {
   return {
     id: "tsa",
     tabTag: "Ages 2–3 · Dyads & Triads",
-    tabName: "Square Box Coordination",
+    tabName: "Square Coordination Box",
     eyebrow: "Tasks · Rivero, Vasil, & Tomasello (2026)",
     studyTitle: "Two- and Three-Year-Olds Coordinate Decisions in Dyads and Triads",
     studyHref: "../studies/tsa/",
@@ -1090,7 +1090,7 @@ export function buildEpistemicProcedure() {
   return {
     id: "epistemic-uncertainty",
     tabTag: "Julia Smith & Dorsa Amir (2025)",
-    tabName: "Dice & Cup Uncertainty",
+    tabName: "Dice Task",
     eyebrow: "Tasks · Smith, Mohamadpour, Engelmann, … & Amir (2025)",
     studyTitle: "No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures",
     studyHref: "../studies/epistemic-uncertainty/",
@@ -1421,7 +1421,7 @@ export function buildTrustProcedure() {
   return {
     id: "trustworthiness-generosity",
     tabTag: "Amir et al. (2021 · Dev Psych)",
-    tabName: "Two-Channel Trust Tray",
+    tabName: "Trust Apparatus",
     eyebrow: "Tasks · Amir, Parsons, Ahl, & McAuliffe (2021)",
     studyTitle: "Trustworthiness is Distinct from Generosity in Children",
     studyHref: "../studies/trustworthiness-generosity/",
@@ -1789,7 +1789,7 @@ export function buildInequityProcedure() {
   return {
     id: "inequity-aversion",
     tabTag: "Amir et al. (2023 · JEP:G)",
-    tabName: "Inequity Levers & DDM",
+    tabName: "Inequity Game",
     eyebrow: "Tasks · Amir, Melnikoff, Warneken, … & McAuliffe (2023)",
     studyTitle: "Computational Signatures of Inequity Aversion in Children Across Seven Societies",
     studyHref: "../studies/inequity-aversion/",

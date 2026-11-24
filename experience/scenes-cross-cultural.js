@@ -259,7 +259,7 @@ export function buildCoopBatteryProcedure() {
   return {
     id: "cooperative-behaviors",
     tabTag: "Amir et al. (2025 · Sci Adv)",
-    tabName: "4-Task Cooperation Battery",
+    tabName: "Cooperation Battery",
     eyebrow: "Tasks · Amir, Ahl, Jordan, … & McAuliffe (2025)",
     studyTitle: "The Emergence of Cooperative Behaviors, Norms, and Strategies Across Five Diverse Societies",
     studyHref: "../studies/cooperative-behaviors/",
@@ -523,7 +523,7 @@ export function buildForgivenessProcedure() {
   return {
     id: "accidental-harms",
     tabTag: "Amir et al. (2021 · JECP)",
-    tabName: "Forgiveness Sheets & Bell",
+    tabName: "Forgiveness Task",
     eyebrow: "Tasks · Amir, Ahl, Parsons, & McAuliffe (2021)",
     studyTitle: "Children Are More Forgiving of Accidental Harms Across Development",
     studyHref: "../studies/accidental-harms/",
@@ -760,7 +760,7 @@ export function buildRiskTimeProcedure() {
   return {
     id: "risk-time-preferences",
     tabTag: "Amir et al. (2020 · JEP:G)",
-    tabName: "Marble Jar & Tomorrow Bag",
+    tabName: "Risk and Time Preference Tasks",
     eyebrow: "Tasks · Amir, Jordan, McAuliffe, … & Dunham (2020)",
     studyTitle: "The Developmental Origins of Risk and Time Preferences Across Diverse Societies",
     studyHref: "../studies/risk-time-preferences/",
@@ -1034,7 +1034,7 @@ export function buildLadderProcedure() {
   return {
     id: "subjective-social-status",
     tabTag: "Amir et al. (2019 · PLOS ONE)",
-    tabName: "10-Rung MacArthur Ladder",
+    tabName: "MacArthur Ladder",
     eyebrow: "Tasks · Amir, Valeggia, Srinivasan, Sugiyama, & Dunham (2019)",
     studyTitle: "Measuring Subjective Social Status in Children of Diverse Societies",
     studyHref: "../studies/subjective-social-status/",

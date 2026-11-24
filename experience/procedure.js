@@ -12,6 +12,7 @@ import {
   buildRiskTimeProcedure,
   buildLadderProcedure
 } from "./scenes-cross-cultural.js";
+import { buildSearchProcedure } from "./scenes-search.js";
 
 const stage = document.querySelector("[data-stage]");
 const badge = document.querySelector("[data-badge]");
@@ -37,6 +38,7 @@ const inspectClose = document.querySelector("[data-inspect-close]");
 const studyLink = document.querySelector("[data-study-link]");
 const dataLink = document.querySelector("[data-data-link]");
 const paperLink = document.querySelector("[data-paper-link]");
+const repoLink = document.querySelector("[data-repo-link]");
 
 // WebGL Studio Setup
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -119,7 +121,8 @@ const procedures = [
   buildCoopBatteryProcedure(),
   buildForgivenessProcedure(),
   buildRiskTimeProcedure(),
-  buildLadderProcedure()
+  buildLadderProcedure(),
+  buildSearchProcedure()
 ];
 
 const procMap = {};
@@ -347,6 +350,14 @@ function selectProcedure(studyId, updateUrl) {
     paperLink.hidden = false;
   } else {
     paperLink.hidden = true;
+  }
+  if (repoLink) {
+    if (activeProc.repoHref) {
+      repoLink.href = activeProc.repoHref;
+      repoLink.hidden = false;
+    } else {
+      repoLink.hidden = true;
+    }
   }
 
   // Update Condition buttons

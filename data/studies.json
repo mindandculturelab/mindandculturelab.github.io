@@ -20,18 +20,21 @@
     },
     {
       "id": "search",
-      "name": "SEARCH",
+      "name": "Goals Shape Children's Explore-Exploit Tendencies",
       "leads": ["Alissa Rivero"],
       "topic": "Exploration & Innovation",
-      "keywords": ["exploration"],
+      "keywords": ["exploration", "decision-making"],
       "ageLabel": "4–9",
       "ageMin": 4,
       "ageMax": 9,
       "ranges": [{ "min": 4, "max": 9 }],
       "stats": null,
       "figures": [],
-      "downloads": [],
-      "citation": null
+      "downloads": [
+        { "label": "Task code (GitHub)", "href": "https://github.com/alissarivero/SEARCH" }
+      ],
+      "procedure": "../../experience/?study=search",
+      "citation": "Rivero, A. Goals shape children's explore-exploit tendencies."
     },
     {
       "id": "true-self",
