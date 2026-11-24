@@ -66,9 +66,10 @@ export function buildCoopBatteryProcedure() {
   const table = makeCompactTable(1.48, 1.04, 0.62);
   root.add(table);
 
+  // Child sits west of the table so elevated cameras never shoot through the head
   const childSeat = new THREE.Group();
-  childSeat.position.set(0, 0, 0.72);
-  childSeat.rotation.y = Math.PI;
+  childSeat.position.set(-0.92, 0, 0.12);
+  childSeat.rotation.y = Math.PI * 0.58;
   childSeat.add(
     makeChair(0.95),
     makeChild({
@@ -230,7 +231,7 @@ export function buildCoopBatteryProcedure() {
       badge: "N = 413 children · Ecuador, Peru, Uganda, Canada & USA",
       body: "Every child completed all four behavioral tasks in counterbalanced order—Fairness (front-left), Trustworthiness (back-left), Forgiveness (back-right), and Honesty (front-right)—alongside community peer (N = 163) and adult (N = 86) norm surveys.",
       why: "Measuring four cooperative domains within the same children tests whether prosociality develops as a single trait or distinct norm-guided strategies.",
-      camera: { pos: [0, 1.95, 2.05], look: [0, 0.66, 0] },
+      camera: { pos: [1.55, 2.85, 1.76], look: [0, 0.66, 0] },
       station: 0
     },
     {
@@ -239,7 +240,7 @@ export function buildCoopBatteryProcedure() {
       badge: "Diverges across societies in middle childhood",
       body: "In Tasks A & B, children weigh payoff maximization against costly fairness (rejecting 4–1 windfalls) and reciprocal trustworthiness (returning candies when entrusted with a partner's tool).",
       why: "Cross-cultural variation emerged most strongly on costly fairness and honesty, tracking local community norms.",
-      camera: { pos: [-0.52, 1.52, 1.48], look: [-0.42, 0.66, -0.02] },
+      camera: { pos: [0.35, 2.8, 1.91], look: [-0.42, 0.66, -0.02] },
       station: 1
     },
     {
@@ -248,7 +249,7 @@ export function buildCoopBatteryProcedure() {
       badge: "Click 'Animate 4-task battery' to see all 4 apparatuses operate",
       body: "In Task C, children return 0–5 scratch sheets after an accidental harm; in Task D, children open a box supposed to contain 1 candy, discover 4 inside, and decide privately whether to return the 3 extras.",
       why: "Latent profile analysis revealed three overarching strategies: payoff maximization, generic cooperation, and partner-contingent cooperation.",
-      camera: { pos: [0.52, 1.52, 1.48], look: [0.42, 0.66, -0.02] },
+      camera: { pos: [1.55, 2.8, 1.53], look: [0.42, 0.66, -0.02] },
       station: 3,
       autoPlay: true
     }
@@ -280,6 +281,7 @@ export function buildCoopBatteryProcedure() {
     },
     setStep: function (idx, nowSec) {
       stepIndex = idx;
+      animStart = -1;
       const tgt = stationTargets[steps[idx].station];
       ring.position.set(tgt[0], 0.625, tgt[1]);
       hLidPivot.rotation.x = idx === 2 ? -0.95 : -0.35;
@@ -287,6 +289,18 @@ export function buildCoopBatteryProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      const tgt = stationTargets[steps[stepIndex].station];
+      ring.position.set(tgt[0], 0.625, tgt[1]);
+      hLidPivot.rotation.x = stepIndex === 2 ? -0.95 : -0.35;
+      hRed.rotation.z = 0;
+      hGreen.rotation.z = 0;
+      bDish.position.x = 0.14;
+      sheetsC.forEach(function (sh, idx) {
+        sh.position.x = -0.12 + idx * 0.04;
+      });
     },
     update: function (t) {
       const pulse = 1 + Math.sin(t * 3.2) * 0.04;
@@ -334,9 +348,10 @@ export function buildForgivenessProcedure() {
   root.add(table);
 
   // Child at desk (south) & Experimenter (north, rotates 180° away during privacy phase!)
+  // Child sits west of the table so elevated cameras never shoot through the head
   const childSeat = new THREE.Group();
-  childSeat.position.set(0, 0, 0.64);
-  childSeat.rotation.y = Math.PI;
+  childSeat.position.set(-0.92, 0, 0.12);
+  childSeat.rotation.y = Math.PI * 0.58;
   const child = makeChild({
     gender: "girl",
     shirt: 0xe08c3c,
@@ -350,7 +365,7 @@ export function buildForgivenessProcedure() {
   root.add(childSeat);
 
   const expGroup = new THREE.Group();
-  expGroup.position.set(0, 0, -0.82);
+  expGroup.position.set(0.42, 0, -0.95);
   const expPerson = makeChild({
     shirt: 0x5c738a,
     pants: 0x333c47,
@@ -474,7 +489,7 @@ export function buildForgivenessProcedure() {
       badge: "N = 257 children (ages 5–10) · 5 conditions",
       body: "The child learns another peer ruined their scratch-art drawing—either accidentally or intentionally, and with or without remorse (compared against a no-harm Baseline).",
       why: "Crossing 2 (Intent) × 2 (Remorse) + Baseline tests whether mental-state reasoning drives costly interpersonal forgiveness across development.",
-      camera: { pos: [0.05, 1.72, 1.9], look: [0, 0.68, 0] },
+      camera: { pos: [1.55, 2.8, 1.72], look: [0, 0.68, 0] },
       expTurned: false
     },
     {
@@ -483,7 +498,7 @@ export function buildForgivenessProcedure() {
       badge: "Experimenter turns around · Ring bell when done",
       body: "Given 5 of the peer's drawings, the child cannot keep any: each goes into the return envelope (left) or trash can (right) while the experimenter turns away. Click 'Watch private decision' to see the difference!",
       why: "Complete privacy removes adult-pleasing demand characteristics, revealing genuine forgiveness.",
-      camera: { pos: [0.12, 1.65, 1.78], look: [0.04, 0.64, 0.04] },
+      camera: { pos: [1.45, 2.8, 1.62], look: [0.04, 0.64, 0.04] },
       expTurned: true,
       autoPlay: true
     },
@@ -493,7 +508,7 @@ export function buildForgivenessProcedure() {
       badge: "Older children increasingly forgive accidental harms",
       body: "After ringing the bell, children recall intent and remorse and judge the action from 'very, very good' (1) to 'very, very bad' (6). Between ages 5 and 10, forgiveness rises sharply for accidental harms.",
       why: "Pairing behavioral sheet returns with verbal evaluations links moral judgment development directly to real social repair.",
-      camera: { pos: [-0.15, 1.68, 1.82], look: [0, 0.68, -0.05] },
+      camera: { pos: [1.4, 2.8, 1.67], look: [0, 0.68, -0.05] },
       expTurned: false
     }
   ];
@@ -538,6 +553,12 @@ export function buildForgivenessProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      bellUntil = 0;
+      dingNote.material.opacity = 0;
+      resetSheets();
     },
     update: function (t) {
       const targetRot = (steps[stepIndex].expTurned || animStart >= 0) ? Math.PI : 0;
@@ -589,9 +610,10 @@ export function buildRiskTimeProcedure() {
   const table = makeCompactTable(1.36, 0.94, 0.62);
   root.add(table);
 
+  // Child sits west of the table so elevated cameras never shoot through the head
   const childSeat = new THREE.Group();
-  childSeat.position.set(0, 0, 0.66);
-  childSeat.rotation.y = Math.PI;
+  childSeat.position.set(-0.92, 0, 0.12);
+  childSeat.rotation.y = Math.PI * 0.58;
   childSeat.add(
     makeChair(0.95),
     makeChild({
@@ -716,7 +738,7 @@ export function buildRiskTimeProcedure() {
       badge: "USA, India, Argentina & 2 Shuar regions (N = 400)",
       body: "On the Risk task (left), children inspect a jar holding 1 green winning marble and 1 red losing marble, complete 3 practice draws, and then make 5 choices between 1 safe candy and 2–6 risky candies.",
       why: "Physical 1-green/1-red draws communicate 50% probability transparently without requiring fractions or literacy.",
-      camera: { pos: [-0.25, 1.55, 1.62], look: [-0.22, 0.68, 0.02] }
+      camera: { pos: [0.55, 2.8, 1.81], look: [-0.22, 0.68, 0.02] }
     },
     {
       short: "2. Today vs. Tomorrow",
@@ -724,7 +746,7 @@ export function buildRiskTimeProcedure() {
       badge: "5 titrating delayed-reward trials + trust check",
       body: "On the Time task (right, order counterbalanced), children make 5 choices between 1 candy right now versus 2–6 candies sealed for delivery the next day.",
       why: "Checking researcher trust ensures present-oriented choices reflect ecological time preference rather than doubt about delivery.",
-      camera: { pos: [0.28, 1.55, 1.62], look: [0.24, 0.68, 0.02] }
+      camera: { pos: [1.55, 2.75, 1.48], look: [0.24, 0.68, 0.02] }
     },
     {
       short: "3. Market Ecology",
@@ -732,7 +754,7 @@ export function buildRiskTimeProcedure() {
       badge: "Toggle Market-Integrated vs. Forager-Horticulturalist",
       body: "Click 'Draw marble & compare' to watch how market-buffered environments promote drawing from the 50/50 marble jar and waiting for tomorrow's larger bag, whereas uncertain foraging ecologies favor guaranteed immediate rewards.",
       why: "Comparing two Shuar regions within the same Indigenous culture isolates market integration from language and heritage.",
-      camera: { pos: [0, 1.68, 1.85], look: [0, 0.68, 0.04] },
+      camera: { pos: [1.5, 2.85, 1.72], look: [0, 0.68, 0.04] },
       autoPlay: true
     }
   ];
@@ -768,6 +790,14 @@ export function buildRiskTimeProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      greenMarble.position.set(-0.028, 0.04, 0.01);
+      redMarble.position.set(0.028, 0.04, -0.01);
+      safePlate.position.z = 0.14;
+      todayPlate.position.z = 0.12;
+      tomorrowBag.position.z = -0.02;
     },
     update: function (t) {
       if (animStart >= 0) {
@@ -869,9 +899,10 @@ export function buildLadderProcedure() {
   const table = makeCompactTable(1.34, 0.94, 0.62);
   root.add(table);
 
+  // Child sits west of the table so elevated cameras never shoot through the head
   const childSeat = new THREE.Group();
-  childSeat.position.set(0, 0, 0.68);
-  childSeat.rotation.y = Math.PI;
+  childSeat.position.set(-0.92, 0, 0.12);
+  childSeat.rotation.y = Math.PI * 0.58;
   childSeat.add(
     makeChair(0.95),
     makeChild({
@@ -977,7 +1008,7 @@ export function buildLadderProcedure() {
       badge: "N = 1,028 assessments · USA, India, Argentina & Ecuador",
       body: "Experimenters walk each child through the 10-rung ladder illustration—explaining who stands at the top (rung 1) and bottom (rung 10)—and ask where their own family stands.",
       why: "A concrete visual ladder lets children as young as 4 represent social hierarchy across both urban schools and Amazonian villages.",
-      camera: { pos: [-0.15, 1.65, 1.82], look: [-0.08, 0.86, 0] }
+      camera: { pos: [0.65, 2.8, 1.81], look: [-0.08, 0.86, 0] }
     },
     {
       short: "2. 4-Item SCI",
@@ -985,7 +1016,7 @@ export function buildLadderProcedure() {
       badge: "Test–retest ρ = 0.47 (1 wk) · ρ = 0.32 (1 yr)",
       body: "Beside the ladder, children rate whether their family has a nicer/same/less nice house and more/same/less food, money, and possessions than most families.",
       why: "Pairing abstract ladder rungs with concrete material domains tests convergent validity across diverse economies.",
-      camera: { pos: [0.22, 1.55, 1.68], look: [0.12, 0.82, 0] }
+      camera: { pos: [1.55, 2.75, 1.48], look: [0.12, 0.82, 0] }
     },
     {
       short: "3. Age Shift",
@@ -993,7 +1024,7 @@ export function buildLadderProcedure() {
       badge: "Toggle Early Childhood vs. Adolescence above",
       body: "Click 'Place family on ladder' to watch younger children place their families near the top rungs while adolescents calibrate downward toward middle rungs aligned with their SCI scores.",
       why: "Across diverse societies, early childhood optimism gives way to calibrated status awareness across middle childhood and adolescence.",
-      camera: { pos: [0.02, 1.65, 1.82], look: [0, 0.86, 0] },
+      camera: { pos: [1.45, 2.85, 1.72], look: [0, 0.86, 0] },
       autoPlay: true
     }
   ];
@@ -1036,6 +1067,10 @@ export function buildLadderProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      syncCondition();
     },
     update: function (t) {
       if (animStart >= 0) {

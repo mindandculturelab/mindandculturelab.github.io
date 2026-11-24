@@ -26,6 +26,7 @@ const studyTabsHost = document.querySelector("[data-study-tabs]");
 const condLabelEl = document.querySelector("[data-cond-label]");
 const condButtonsHost = document.querySelector("[data-cond-buttons]");
 const playAnimBtn = document.querySelector("[data-play-anim]");
+const resetAnimBtn = document.querySelector("[data-reset-anim]");
 const playLabelEl = document.querySelector("[data-play-label]");
 const clickTipEl = document.querySelector("[data-click-tip]");
 const inspectCard = document.querySelector("[data-inspect]");
@@ -396,6 +397,28 @@ function selectProcedure(studyId, updateUrl) {
 playAnimBtn.addEventListener("click", function () {
   activeProc.playAction(nowSeconds);
 });
+
+function resetActiveAnimation() {
+  if (typeof activeProc.resetAction === "function") {
+    activeProc.resetAction(nowSeconds);
+  } else {
+    activeProc.setStep(stepIndex, nowSeconds);
+  }
+  userAzimuth = 0;
+  userPolar = 0;
+  userZoom = 1;
+  const st = activeProc.steps[stepIndex];
+  basePos.set(st.camera.pos[0], st.camera.pos[1], st.camera.pos[2]);
+  lookTarget.set(st.camera.look[0], st.camera.look[1], st.camera.look[2]);
+  hideInspectCard(false);
+  renderFrame(true);
+}
+
+if (resetAnimBtn) {
+  resetAnimBtn.addEventListener("click", function () {
+    resetActiveAnimation();
+  });
+}
 
 prevBtn.addEventListener("click", function () {
   if (stepIndex > 0) applyStep(stepIndex - 1);

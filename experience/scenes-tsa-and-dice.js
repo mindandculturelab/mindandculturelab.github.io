@@ -415,7 +415,7 @@ export function buildTsaProcedure() {
       badge: "Matched to criterion before peer trials",
       body: "Before peers sit together, each child completes individual training: dropping brass coins into the music box (click the music box to hear/see it!), matching red and blue magnets to criterion, and unlocking the square box with adult scaffolding.",
       why: "Training every child to criterion ensures any group difficulty reflects peer decision coordination—not confusion about the matching rule.",
-      camera: { pos: [-1.35, 1.65, 1.75], look: [-0.2, 0.72, -0.05] },
+      camera: { pos: [-1.55, 2.7, 1.65], look: [-0.2, 0.72, -0.05] },
       mode: "color",
       boxVisible: true,
       keysAttached: false,
@@ -439,7 +439,7 @@ export function buildTsaProcedure() {
       badge: "Click 'Watch key matching' to see mismatch → swap → unlock",
       body: "Across three 70-second test trials, each child sticks one magnet to their own vertical wall of the square box, out of partners' sightlines. If keys mismatch (e.g., red vs. blue), the lid stays locked until peers coordinate, swap to the same color, and unlock the coins!",
       why: "Because the square box blocks sightlines to partners' chosen sides, reliable coordination requires peer talk, pointing, or checking.",
-      camera: { pos: [1.15, 1.72, 1.92], look: [0.05, 0.7, -0.05] },
+      camera: { pos: [1.45, 2.7, 1.85], look: [0.05, 0.7, -0.05] },
       mode: "color",
       boxVisible: true,
       keysAttached: true,
@@ -452,7 +452,7 @@ export function buildTsaProcedure() {
       badge: "90% in 3-year-old triads vs. 46.7% in 2-year-old triads",
       body: "Two-year-olds relied mostly on solo habits (repeating their last rewarded color), succeeding in dyads (83.3%) but struggling in triads (46.7%). Three-year-olds communicated about a specific key 2.5× as often and reached 90.0% in triads.",
       why: "Adding a third partner squares the difficulty of matching by chance; peer-directed key talk aligns all three sides.",
-      camera: { pos: [0.08, 2.18, 2.45], look: [0, 0.78, -0.04] },
+      camera: { pos: [0.08, 2.73, 2.45], look: [0, 0.78, -0.04] },
       mode: "color",
       boxVisible: true,
       keysAttached: true,
@@ -464,7 +464,7 @@ export function buildTsaProcedure() {
       badge: "10/10 everywhere except 2-year-old triads (1/10)",
       body: "On Trial 4, red and blue magnets are replaced with circular pig and cow magnets without extra instruction. Press 'Watch key matching' to see peers coordinate on the novel animal keys.",
       why: "Replacing colors with animals removes color-repetition habits: 10/10 2-year-old dyads and all 3-year-old groups succeeded, versus 1/10 2-year-old triads.",
-      camera: { pos: [0.15, 2.05, 2.25], look: [0, 0.7, 0.02] },
+      camera: { pos: [0.15, 2.6, 2.25], look: [0, 0.7, 0.02] },
       mode: "animal",
       boxVisible: true,
       keysAttached: false,
@@ -555,6 +555,13 @@ export function buildTsaProcedure() {
         focusRing.visible = true;
       }
       keyMatchStart = nowSec;
+    },
+    resetAction: function () {
+      keyMatchStart = -1;
+      musicChimeUntil = 0;
+      lidPeekUntil = 0;
+      flyingCoin.visible = false;
+      resetStaticPose();
     },
     update: function (t) {
       const st = steps[stepIndex];
@@ -891,10 +898,10 @@ export function buildEpistemicProcedure() {
   const table = makeCompactTable(1.24, 0.92, 0.62);
   root.add(table);
 
-  // Child (south, facing table) & Researcher (north, facing child)
+  // Child sits west of the table so elevated cameras never shoot through the head
   const childSeat = new THREE.Group();
-  childSeat.position.set(0, 0, 0.64);
-  childSeat.rotation.y = Math.PI;
+  childSeat.position.set(-0.92, 0, 0.12);
+  childSeat.rotation.y = Math.PI * 0.58;
   childSeat.add(makeChair(0.95));
   const child = makeChild({
     gender: "girl",
@@ -913,7 +920,7 @@ export function buildEpistemicProcedure() {
   root.add(childSeat);
 
   const expSeat = new THREE.Group();
-  expSeat.position.set(0, 0, -0.68);
+  expSeat.position.set(0.42, 0, -0.92);
   expSeat.add(makeChair(1.05));
   const experimenter = makeChild({ shirt: 0x5c738a, pants: 0x333c47, skin: 0xf0cab0, hair: 0x5a3e28, hairStyle: "parted" }, 0.98);
   expSeat.add(experimenter);
@@ -1022,7 +1029,7 @@ export function buildEpistemicProcedure() {
       badge: "USA (N = 56) · Bolivia Tsimané (N = 54) · Iran (N = 100)",
       body: "The researcher asks whether the participant has ever seen a die before, counts the dots from 1 to 6 across all six faces together, rolls the die openly twice, and invites the participant to roll twice.",
       why: "Hands-on familiarization ensures participants with zero prior exposure to dice (100% of Bolivian Tsimané children) understand equiprobable 1–6 outcomes just as clearly as urban peers.",
-      camera: { pos: [0.15, 1.75, 1.95], look: [0, 0.68, 0] },
+      camera: { pos: [0.95, 2.85, 1.85], look: [0, 0.55, 0] },
       covered: false,
       bubble: false
     },
@@ -1032,7 +1039,7 @@ export function buildEpistemicProcedure() {
       badge: "79% passed on first try · 20% on second try",
       body: "The researcher shakes the die inside the opaque cup, flips it upside-down on the mat so the rolled number stays hidden, and verifies comprehension of the matching rule for winning a prize.",
       why: "Keeping the inverted cup directly in view makes the distinction between a determined-but-hidden outcome and an unrolled future outcome concrete.",
-      camera: { pos: [-0.62, 1.48, 1.52], look: [-0.18, 0.68, 0] },
+      camera: { pos: [0.55, 2.75, 1.95], look: [-0.18, 0.55, 0] },
       covered: true,
       bubble: false
     },
@@ -1042,7 +1049,7 @@ export function buildEpistemicProcedure() {
       badge: "Counterbalanced diagram (Figure 1)",
       body: "Using the printed two-panel diagram on the table, the researcher explains Roll-Then-Guess (top) and Guess-Then-Roll (bottom), then plays one practice round of each version in random order.",
       why: "Experiencing both timing sequences firsthand before the critical choice eliminates order confounds and verbal ambiguity across languages.",
-      camera: { pos: [0.48, 1.58, 1.48], look: [0.12, 0.66, 0.02] },
+      camera: { pos: [1.15, 2.75, 1.55], look: [0.12, 0.55, 0.02] },
       covered: false,
       bubble: false
     },
@@ -1052,7 +1059,7 @@ export function buildEpistemicProcedure() {
       badge: "60.5% chose Epistemic (Roll-Then-Guess), p < .001",
       body: "For the real prize game, the participant chooses which version to play. Toggle between Epistemic and Physical above or click 'Play dice round' to watch the exact sequence difference!",
       why: "Across ages 6–19 in the US (64%), Bolivia (65%), and Iran (56%), youth favored Roll-Then-Guess with no developmental shift toward physical uncertainty.",
-      camera: { pos: [0.08, 1.72, 1.88], look: [0, 0.72, 0.02] },
+      camera: { pos: [0.9, 2.9, 1.9], look: [0, 0.55, 0.02] },
       covered: true,
       bubble: true,
       autoPlay: true
@@ -1109,6 +1116,11 @@ export function buildEpistemicProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      cupPeekUntil = 0;
+      resetPose();
     },
     update: function (t) {
       child.userData.head.rotation.y = Math.sin(t * 1.2) * 0.08;
@@ -1362,7 +1374,7 @@ export function buildTrustProcedure() {
       badge: "Yellow dish (2 candies) vs. far Blue dish (6 candies)",
       body: "The child sits at the open end of the wooden tray (Figure 1). A single short white rod can reach the yellow dish (2 Starbursts) in the short channel, but cannot reach the blue dish (6 Starbursts) at the end of the long channel.",
       why: "Making multiplication physical (2 vs. 6 visible candies) removes arithmetic demands so 5-to-8-year-olds grasp the exact stakes immediately.",
-      camera: { pos: [-0.15, 1.72, 1.82], look: [0, 0.66, 0] },
+      camera: { pos: [1.35, 2.7, 1.55], look: [0, 0.66, 0] },
       assembled: false
     },
     {
@@ -1371,7 +1383,7 @@ export function buildTrustProcedure() {
       badge: "Trustworthiness vs. Generosity control",
       body: "In Trustworthiness, the peer partner gives up their own short rod (forfeiting 2 guaranteed candies) so the participant can join both rods inside the bright red connector sleeve. In Generosity, the participant already has both pieces without peer sacrifice.",
       why: "Holding the physical tool assembly and 6-candy windfall identical isolates genuine reciprocity for trust from baseline Dictator-Game generosity.",
-      camera: { pos: [-0.35, 1.55, 1.55], look: [-0.05, 0.68, -0.05] },
+      camera: { pos: [-1.25, 2.6, 1.35], look: [-0.05, 0.68, -0.05] },
       assembled: true
     },
     {
@@ -1380,7 +1392,7 @@ export function buildTrustProcedure() {
       badge: "M = 2.70 shared (Trust) vs. M = 2.12 (Generosity), p = .002",
       body: "Click 'Watch tool & sharing' to see the assembled long tool slide beneath the Plexiglass, hook the 6-Starburst blue dish out of the far channel, and allocate candies into the two paper bags.",
       why: "Children both returned more candies and predicted higher partner expectations when entrusted with the partner's rod.",
-      camera: { pos: [-0.22, 1.65, 1.72], look: [-0.06, 0.66, 0] },
+      camera: { pos: [1.2, 2.7, 1.55], look: [-0.06, 0.66, 0] },
       assembled: true,
       autoPlay: true
     }
@@ -1435,6 +1447,10 @@ export function buildTrustProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      resetPose();
     },
     update: function (t) {
       if (animStart >= 0) {
@@ -1735,7 +1751,7 @@ export function buildInequityProcedure() {
       badge: "7 societies · Ages 4–15 · N = 808 actors",
       body: "Two peers sit face-to-face across the wooden platform: the Actor (left, yellow bowl) controls the upright Green and Red handles, while the Recipient sits opposite (right, blue bowl), with a red discard bowl in the center.",
       why: "Face-to-face seating makes social comparison salient while mechanical levers let even 4-year-olds enact or reject allocations cleanly.",
-      camera: { pos: [0.08, 1.72, 1.95], look: [0, 0.78, 0] }
+      camera: { pos: [1.25, 2.7, 1.65], look: [0, 0.78, 0] }
     },
     {
       short: "2. DI vs. AI",
@@ -1743,7 +1759,7 @@ export function buildInequityProcedure() {
       badge: "Toggle 4–1 AI vs. 1–4 DI above",
       body: "In Disadvantageous Inequity (1–4 DI), rejecting prevents a peer from getting more. In Advantageous Inequity (4–1 AI), rejecting requires sacrificing 4 candies so the peer does not receive an unfair 1.",
       why: "Contrasting DI and AI separates self-protective envy/fairness from costly, other-regarding fairness norms across cultures.",
-      camera: { pos: [0.35, 1.55, 1.65], look: [0, 0.72, 0.04] }
+      camera: { pos: [1.35, 2.6, 1.45], look: [0, 0.72, 0.04] }
     },
     {
       short: "3. DDM & Lever Pull",
@@ -1751,7 +1767,7 @@ export function buildInequityProcedure() {
       badge: "Drift rate (v) drives cultural variation",
       body: "Click 'Pull lever & trace DDM' to watch evidence accumulate past non-decision time (t) along drift slope (v) until reaching the Reject boundary—triggering the Red handle pull and dumping candies into the center red bowl.",
       why: "Reaction-time DDM modeling shows culture shapes immediate evaluative valuation (v) rather than merely motor caution (a).",
-      camera: { pos: [0.05, 1.62, 1.82], look: [0, 0.86, -0.06] },
+      camera: { pos: [1.15, 2.7, 1.55], look: [0, 0.86, -0.06] },
       autoPlay: true
     }
   ];
@@ -1799,6 +1815,10 @@ export function buildInequityProcedure() {
     },
     playAction: function (nowSec) {
       animStart = nowSec;
+    },
+    resetAction: function () {
+      animStart = -1;
+      resetPose();
     },
     update: function (t) {
       if (animStart >= 0) {

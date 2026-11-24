@@ -77,10 +77,21 @@
           <div class="experience">
             <div class="experience-stage" data-stage>
               <div class="experience-actions-bar">
-                <button class="experience-anim-btn" type="button" data-play-anim>
-                  <span aria-hidden="true">▶</span>
-                  <span data-play-label>Watch key matching</span>
-                </button>
+                <div class="experience-anim-controls">
+                  <button class="experience-anim-btn" type="button" data-play-anim>
+                    <span aria-hidden="true">▶</span>
+                    <span data-play-label>Watch key matching</span>
+                  </button>
+                  <button
+                    class="experience-reset-btn"
+                    type="button"
+                    data-reset-anim
+                    title="Reset animation"
+                    aria-label="Reset animation"
+                  >
+                    ⟲
+                  </button>
+                </div>
                 <p class="experience-click-tip" data-click-tip>Click the box, music box, or keys to inspect</p>
               </div>
               <p class="stage-badge" data-badge>Apparatus &amp; seating</p>
