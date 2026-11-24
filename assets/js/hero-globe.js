@@ -150,8 +150,8 @@ if (!stage) {
   let pinEntries = [];
   let userAzimuth = 0.55;
   let userPolar = 0.06;
-  let userZoom = 1.22;
-  let autoSpin = 0.1;
+  let userZoom = 1.05;
+  let autoSpin = 0.12;
   let dragging = false;
   let downX = 0;
   let downY = 0;

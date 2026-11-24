@@ -95,20 +95,6 @@
             <p class="lede hero-home-lede">
               We investigate how culture shapes the developing mind—working with children and families around the world to bridge developmental psychology and anthropology—and share our datasets, analysis code, and experimental tasks openly.
             </p>
-            <div class="hero-cta-row">
-              <a class="button button-cta-primary" href="data/">
-                <span>Investigate our data</span>
-                <span class="cta-arrow" aria-hidden="true">→</span>
-              </a>
-              <a class="button button-secondary button-cta-secondary" href="experience/">
-                <span>Experience our tasks in 3d</span>
-                <span class="cta-arrow" aria-hidden="true">→</span>
-              </a>
-              <a class="button button-secondary button-cta-secondary" href="sites/">
-                <span>Explore our testing sites</span>
-                <span class="cta-arrow" aria-hidden="true">→</span>
-              </a>
-            </div>
             <p class="hero-sublinks">
               <a href="studies/">Browse all 14 studies</a>
               <span aria-hidden="true">·</span>
@@ -118,8 +104,47 @@
             </p>
           </div>
 
-          <div class="hero-art hero-globe" data-hero-globe role="img" aria-label="Interactive globe of Mind and Culture Lab testing sites. Drag to rotate. Click a pin or the globe to open Sites.">
-            <p class="hero-globe-badge" data-hero-globe-badge>17 sites</p>
+          <div class="home-glimpses" aria-label="Ways to explore the lab">
+            <article class="glimpse glimpse-data">
+              <a class="button button-cta button-cta-data" href="data/">
+                <span>Investigate our data</span>
+                <span class="cta-arrow" aria-hidden="true">→</span>
+              </a>
+              <div class="glimpse-stage glimpse-charts" data-hero-charts role="img" aria-label="Sample charts from open datasets: success by age, strategy mix, and trial outcomes."></div>
+              <p class="glimpse-caption">Live charts · trial-level datasets · analysis code</p>
+            </article>
+
+            <article class="glimpse glimpse-tasks">
+              <a class="button button-cta button-cta-tasks" href="experience/">
+                <span>Experience our tasks in 3d</span>
+                <span class="cta-arrow" aria-hidden="true">→</span>
+              </a>
+              <div
+                class="glimpse-stage glimpse-task"
+                data-hero-task
+                role="img"
+                aria-label="3D preview of the coordination-box task. Drag to rotate. Click to open the full walkthrough."
+              >
+                <p class="glimpse-badge">Coordination box</p>
+              </div>
+              <p class="glimpse-caption">8 interactive apparatuses · click objects to inspect</p>
+            </article>
+
+            <article class="glimpse glimpse-sites">
+              <a class="button button-cta button-cta-sites" href="sites/">
+                <span>Explore our testing sites</span>
+                <span class="cta-arrow" aria-hidden="true">→</span>
+              </a>
+              <div
+                class="glimpse-stage hero-globe"
+                data-hero-globe
+                role="img"
+                aria-label="Interactive globe of Mind and Culture Lab testing sites. Drag to rotate. Click a pin or the globe to open Sites."
+              >
+                <p class="hero-globe-badge" data-hero-globe-badge>17 sites</p>
+              </div>
+              <p class="glimpse-caption">17 field sites · drag to spin · click a pin</p>
+            </article>
           </div>
         </section>
       </div>
@@ -296,6 +321,8 @@
       </div>
     </footer>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/hero-charts.js"></script>
+    <script type="module" src="assets/js/hero-task.js"></script>
     <script type="module" src="assets/js/hero-globe.js"></script>
   </body>
 </html>
