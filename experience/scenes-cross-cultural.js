@@ -162,6 +162,7 @@ export function buildCoopBatteryProcedure() {
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.set(-0.42, 0.625, 0.16);
+  ring.userData.thumbHide = true;
   root.add(ring);
 
   let cond = "partner";

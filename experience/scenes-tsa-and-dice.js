@@ -337,6 +337,7 @@ export function buildTsaProcedure() {
   );
   focusRing.rotation.x = -Math.PI / 2;
   focusRing.position.y = 0.623;
+  focusRing.userData.thumbHide = true;
   root.add(focusRing);
 
   // Micro-animation timers & full key-matching state
