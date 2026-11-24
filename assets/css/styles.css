@@ -944,6 +944,12 @@ h2 {
   align-items: start;
 }
 
+.sites-sidebar {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
 .sites-stage {
   position: relative;
   background:
@@ -1095,6 +1101,10 @@ h2 {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--terracotta-deep);
+}
+
+.sites-sidebar .site-chips {
+  margin: 0;
 }
 
 .site-chips {

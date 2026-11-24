@@ -304,12 +304,12 @@ function selectSite(id, fromUser) {
   });
 
   if (!site) {
-    kickerEl.textContent = "Select a site";
-    titleEl.textContent = "Our testing & field sites";
+    kickerEl.textContent = "";
+    kickerEl.hidden = true;
+    titleEl.textContent = "Testing sites";
     regionEl.textContent = "";
     metaEl.hidden = true;
-    bodyEl.textContent =
-      "Pins sit on real geographic coordinates. Click any pin—or a name below—to see the communities, venues, ages, tasks, and studies behind that sample.";
+    bodyEl.textContent = "";
     statEl.hidden = true;
     venuesEl.hidden = true;
     venuesEl.replaceChildren();
@@ -317,6 +317,7 @@ function selectSite(id, fromUser) {
     return;
   }
 
+  kickerEl.hidden = false;
   kickerEl.textContent = "Field site";
   titleEl.textContent = site.name;
   regionEl.textContent = site.region + " · " + formatCoord(site);
@@ -506,7 +507,7 @@ Promise.all([
       studiesById[s.id] = s;
     });
 
-    badgeEl.textContent = sites.length + " field sites";
+    badgeEl.textContent = sites.length + " sites";
 
     sites.forEach(function (site) {
       const pin = buildPin(site);

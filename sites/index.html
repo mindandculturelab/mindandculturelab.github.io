@@ -50,36 +50,28 @@
     <main id="main">
       <section class="hero wrap">
         <div>
-          <p class="eyebrow">Field sites · Cross-cultural sampling</p>
+          <p class="eyebrow">Field sites</p>
           <h1>Cognitive science on a global scale</h1>
         </div>
-        <p class="lede">
-          Drag to orbit the globe, click a pin, and learn about the communities where we have collected developmental and cross-cultural data.
-        </p>
       </section>
 
       <section class="wrap section sites-layout" aria-label="Interactive field-site globe">
         <div class="sites-stage" data-globe-stage>
-          <p class="experience-hint">Drag to rotate · Scroll to zoom · Click a pin</p>
-          <p class="experience-badge" data-globe-badge>17 field sites</p>
+          <p class="experience-badge" data-globe-badge>17 sites</p>
         </div>
-        <aside class="sites-panel" aria-live="polite">
-          <p class="experience-kicker" data-site-kicker>Select a site</p>
-          <h2 data-site-title>Our testing &amp; field sites</h2>
-          <p data-site-region class="sites-region"></p>
-          <p data-site-meta class="sites-meta" hidden></p>
-          <p data-site-body>
-            Pins sit on real geographic coordinates. Click any pin—or a name below—to see the communities, venues, ages, tasks, and studies behind that sample.
-          </p>
-          <p class="sites-stat" data-site-stat hidden></p>
-          <div class="sites-venues" data-site-venues hidden></div>
-          <div class="sites-studies" data-site-studies></div>
-        </aside>
-      </section>
-
-      <section class="wrap section">
-        <p class="eyebrow">Browse by name</p>
-        <div class="site-chips" data-site-chips role="list"></div>
+        <div class="sites-sidebar">
+          <aside class="sites-panel" aria-live="polite">
+            <p class="experience-kicker" data-site-kicker hidden></p>
+            <h2 data-site-title>Testing sites</h2>
+            <p data-site-region class="sites-region"></p>
+            <p data-site-meta class="sites-meta" hidden></p>
+            <p data-site-body></p>
+            <p class="sites-stat" data-site-stat hidden></p>
+            <div class="sites-venues" data-site-venues hidden></div>
+            <div class="sites-studies" data-site-studies></div>
+          </aside>
+          <div class="site-chips" data-site-chips role="list" aria-label="Sites"></div>
+        </div>
       </section>
     </main>
 
