@@ -11,8 +11,8 @@ import {
 } from "./scene-kit.js";
 
 /**
- * SEARCH / Grid Search Task — spatially correlated 8×8 explore–exploit board
- * Modeled after the tablet GridSearch app in https://github.com/alissarivero/SEARCH
+ * Volcano Escape Game — child-facing explore–exploit tablet task
+ * Task code: https://github.com/alissarivero/SEARCH (E_Experiment Cordova app)
  */
 export function buildSearchProcedure() {
   const root = new THREE.Group();
@@ -39,7 +39,7 @@ export function buildSearchProcedure() {
   childSeat.add(makeChair(0.95), child);
   root.add(childSeat);
 
-  // Tablet frame with 8×8 spatially correlated reward grid
+  // Tablet running Volcano Escape (8×8 spatially correlated reward grid)
   const tablet = new THREE.Group();
   tablet.position.set(0, 0.625, -0.02);
   const bezel = new THREE.Mesh(
@@ -62,7 +62,6 @@ export function buildSearchProcedure() {
   const n = 8;
   const cell = 0.07;
   const gap = 0.002;
-  // Spatially smooth reward field (high values clustered toward SE)
   function rewardAt(i, j) {
     const x = (i - 3.5) / 3.5;
     const y = (j - 3.5) / 3.5;
@@ -71,7 +70,8 @@ export function buildSearchProcedure() {
     return Math.min(1, peak * 0.95 + ridge);
   }
   function heatColor(t) {
-    const stops = [0xfff7ec, 0xfdd49e, 0xfc8d59, 0xd7301f, 0x7f0000];
+    // Volcano Escape palette: cool ash → warm lava
+    const stops = [0xe8e0d4, 0xf4a261, 0xe76f51, 0xc1121f, 0x6a040f];
     const idx = Math.min(stops.length - 2, Math.floor(t * (stops.length - 1)));
     const local = t * (stops.length - 1) - idx;
     const a = stops[idx];
@@ -108,7 +108,6 @@ export function buildSearchProcedure() {
   }
   tablet.add(gridGroup);
 
-  // Click counter / stars strip above the grid
   const hud = new THREE.Mesh(
     new THREE.BoxGeometry(0.64, 0.012, 0.06),
     new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.5 })
@@ -117,7 +116,6 @@ export function buildSearchProcedure() {
   tablet.add(hud);
   root.add(tablet);
 
-  // Goal cue card (maximize points vs learn the board)
   const goalCard = new THREE.Mesh(
     new THREE.BoxGeometry(0.34, 0.008, 0.22),
     new THREE.MeshStandardMaterial({ color: 0xfaf6ef, roughness: 0.65 })
@@ -139,7 +137,6 @@ export function buildSearchProcedure() {
     tiles.forEach(function (tile) {
       paintTile(tile, false);
     });
-    // One starter tile revealed, matching the app
     paintTile(tiles[18], true);
   }
 
@@ -148,9 +145,9 @@ export function buildSearchProcedure() {
   inspectables.push(
     tagInspectable(
       tablet,
-      "grid-search-board",
-      "8×8 Spatially Correlated Grid Search",
-      "Sixty-four tiles on a tablet. Darker colors mark higher point values, and nearby tiles tend to share similar rewards—so children can explore new squares or re-click known ones within a 25-click horizon.",
+      "volcano-escape-board",
+      "Volcano Escape Game board",
+      "Children play Volcano Escape on a tablet: an 8×8 board of 64 squares with spatially correlated point values. Darker / warmer tiles pay more, nearby tiles tend to share similar rewards, and each board allows 25 clicks to explore new squares or re-click known ones.",
       [0.05, 1.12, 0.52],
       [0, 0.66, -0.02],
       function (nowSec) {
@@ -161,7 +158,7 @@ export function buildSearchProcedure() {
       goalCard,
       "goal-cue",
       "Goal framing",
-      "Instructions shape whether children treat the board as a points-maximizing exploit problem or an information-gathering explore problem—the core manipulation behind Goals Shape Children's Explore-Exploit Tendencies.",
+      "Instructions shape whether children treat Volcano Escape as a points-maximizing exploit problem or an information-gathering explore problem—the core manipulation behind Goals Shape Children's Explore-Exploit Tendencies.",
       [0.42, 1.12, 0.48],
       [0.5, 0.66, 0.1]
     )
@@ -169,10 +166,10 @@ export function buildSearchProcedure() {
 
   const steps = [
     {
-      short: "1. Grid Board",
-      title: "Spatially correlated 8×8 search board",
+      short: "1. Escape Board",
+      title: "Volcano Escape Game on the tablet",
       badge: "64 tiles · 25 clicks per board · ages 4–9",
-      body: "Children play on a tablet GridSearch board: each click reveals a point value, darker tiles pay more, and high values tend to sit next to other high values. One square starts revealed; 25 clicks remain to explore new tiles or re-click known ones.",
+      body: "Children play Volcano Escape: each click reveals a point value on the volcanic grid, warmer tiles pay more, and high values tend to sit next to other high values. One square starts revealed; 25 clicks remain to explore new tiles or re-click known ones.",
       why: "Spatial correlation makes pure random search inefficient—children can generalize from local evidence when deciding whether to explore or exploit.",
       camera: childPov.overview
     },
@@ -180,8 +177,8 @@ export function buildSearchProcedure() {
       short: "2. Explore vs Exploit",
       title: "Click new tiles or re-click known rewards",
       badge: "Horizon = 25 clicks per board",
-      body: "Each click is a choice: open a covered square to learn its value (explore), or return to a revealed square to collect points again (exploit). Click 'Watch a search path' to see a typical trajectory moving toward a high-value cluster.",
-      why: "A fixed horizon forces the classic explore–exploit tradeoff inside a single board rather than across infinite trials.",
+      body: "Each click is a choice: open a covered square to learn its value (explore), or return to a revealed square to collect points again (exploit). Click 'Watch an escape path' to see a typical trajectory moving toward a high-value cluster.",
+      why: "A fixed horizon forces the classic explore–exploit tradeoff inside a single Volcano Escape board rather than across infinite trials.",
       camera: childPov.close,
       autoPlay: true
     },
@@ -189,16 +186,16 @@ export function buildSearchProcedure() {
       short: "3. Goal Framing",
       title: "Goals reshape explore–exploit tendencies",
       badge: "Toggle Maximize Points vs Learn the Board",
-      body: "The same board supports different goals. When told to collect as many points as possible, children should exploit high tiles sooner; when the goal emphasizes learning the board, broader exploration becomes rational—matching the paper's claim that goals shape children's explore–exploit tendencies.",
-      why: "Holding the apparatus fixed while varying the instructed goal isolates motivation from ability to search.",
+      body: "The same Volcano Escape board supports different goals. When told to collect as many points as possible, children should exploit high tiles sooner; when the goal emphasizes learning the board, broader exploration becomes rational—matching the paper's claim that goals shape children's explore–exploit tendencies.",
+      why: "Holding the game apparatus fixed while varying the instructed goal isolates motivation from ability to search.",
       camera: childPov.right
     }
   ];
 
   return {
     id: "search",
-    tabTag: "Rivero · Explore–Exploit",
-    tabName: "SEARCH Grid Search",
+    tabTag: "Rivero, Pitt, & Amir · Explore–Exploit",
+    tabName: "Volcano Escape Game",
     eyebrow: "Tasks · Goals Shape Children's Explore-Exploit Tendencies",
     studyTitle: "Goals Shape Children's Explore-Exploit Tendencies",
     studyHref: "../studies/search/",
@@ -211,8 +208,8 @@ export function buildSearchProcedure() {
       { value: "learn", label: "Learn the board (explore)" }
     ],
     defaultCondition: "maximize",
-    playLabel: "Watch a search path",
-    clickTip: "Click the grid board or goal card to inspect",
+    playLabel: "Watch an escape path",
+    clickTip: "Click the Volcano Escape board or goal card to inspect",
     steps: steps,
     root: root,
     inspectables: inspectables,
