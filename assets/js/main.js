@@ -7,6 +7,67 @@
     year.textContent = String(new Date().getFullYear());
   }
 
+  const headlines = document.querySelectorAll(".hero h1, .hero-home h1, .missing h1");
+  const minHeadlinePx = 12;
+
+  const fitHeadline = function (el) {
+    el.style.fontSize = "";
+    const maxPx = parseFloat(getComputedStyle(el).fontSize);
+    if (!maxPx) {
+      return;
+    }
+
+    const available = el.clientWidth;
+    if (available <= 0) {
+      return;
+    }
+
+    if (el.scrollWidth <= available + 1) {
+      return;
+    }
+
+    let lo = minHeadlinePx;
+    let hi = maxPx;
+    let best = minHeadlinePx;
+
+    for (let i = 0; i < 18; i += 1) {
+      const mid = (lo + hi) / 2;
+      el.style.fontSize = mid + "px";
+      if (el.scrollWidth <= available + 1) {
+        best = mid;
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+
+    el.style.fontSize = best + "px";
+  };
+
+  const fitAllHeadlines = function () {
+    headlines.forEach(fitHeadline);
+  };
+
+  fitAllHeadlines();
+  window.addEventListener("resize", fitAllHeadlines);
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitAllHeadlines).catch(function () {});
+  }
+
+  if (typeof ResizeObserver !== "undefined") {
+    let frame = 0;
+    const observer = new ResizeObserver(function () {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fitAllHeadlines);
+    });
+    headlines.forEach(function (el) {
+      if (el.parentElement) {
+        observer.observe(el.parentElement);
+      }
+    });
+  }
+
   if (!nav || !toggle) {
     return;
   }

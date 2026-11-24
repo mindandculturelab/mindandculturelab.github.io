@@ -221,21 +221,23 @@ a {
 /* Shared Hero & Typography */
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(16rem, 0.85fr);
-  gap: 2rem 3rem;
-  align-items: end;
-  padding: 3.4rem 0 2.6rem;
-}
-
-.hero-experience {
   grid-template-columns: 1fr;
   gap: 1.15rem;
   align-items: start;
+  padding: 3.4rem 0 2.6rem;
 }
 
-.hero-experience h1 {
+.hero > *,
+.hero-home-copy,
+.missing > * {
+  min-width: 0;
+}
+
+.hero h1,
+.hero-home h1,
+.missing h1 {
   white-space: nowrap;
-  font-size: clamp(1.35rem, 5.1vw, 3.85rem);
+  max-width: 100%;
 }
 
 .eyebrow {
