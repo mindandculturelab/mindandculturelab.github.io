@@ -475,7 +475,9 @@ stage.addEventListener(
   function (event) {
     event.preventDefault();
     autoSpin = 0;
-    userZoom = Math.max(0.72, Math.min(1.55, userZoom + event.deltaY * 0.0009));
+    // Keep a floor on camera distance so the globe never grows large enough
+    // to collide with the Testing sites panel beside it.
+    userZoom = Math.max(1.0, Math.min(1.55, userZoom + event.deltaY * 0.0009));
     if (reduceMotion) {
       renderOnce();
     }

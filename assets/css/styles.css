@@ -1209,8 +1209,8 @@ h2 {
 
 .sites-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(17.5rem, 23.5rem);
-  gap: 1.25rem 1.5rem;
+  grid-template-columns: minmax(0, 0.95fr) minmax(22rem, 1.15fr);
+  gap: 1.25rem 2rem;
   align-items: stretch;
   flex: 1;
   min-height: 0;
@@ -1225,12 +1225,16 @@ h2 {
 
 .sites-stage {
   position: relative;
+  justify-self: start;
+  width: 100%;
+  max-width: 34rem;
   background: transparent;
   border: 0;
   border-radius: 0;
   min-height: min(58vh, 560px);
   height: 100%;
-  overflow: visible;
+  /* Keep the globe from spilling into the sidebar panel */
+  overflow: hidden;
   box-shadow: none;
   cursor: grab;
   touch-action: none;
@@ -1380,9 +1384,9 @@ h2 {
 }
 
 .site-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
 }
 
 .site-chip {
@@ -1391,10 +1395,12 @@ h2 {
   background: var(--paper);
   color: var(--ink);
   border-radius: 999px;
-  padding: 0.42rem 0.85rem;
+  padding: 0.5rem 0.75rem;
   font: inherit;
   font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
