@@ -32,6 +32,16 @@
         { label: "ORCID", href: "https://orcid.org/0000-0001-8788-6948" },
         { label: "Email", href: "mailto:julia.m.smith@duke.edu" }
       ]
+    },
+    "Alissa Rivero": {
+      role: "PhD Student in Developmental Psychology, Duke University · NSF GRFP Fellow",
+      education: "B.A. Psychology (Minor: Evolutionary Anthropology), Duke University · Advisors: Dorsa Amir & Michael Tomasello",
+      bio: "Developmental psychologist studying how we can best structure childhood to cultivate children's motivation, creativity, and exploration.",
+      links: [
+        { label: "Website", href: "https://alissarivero.github.io/" },
+        { label: "CV", href: "https://alissarivero.github.io/cv/" },
+        { label: "Email", href: "mailto:alissa.rivero@duke.edu" }
+      ]
     }
   };
   var root = document.querySelector("[data-people]");
@@ -64,7 +74,7 @@
     var names = order.filter(function (name) {
       if (!query) return true;
       var info = details[name];
-      var haystack = [name, info && info.role, info && info.education]
+      var haystack = [name, info && info.role, info && info.education, info && info.bio]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -102,6 +112,9 @@
       }
       if (info && info.education) {
         addText(body, "p", "person-education", info.education);
+      }
+      if (info && info.bio) {
+        addText(body, "p", "person-bio", info.bio);
       }
       if (info && info.links && info.links.length) {
         var linkRow = document.createElement("p");
