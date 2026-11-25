@@ -1,4 +1,4 @@
-/* SEARCH-App Volcano Escape — flat iPad recreation */
+/* SEARCH-App Volcano Escape — flat iPad recreation (matches device recording) */
 .search-flat-host {
   position: absolute;
   inset: 0;
@@ -17,9 +17,9 @@
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 1.1rem 1.25rem 1.35rem;
+  padding: 0.85rem 1rem 1rem;
   background:
-    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.9), transparent 55%),
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.88), transparent 52%),
     linear-gradient(165deg, #f4f1ea 0%, #ebe4d8 100%);
   pointer-events: auto;
 }
@@ -48,55 +48,38 @@
 }
 
 .search-ipad-bezel {
-  width: min(100%, 920px);
+  width: min(100%, 980px);
   aspect-ratio: 4 / 3;
   max-height: 100%;
-  padding: 14px;
-  border-radius: 28px;
+  padding: 12px;
+  border-radius: 26px;
   background: linear-gradient(160deg, #3a3a3c 0%, #1c1c1e 55%, #0e0e10 100%);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 1px 0 rgba(255, 255, 255, 0.16) inset,
     0 22px 48px rgba(26, 26, 26, 0.22);
 }
 
 .search-ipad-screen {
   width: 100%;
   height: 100%;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #111;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  background: #000;
   color: #eee;
   font-family: var(--sans);
-}
-
-.search-ipad-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.45rem 0.7rem;
-  background: #1a1a1a;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.search-ipad-topbar strong {
-  color: #ff9f40;
-  font-weight: 700;
+  position: relative;
 }
 
 .search-ipad-play {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) minmax(110px, 28%);
-  gap: 8px;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(120px, 22%);
+  gap: min(1.5vw, 12px);
   align-items: stretch;
-  min-height: 0;
+  width: 100%;
   height: 100%;
-  padding: 8px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px min(10px, 1.4vw) 10px;
   box-sizing: border-box;
 }
 
@@ -105,24 +88,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: stretch;
-  min-height: 0;
-}
-
-.search-ipad-clicks-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 0.35rem;
+  align-self: stretch;
+  min-width: 0;
+  width: 32px;
+  padding: 0 2px;
+  box-sizing: border-box;
 }
 
 .search-ipad-clicks-track {
-  flex: 1;
-  width: 22px;
-  min-height: 80px;
+  flex: 1 1 auto;
+  width: 28px;
+  min-height: 120px;
+  height: 100%;
   border-radius: 999px;
   background: #2e2e2e;
   border: 2px solid #4a4a4a;
@@ -137,18 +114,37 @@
   right: 0;
   bottom: 0;
   height: 100%;
+  z-index: 1;
   background: linear-gradient(to top, #ff5a00, #ff9f40);
-  transition: height 0.25s ease;
+  border-radius: 999px;
+  transition: height 0.28s ease;
+}
+
+.search-ipad-clicks-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  transform: translateY(50%);
+  font-size: clamp(12px, 2vmin, 16px);
+  font-weight: 700;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 0 6px #000, 0 1px 2px #000;
+  line-height: 1;
 }
 
 .search-ipad-grid-wrap {
-  background: #000;
-  padding: 5px;
-  border-radius: 4px;
   min-width: 0;
   min-height: 0;
   display: grid;
   place-items: center;
+  background: #000;
 }
 
 .search-ipad-grid {
@@ -158,8 +154,9 @@
   width: min(100%, 100%);
   aspect-ratio: 1 / 1;
   max-height: 100%;
-  border: 2px solid #fff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
   box-sizing: border-box;
+  background: #000;
 }
 
 .search-ipad-cell {
@@ -167,20 +164,22 @@
   background: #000;
   position: relative;
   overflow: hidden;
+  aspect-ratio: 1 / 1;
 }
 
-.search-ipad-cell.is-revealed {
-  background: #141414;
+.search-ipad-cell.is-active {
+  box-shadow: inset 0 0 0 2px #ff7a18;
+  z-index: 1;
 }
 
 .search-ipad-cell img {
   position: absolute;
-  inset: 8%;
-  width: 84%;
-  height: 84%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   pointer-events: none;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+  transform-origin: center center;
 }
 
 .search-ipad-side {
@@ -188,15 +187,19 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  height: 100%;
   gap: 0;
+  width: 100%;
+  justify-self: end;
 }
 
 .search-ipad-volcano {
   flex: 0 0 auto;
-  height: 34%;
-  min-height: 72px;
+  height: min(22%, 120px);
+  min-height: 64px;
   display: grid;
   place-items: end center;
+  width: 100%;
 }
 
 .search-ipad-volcano img {
@@ -208,42 +211,64 @@
 }
 
 .search-ipad-volcano.is-hidden {
-  visibility: hidden;
+  display: none;
 }
 
 .search-ipad-bin {
   flex: 1 1 0;
   min-height: 0;
   margin-top: -4px;
-  border: 2px solid #4a4a4a;
-  border-radius: 4px;
-  background: #1c1c1c;
+  width: 100%;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: #0a0a0a;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 2px;
-  padding: 6px 4px;
-  overflow: hidden;
+  gap: 1px;
+  padding: 0 3px;
+  overflow-x: hidden;
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
 .search-ipad-bin.is-escape {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
+  border-left: 2px dashed rgba(255, 140, 60, 0.35);
+  background:
+    linear-gradient(to left, rgba(255, 90, 0, 0.07) 0%, transparent 50%),
+    #0a0a0a;
 }
 
-.search-ipad-bin img {
-  width: auto;
-  height: auto;
-  max-width: 78%;
-  object-fit: contain;
+.search-ipad-bin.is-bigger {
+  border-radius: 10px;
+  justify-content: flex-end;
+}
+
+.search-ipad-bin-slot {
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  max-height: 11%;
+  line-height: 0;
+  box-sizing: border-box;
+}
+
+.search-ipad-bin-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: center center;
 }
 
 @media (max-width: 720px) {
   .search-ipad {
-    padding: 0.7rem;
+    padding: 0.55rem;
   }
 
   .search-ipad-bezel {
@@ -253,8 +278,12 @@
   }
 
   .search-ipad-play {
-    grid-template-columns: 22px minmax(0, 1fr) minmax(72px, 30%);
-    gap: 5px;
-    padding: 5px;
+    grid-template-columns: 28px minmax(0, 1fr) minmax(78px, 28%);
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .search-ipad-clicks-track {
+    width: 22px;
   }
 }
