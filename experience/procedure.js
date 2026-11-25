@@ -337,6 +337,33 @@ inspectClose.addEventListener("click", function () {
 
 let stepButtons = [];
 
+function applyGuideCopy(st) {
+  if (!st) return;
+  kicker.textContent = "Step " + (st.index + 1) + " of " + st.total;
+  titleEl.textContent = st.title;
+  bodyEl.textContent = st.body;
+  whyEl.textContent = st.why;
+  badge.textContent = st.badge;
+  if (st.tip) clickTipEl.textContent = st.tip;
+  prevBtn.disabled = st.index === 0;
+  nextBtn.disabled = st.index >= st.total - 1;
+  stepButtons.forEach(function (b, i) {
+    if (i === st.index) b.setAttribute("aria-current", "step");
+    else b.removeAttribute("aria-current");
+  });
+  stepIndex = st.index;
+}
+
+function bindActiveGuide() {
+  if (typeof activeProc.bindGuide !== "function") return;
+  activeProc.bindGuide({
+    setCopy: applyGuideCopy,
+    setTip: function (tip) {
+      clickTipEl.textContent = tip;
+    }
+  });
+}
+
 function applyStep(idx) {
   stepIndex = idx;
   hideInspectCard(false);
@@ -347,6 +374,7 @@ function applyStep(idx) {
   bodyEl.textContent = st.body;
   whyEl.textContent = st.why;
   badge.textContent = st.badge;
+  if (st.tip) clickTipEl.textContent = st.tip;
   prevBtn.disabled = stepIndex === 0;
   nextBtn.disabled = stepIndex === activeProc.steps.length - 1;
 
@@ -439,6 +467,7 @@ function selectProcedure(studyId, updateUrl) {
   });
 
   applyStep(0);
+  bindActiveGuide();
 
   if (updateUrl && window.history && window.history.replaceState) {
     const url = new URL(window.location.href);
