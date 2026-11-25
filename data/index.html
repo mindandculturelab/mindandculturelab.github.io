@@ -54,66 +54,51 @@
             <p class="eyebrow">Open data</p>
             <h1>Explore our data</h1>
           </div>
-          <p class="lede">Search studies, then group them by researcher or topic.</p>
+          <p class="lede">Browse every study, or jump in by researcher or topic.</p>
         </section>
       </div>
 
-      <section class="wrap section" aria-label="Browse open data">
-        <form class="filters filters-search data-hub-search" role="search" data-data-search-form>
-          <label>
-            Search
+      <section class="wrap section data-hub" aria-label="Browse open data">
+        <div class="data-hub-toolbar">
+          <form class="data-hub-search" role="search" data-data-search-form>
+            <label class="data-hub-search-label" for="data-hub-query">Search</label>
             <input
+              id="data-hub-query"
               type="search"
               data-data-search
-              placeholder="Study, researcher, or topic"
+              placeholder="Filter by study, person, or topic"
               autocomplete="off"
               enterkeyhint="search"
             />
-          </label>
-        </form>
+          </form>
 
-        <ul class="choices choices-groupers" role="tablist" aria-label="Group studies">
-          <li>
-            <button class="choice-card" type="button" role="tab" data-group="researcher" aria-selected="false">
-              <p class="choice-meta">6 researchers</p>
-              <h2>Researchers</h2>
-              <div class="choice-avatars" aria-hidden="true">
-                <img class="choice-avatar" src="../assets/images/researchers/dorsa-amir.png" alt="" width="56" height="56" />
-                <img class="choice-avatar" src="../assets/images/researchers/alissa-rivero.jpg" alt="" width="56" height="56" />
-                <img class="choice-avatar" src="../assets/images/researchers/julia-bainbridge.png" alt="" width="56" height="56" />
-                <img class="choice-avatar" src="../assets/images/researchers/gita-paladugu.png" alt="" width="56" height="56" />
-                <img class="choice-avatar" src="../assets/images/researchers/serena-spada.png" alt="" width="56" height="56" />
-                <span class="choice-avatar choice-avatar-initial">J</span>
-              </div>
+          <div class="data-mode-switch" role="tablist" aria-label="Browse by">
+            <button class="data-mode" type="button" role="tab" data-group="study" aria-selected="true">
+              <span class="data-mode-kicker">All</span>
+              <span class="data-mode-label">Studies</span>
             </button>
-          </li>
-          <li>
-            <button class="choice-card" type="button" role="tab" data-group="topic" aria-selected="false">
-              <p class="choice-meta">5 topic lenses</p>
-              <h2>Topics</h2>
-              <div class="choice-topic-chips" aria-hidden="true">
-                <span>Exploration</span>
-                <span>Morality</span>
-                <span>Cooperation</span>
-                <span>Generosity</span>
-                <span>Decision making</span>
-              </div>
+            <button class="data-mode" type="button" role="tab" data-group="researcher" aria-selected="false">
+              <span class="data-mode-kicker">By person</span>
+              <span class="data-mode-label">Researchers</span>
             </button>
-          </li>
-          <li>
-            <button class="choice-card" type="button" role="tab" data-group="study" aria-selected="true">
-              <p class="choice-meta">14 studies · ages 2–adult</p>
-              <h2>Studies</h2>
-              <ul class="choice-study-points">
-                <li>Interactive explorers</li>
-                <li>3D tasks</li>
-                <li>Local PDFs &amp; CSVs</li>
-              </ul>
+            <button class="data-mode" type="button" role="tab" data-group="topic" aria-selected="false">
+              <span class="data-mode-kicker">By lens</span>
+              <span class="data-mode-label">Topics</span>
             </button>
-          </li>
-        </ul>
+          </div>
+        </div>
 
-        <p class="result-count" data-browse-count aria-live="polite">Loading studies.</p>
+        <div class="data-picker" data-picker hidden>
+          <div class="data-picker-head">
+            <p class="data-picker-title" data-picker-title>Choose a researcher</p>
+            <p class="data-picker-hint" data-picker-hint>Jump to their studies below</p>
+          </div>
+          <div class="data-picker-grid" data-picker-grid role="list"></div>
+        </div>
+
+        <div class="data-browse-head">
+          <p class="result-count" data-browse-count aria-live="polite">Loading studies.</p>
+        </div>
         <div class="data-browse" data-browse-list></div>
       </section>
     </main>
