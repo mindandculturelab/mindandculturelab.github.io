@@ -160,12 +160,29 @@ const offsetVec = new THREE.Vector3();
 const raycaster = new THREE.Raycaster();
 const pointerNDC = new THREE.Vector2();
 
-// Build 8-study procedure tabs (screenshot + task name + study title)
+// Build procedure tabs grouped by subcategory (in-person vs online)
 const tabButtons = {};
 const tabThumbs = {};
 const simBand = document.getElementById("task-simulation");
 
-procedures.forEach(function (proc) {
+const procedureCategories = [
+  {
+    id: "in-person",
+    label: "In-person tasks",
+    match: function (proc) {
+      return (proc.category || "in-person") !== "online";
+    }
+  },
+  {
+    id: "online",
+    label: "Online tasks",
+    match: function (proc) {
+      return proc.category === "online";
+    }
+  }
+];
+
+function makeProcedureTab(proc) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "procedure-tab";
@@ -196,8 +213,34 @@ procedures.forEach(function (proc) {
       simBand.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
-  studyTabsHost.appendChild(btn);
   tabButtons[proc.id] = btn;
+  return btn;
+}
+
+procedureCategories.forEach(function (category) {
+  const members = procedures.filter(category.match);
+  if (!members.length) return;
+
+  const group = document.createElement("section");
+  group.className = "procedure-group";
+  group.dataset.category = category.id;
+
+  const heading = document.createElement("h2");
+  heading.className = "procedure-group-title";
+  heading.id = "procedure-group-" + category.id;
+  heading.textContent = category.label;
+
+  const tabs = document.createElement("div");
+  tabs.className = "procedure-tabs";
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-labelledby", heading.id);
+
+  members.forEach(function (proc) {
+    tabs.appendChild(makeProcedureTab(proc));
+  });
+
+  group.append(heading, tabs);
+  studyTabsHost.appendChild(group);
 });
 
 function setThumbExtrasVisible(root, visible) {

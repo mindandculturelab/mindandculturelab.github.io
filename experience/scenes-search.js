@@ -336,6 +336,7 @@ export function buildSearchProcedure() {
   return {
     id: "search",
     mode: "flat2d",
+    category: "online",
     interactive: true,
     tabTag: "Rivero, Pitt, & Amir · Explore–Exploit",
     tabName: "Volcano Escape Game",
