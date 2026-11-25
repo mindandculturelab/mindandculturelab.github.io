@@ -1,28 +1,30 @@
 (function () {
   var form = document.querySelector("[data-data-search-form]");
   var input = document.querySelector("[data-data-search]");
-  var results = document.querySelector("[data-data-search-results]");
-  var count = document.querySelector("[data-data-search-count]");
-  if (!form || !input || !results || !count) return;
+  var listHost = document.querySelector("[data-browse-list]");
+  var countEl = document.querySelector("[data-browse-count]");
+  var groupButtons = Array.prototype.slice.call(document.querySelectorAll("[data-group]"));
+  if (!form || !input || !listHost || !countEl || !groupButtons.length) return;
 
-  var researchers = [
-    { name: "Dorsa Amir", href: "researchers/", role: "Principal Investigator" },
-    { name: "Julia Smith", href: "researchers/", role: "Postdoctoral Scholar" },
-    { name: "Alissa Rivero", href: "researchers/", role: "PhD Student" },
-    { name: "Julia Bainbridge", href: "researchers/", role: "Researcher" },
-    { name: "Gita Paladugu", href: "researchers/", role: "Researcher" },
-    { name: "Serena Spada", href: "researchers/", role: "Researcher" }
+  var researcherOrder = [
+    "Dorsa Amir",
+    "Julia Smith",
+    "Alissa Rivero",
+    "Julia Bainbridge",
+    "Gita Paladugu",
+    "Serena Spada"
   ];
 
-  var topics = [
-    { name: "Exploration", href: "topics/#exploration" },
-    { name: "Morality", href: "topics/#morality" },
-    { name: "Cooperation", href: "topics/#cooperation" },
-    { name: "Generosity", href: "topics/#generosity" },
-    { name: "Decision making", href: "topics/#decision-making" }
+  var topicOrder = [
+    { id: "exploration", label: "Exploration" },
+    { id: "morality", label: "Morality" },
+    { id: "cooperation", label: "Cooperation" },
+    { id: "generosity", label: "Generosity" },
+    { id: "decision-making", label: "Decision making" }
   ];
 
   var studies = [];
+  var groupMode = "study";
 
   function addText(parent, tag, className, text) {
     var node = document.createElement(tag);
@@ -36,108 +38,193 @@
     return "../studies/" + study.id + "/";
   }
 
-  function matches(haystack, query) {
-    return haystack.toLowerCase().indexOf(query) !== -1;
+  function journalOf(study) {
+    var citation = study.citation;
+    if (!citation || typeof citation !== "string") return "";
+    var known = [
+      "Science Advances",
+      "Child Development",
+      "Developmental Science",
+      "Developmental Psychology",
+      "Journal of Experimental Child Psychology",
+      "Journal of Experimental Psychology: General",
+      "PLOS ONE"
+    ];
+    for (var i = 0; i < known.length; i += 1) {
+      if (citation.indexOf(known[i]) !== -1) return known[i];
+    }
+    return "";
   }
 
-  function clearResults() {
-    results.replaceChildren();
-    results.hidden = true;
-    count.hidden = true;
-    count.textContent = "";
+  function matchesQuery(study, query) {
+    if (!query) return true;
+    var haystack = [study.name, study.topic, study.ageLabel]
+      .concat(study.leads || [])
+      .concat(study.keywords || [])
+      .join(" ")
+      .toLowerCase();
+    return haystack.indexOf(query) !== -1;
   }
 
-  function render(query) {
-    var q = query.trim().toLowerCase();
-    if (!q) {
-      clearResults();
+  function filteredStudies() {
+    var query = input.value.trim().toLowerCase();
+    return studies.filter(function (study) {
+      return matchesQuery(study, query);
+    });
+  }
+
+  function makeStudyCard(study) {
+    var card = document.createElement("a");
+    card.className = "card";
+    card.href = studyHref(study);
+    var metaParts = [study.topic, "Ages " + study.ageLabel];
+    var journal = journalOf(study);
+    if (journal) metaParts.push(journal);
+    addText(card, "p", "meta", metaParts.join(" · "));
+    addText(card, "h3", "", study.name);
+    addText(card, "p", "", (study.leads || []).join(", "));
+    return card;
+  }
+
+  function makeCardsGrid(items) {
+    var grid = document.createElement("div");
+    grid.className = "cards";
+    items.forEach(function (study) {
+      grid.appendChild(makeStudyCard(study));
+    });
+    return grid;
+  }
+
+  function studiesForResearcher(name, list) {
+    return list.filter(function (study) {
+      return (study.leads || []).indexOf(name) !== -1;
+    });
+  }
+
+  function studiesForTopic(topicId, list) {
+    return list.filter(function (study) {
+      return (study.keywords || []).indexOf(topicId) !== -1;
+    });
+  }
+
+  function renderGrouped(sections) {
+    listHost.replaceChildren();
+    var shown = 0;
+    sections.forEach(function (section) {
+      if (!section.items.length) return;
+      shown += section.items.length;
+      var block = document.createElement("section");
+      block.className = "data-browse-group";
+      var head = document.createElement("div");
+      head.className = "data-browse-group-head";
+      addText(head, "h3", "data-browse-group-title", section.title);
+      addText(
+        head,
+        "p",
+        "data-browse-group-meta",
+        section.items.length === 1 ? "1 study" : section.items.length + " studies"
+      );
+      block.appendChild(head);
+      block.appendChild(makeCardsGrid(section.items));
+      listHost.appendChild(block);
+    });
+    return shown;
+  }
+
+  function render() {
+    var list = filteredStudies();
+    listHost.replaceChildren();
+
+    if (!list.length) {
+      countEl.textContent = input.value.trim() ? "Nothing matches." : "No studies yet.";
       return;
     }
 
-    var hits = [];
-
-    studies.forEach(function (study) {
-      var blob = [study.name, study.topic, (study.leads || []).join(" "), (study.keywords || []).join(" "), study.ageLabel]
-        .filter(Boolean)
-        .join(" ");
-      if (!matches(blob, q)) return;
-      hits.push({
-        kind: "Study",
-        title: study.name,
-        meta: (study.leads || []).join(", ") + (study.topic ? " · " + study.topic : ""),
-        href: studyHref(study)
+    if (groupMode === "researcher") {
+      var researcherSections = researcherOrder.map(function (name) {
+        return { title: name, items: studiesForResearcher(name, list) };
       });
-    });
-
-    researchers.forEach(function (person) {
-      if (!matches(person.name + " " + person.role, q)) return;
-      hits.push({
-        kind: "Researcher",
-        title: person.name,
-        meta: person.role,
-        href: person.href
+      // Any leads not in the fixed lab roster
+      var known = {};
+      researcherOrder.forEach(function (name) {
+        known[name] = true;
       });
-    });
-
-    topics.forEach(function (topic) {
-      if (!matches(topic.name, q)) return;
-      hits.push({
-        kind: "Topic",
-        title: topic.name,
-        meta: "Browse studies by topic",
-        href: topic.href
+      var extras = {};
+      list.forEach(function (study) {
+        (study.leads || []).forEach(function (name) {
+          if (!known[name]) extras[name] = true;
+        });
       });
-    });
-
-    results.replaceChildren();
-    results.hidden = false;
-    count.hidden = false;
-    count.textContent =
-      hits.length === 0
-        ? "No matches for “" + query.trim() + "”."
-        : hits.length === 1
-          ? "1 match"
-          : hits.length + " matches";
-
-    if (!hits.length) {
-      addText(results, "p", "data-search-empty", "Try a study title, researcher name, or topic word.");
+      Object.keys(extras)
+        .sort()
+        .forEach(function (name) {
+          researcherSections.push({ title: name, items: studiesForResearcher(name, list) });
+        });
+      var n = renderGrouped(researcherSections);
+      countEl.textContent =
+        n === 1 ? "1 study · grouped by researcher" : n + " studies · grouped by researcher";
       return;
     }
 
-    var list = document.createElement("ul");
-    list.className = "data-search-list";
-    hits.slice(0, 12).forEach(function (hit) {
-      var li = document.createElement("li");
-      var a = document.createElement("a");
-      a.className = "data-search-item";
-      a.href = hit.href;
-      addText(a, "span", "data-search-kind", hit.kind);
-      addText(a, "span", "data-search-title", hit.title);
-      if (hit.meta) addText(a, "span", "data-search-meta", hit.meta);
-      li.appendChild(a);
-      list.appendChild(li);
-    });
-    results.appendChild(list);
+    if (groupMode === "topic") {
+      var topicSections = topicOrder.map(function (topic) {
+        return { title: topic.label, items: studiesForTopic(topic.id, list) };
+      });
+      var nTopic = renderGrouped(topicSections);
+      countEl.textContent =
+        nTopic === 1 ? "1 study · grouped by topic" : nTopic + " studies · grouped by topic";
+      return;
+    }
+
+    // Flat study list
+    listHost.appendChild(makeCardsGrid(list));
+    countEl.textContent = list.length === 1 ? "1 study" : list.length + " studies";
   }
+
+  function setGroup(mode) {
+    groupMode = mode;
+    groupButtons.forEach(function (btn) {
+      var selected = btn.getAttribute("data-group") === mode;
+      btn.setAttribute("aria-selected", selected ? "true" : "false");
+    });
+    render();
+  }
+
+  groupButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      setGroup(btn.getAttribute("data-group"));
+    });
+  });
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    render(input.value);
+    render();
   });
 
-  input.addEventListener("input", function () {
-    render(input.value);
-  });
+  input.addEventListener("input", render);
+
+  // Support deep links like ?group=topic or #topic
+  var params = new URLSearchParams(window.location.search);
+  var initialGroup = params.get("group");
+  if (initialGroup === "researcher" || initialGroup === "topic" || initialGroup === "study") {
+    groupMode = initialGroup;
+  } else if (location.hash === "#topics" || location.hash.indexOf("topic") !== -1) {
+    groupMode = "topic";
+  } else if (location.hash === "#researchers" || location.hash.indexOf("researcher") !== -1) {
+    groupMode = "researcher";
+  }
 
   fetch("./studies.json")
     .then(function (res) {
+      if (!res.ok) throw new Error("Could not load studies");
       return res.json();
     })
     .then(function (payload) {
       studies = payload.studies || [];
-      if (input.value.trim()) render(input.value);
+      setGroup(groupMode);
     })
     .catch(function () {
-      studies = [];
+      countEl.textContent = "The study list could not be loaded.";
+      listHost.replaceChildren();
     });
 })();
