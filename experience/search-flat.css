@@ -257,6 +257,52 @@
   display: none;
 }
 
+.search-ipad-prize {
+  flex: 0 0 auto;
+  height: min(22%, 120px);
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  width: 100%;
+  padding-bottom: 0.15rem;
+  box-sizing: border-box;
+}
+
+.search-ipad-prize.is-hidden {
+  display: none;
+}
+
+.search-ipad-prize-mark {
+  width: min(72%, 88px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #ffe7a8 0%, #ffb347 42%, #e07a00 78%, #9a4a00 100%);
+  box-shadow:
+    0 0 0 3px rgba(255, 196, 80, 0.35),
+    0 8px 18px rgba(255, 122, 24, 0.22);
+  position: relative;
+}
+
+.search-ipad-prize-mark::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+}
+
+.search-ipad-prize-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffd7a8;
+}
+
 .search-ipad-bin {
   flex: 1 1 0;
   min-height: 0;

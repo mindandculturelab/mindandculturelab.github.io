@@ -525,7 +525,7 @@ export function buildTsaProcedure() {
     tabTag: "Ages 2–3 · Dyads & Triads",
     tabName: "Pure Coordination Task",
     eyebrow: "Tasks · Rivero, Vasil, & Tomasello (2026)",
-    studyTitle: "Two- and Three-Year-Olds Coordinate Decisions in Dyads and Triads",
+    studyTitle: "Two- and three-year-olds coordinate decisions in dyads and triads",
     studyHref: "../studies/tsa/",
     dataHref: "../studies/tsa/data/",
     paperHref: "../studies/tsa/files/Rivero-et-al-2026-dyad-triad.pdf",
@@ -535,6 +535,23 @@ export function buildTsaProcedure() {
       { value: "triad", label: "Triad (3 peers · 6 coins)" }
     ],
     defaultCondition: "triad",
+    iv: {
+      name: "Peer group size",
+      blurb: "Same coordination box and keys. The paper varies how many same-aged partners must match—two versus three—which changes seating and the number of coins on display.",
+      mode: "levels",
+      levels: [
+        {
+          value: "dyad",
+          title: "Dyad",
+          detail: "2 peers across the table · 4 coins under the lid (2 per child)."
+        },
+        {
+          value: "triad",
+          title: "Triad",
+          detail: "3 peers on three sides · 6 coins under the lid (2 per child)."
+        }
+      ]
+    },
     playLabel: "Watch key matching",
     clickTip: "Click the square box, music box, or keys to inspect",
     steps: steps,
@@ -1092,16 +1109,33 @@ export function buildEpistemicProcedure() {
     tabTag: "Julia Smith & Dorsa Amir (2025)",
     tabName: "Epistemic vs. Physical Uncertainty",
     eyebrow: "Tasks · Smith, Mohamadpour, Engelmann, … & Amir (2025)",
-    studyTitle: "No Developmental Differences in Preferences for Epistemic Versus Physical Uncertainty Across Three Diverse Cultures",
+    studyTitle: "No developmental differences in preferences for epistemic versus physical uncertainty across three diverse cultures",
     studyHref: "../studies/epistemic-uncertainty/",
     dataHref: "../studies/epistemic-uncertainty/data/",
     paperHref: "../studies/epistemic-uncertainty/files/Smith-et-al-2025-epistemic-uncertainty.pdf",
-    condLabel: "Game timing sequence (Figure 1)",
+    condLabel: "Uncertainty type",
     conditions: [
       { value: "epistemic", label: "Roll-Then-Guess (Epistemic · 60.5%)" },
       { value: "physical", label: "Guess-Then-Roll (Physical · 39.5%)" }
     ],
     defaultCondition: "epistemic",
+    iv: {
+      name: "Uncertainty type (Figure 1)",
+      blurb: "Same die and cups. Only the timing of the roll relative to the guess changes—creating epistemic versus physical uncertainty.",
+      mode: "levels",
+      levels: [
+        {
+          value: "epistemic",
+          title: "Epistemic",
+          detail: "Roll-then-guess: the outcome already exists; uncertainty is about what you know."
+        },
+        {
+          value: "physical",
+          title: "Physical",
+          detail: "Guess-then-roll: the outcome is not yet determined when you choose."
+        }
+      ]
+    },
     playLabel: "Play dice round",
     clickTip: "Click the cup, die, Figure 1 card, or prize tray to inspect",
     steps: steps,
@@ -1423,16 +1457,33 @@ export function buildTrustProcedure() {
     tabTag: "Amir et al. (2021 · Dev Psych)",
     tabName: "Trust Apparatus",
     eyebrow: "Tasks · Amir, Parsons, Ahl, & McAuliffe (2021)",
-    studyTitle: "Trustworthiness is Distinct from Generosity in Children",
+    studyTitle: "Trustworthiness is distinct from generosity in children",
     studyHref: "../studies/trustworthiness-generosity/",
     dataHref: "../studies/trustworthiness-generosity/data/",
     paperHref: "../studies/trustworthiness-generosity/files/Amir-et-al-2021-trustworthiness-generosity.pdf",
-    condLabel: "Experimental condition",
+    condLabel: "Social condition",
     conditions: [
       { value: "trustworthiness", label: "Trustworthiness (Peer gives rod · M = 2.70)" },
       { value: "generosity", label: "Generosity (Solo control · M = 2.12)" }
     ],
     defaultCondition: "trustworthiness",
+    iv: {
+      name: "Social condition",
+      blurb: "Same two-channel tray and hooked rods. The paper contrasts whether a peer first sacrifices their short rod (trustworthiness) or the child already holds both pieces alone (generosity control).",
+      mode: "levels",
+      levels: [
+        {
+          value: "trustworthiness",
+          title: "Trustworthiness",
+          detail: "Peer gives up their short rod so you can assemble the long tool—then you decide how many candies to return."
+        },
+        {
+          value: "generosity",
+          title: "Generosity control",
+          detail: "You already have both rod pieces with no peer sacrifice—sharing is generosity without prior trust."
+        }
+      ]
+    },
     playLabel: "Watch tool & sharing",
     clickTip: "Click the two-channel tray, hooked rod, or paper bags to inspect",
     steps: steps,
@@ -1791,16 +1842,33 @@ export function buildInequityProcedure() {
     tabTag: "Amir et al. (2023 · JEP:G)",
     tabName: "Inequity Game",
     eyebrow: "Tasks · Amir, Melnikoff, Warneken, … & McAuliffe (2023)",
-    studyTitle: "Computational Signatures of Inequity Aversion in Children Across Seven Societies",
+    studyTitle: "Computational signatures of inequity aversion in children across seven societies",
     studyHref: "../studies/inequity-aversion/",
     dataHref: "../studies/inequity-aversion/data/",
     paperHref: "../studies/inequity-aversion/files/Amir-et-al-2023-inequity-aversion.pdf",
-    condLabel: "Inequity allocation",
+    condLabel: "Offer type",
     conditions: [
       { value: "AI", label: "Advantageous (4–1 AI)" },
       { value: "DI", label: "Disadvantageous (1–4 DI)" }
     ],
     defaultCondition: "AI",
+    iv: {
+      name: "Inequity type (offer on the trays)",
+      blurb: "Same Accept/Reject handles and bowls. Only the candy split between Actor and Recipient changes—watch the trays update when you switch.",
+      mode: "levels",
+      levels: [
+        {
+          value: "AI",
+          title: "Advantageous (4–1)",
+          detail: "Actor would get 4, Recipient 1. Rejecting costs you the larger share."
+        },
+        {
+          value: "DI",
+          title: "Disadvantageous (1–4)",
+          detail: "Actor would get 1, Recipient 4. Rejecting blocks the peer’s larger share."
+        }
+      ]
+    },
     playLabel: "Pull lever & trace DDM",
     clickTip: "Click the Green/Red handles, seesaw bowls, or DDM board to inspect",
     steps: steps,

@@ -79,6 +79,7 @@ export function buildSearchProcedure() {
   let cells = [];
   let binEl = null;
   let volcanoWrap = null;
+  let prizeWrap = null;
   let clicksFill = null;
   let clicksCount = null;
   let goalBanner = null;
@@ -157,6 +158,11 @@ export function buildSearchProcedure() {
     }
     if (volcanoWrap) {
       volcanoWrap.classList.toggle("is-hidden", condition !== "volcano_escape");
+    }
+    if (prizeWrap) {
+      const showPrize = condition === "bigger_reward";
+      prizeWrap.classList.toggle("is-hidden", !showPrize);
+      prizeWrap.setAttribute("aria-hidden", showPrize ? "false" : "true");
     }
     if (binEl) {
       binEl.classList.toggle("is-escape", condition === "volcano_escape");
@@ -284,6 +290,10 @@ export function buildSearchProcedure() {
       '          <div class="search-ipad-volcano" data-search-volcano><img src="' +
         ASSET +
         'volcano.svg" alt="" /></div>',
+      '          <div class="search-ipad-prize is-hidden" data-search-prize aria-hidden="true">',
+      '            <div class="search-ipad-prize-mark" aria-hidden="true"></div>',
+      '            <span class="search-ipad-prize-label">Bigger prize</span>',
+      "          </div>",
       '          <div class="search-ipad-bin is-escape" data-search-bin></div>',
       "        </div>",
       "      </div>",
@@ -313,6 +323,7 @@ export function buildSearchProcedure() {
 
     binEl = mountEl.querySelector("[data-search-bin]");
     volcanoWrap = mountEl.querySelector("[data-search-volcano]");
+    prizeWrap = mountEl.querySelector("[data-search-prize]");
     clicksFill = mountEl.querySelector("[data-search-fill]");
     clicksCount = mountEl.querySelector("[data-search-clicks]");
     goalBanner = mountEl.querySelector("[data-search-goal]");
@@ -328,19 +339,36 @@ export function buildSearchProcedure() {
     interactive: true,
     tabTag: "Rivero, Pitt, & Amir · Explore–Exploit",
     tabName: "Volcano Escape Game",
-    eyebrow: "Tasks · Goals Shape Children's Explore-Exploit Tendencies",
-    studyTitle: "Goals Shape Children's Explore-Exploit Tendencies",
+    eyebrow: "Tasks · Goals shape children's explore-exploit tendencies",
+    studyTitle: "Goals shape children's explore-exploit tendencies",
     studyHref: "../studies/search/",
     dataHref: "../studies/search/",
     paperHref: null,
     repoHref: "https://github.com/alissarivero/SEARCH-App",
     thumbSrc: ASSET + "thumb.jpg",
-    condLabel: "Goal framing (SEARCH-App)",
+    condLabel: "Instructed goal",
     conditions: [
       { value: "volcano_escape", label: "Volcano Escape" },
       { value: "bigger_reward", label: "Bigger Reward" }
     ],
     defaultCondition: "volcano_escape",
+    iv: {
+      name: "Instructed goal (within participants)",
+      blurb: "The 8×8 map and 25-click horizon stay fixed. Only the goal children are told changes—SEARCH-App counterbalances these two framings.",
+      mode: "levels",
+      levels: [
+        {
+          value: "volcano_escape",
+          title: "Volcano Escape",
+          detail: "“Bigger rocks get you farther away from the volcano.” Collected rocks build an escape path under the volcano."
+        },
+        {
+          value: "bigger_reward",
+          title: "Bigger Reward",
+          detail: "“Bigger rocks get you a bigger prize.” Collected rocks stack toward a sized prize instead of an escape path."
+        }
+      ]
+    },
     playLabel: "Reset map",
     clickTip: "Click an empty square to explore",
     steps: steps,

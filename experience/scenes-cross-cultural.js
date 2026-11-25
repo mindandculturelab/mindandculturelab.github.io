@@ -261,16 +261,22 @@ export function buildCoopBatteryProcedure() {
     tabTag: "Amir et al. (2025 · Sci Adv)",
     tabName: "Cooperation Battery",
     eyebrow: "Tasks · Amir, Ahl, Jordan, … & McAuliffe (2025)",
-    studyTitle: "The Emergence of Cooperative Behaviors, Norms, and Strategies Across Five Diverse Societies",
+    studyTitle: "The emergence of cooperative behaviors, norms, and strategies across five diverse societies",
     studyHref: "../studies/cooperative-behaviors/",
     dataHref: "../studies/cooperative-behaviors/data/",
     paperHref: "../studies/cooperative-behaviors/files/Amir-et-al-cooperative-behaviors.pdf",
-    condLabel: "Behavioral strategy profile",
+    condLabel: "Societies & age",
     conditions: [
       { value: "partner", label: "Partner-Contingent / Norm-Aligned" },
       { value: "maximizer", label: "Payoff-Maximizing Strategy" }
     ],
     defaultCondition: "partner",
+    iv: {
+      name: "Society and age (between participants)",
+      blurb: "The four apparatuses on the table are held constant. The paper’s design compares children and adults across five diverse societies; latent strategy profiles (e.g., partner-contingent vs. payoff-maximizing) are measured outcomes, not toggled task conditions.",
+      mode: "note",
+      note: "<strong>Independent variables:</strong> society (India, Uganda, U.S., and two Shuar communities) and age. <strong>Held constant:</strong> the inequity, trust, dictator, and resource-sharing apparatuses shown here. Strategy labels in the paper describe emergent choice patterns—not alternate versions of this battery."
+    },
     playLabel: "Animate 4-task battery",
     clickTip: "Click any of the 4 apparatuses on the table to inspect",
     steps: steps,
@@ -525,16 +531,33 @@ export function buildForgivenessProcedure() {
     tabTag: "Amir et al. (2021 · JECP)",
     tabName: "Forgiveness Task",
     eyebrow: "Tasks · Amir, Ahl, Parsons, & McAuliffe (2021)",
-    studyTitle: "Children Are More Forgiving of Accidental Harms Across Development",
+    studyTitle: "Children are more forgiving of accidental harms across development",
     studyHref: "../studies/accidental-harms/",
     dataHref: "../studies/accidental-harms/data/",
     paperHref: "../studies/accidental-harms/files/Amir-et-al-2021-accidental-harms-preprint.pdf",
-    condLabel: "Transgression condition",
+    condLabel: "Transgression type",
     conditions: [
       { value: "accidental", label: "Accidental + Remorse (4/5 returned)" },
       { value: "intentional", label: "Intentional + No Remorse (2/5 returned)" }
     ],
     defaultCondition: "accidental",
+    iv: {
+      name: "Transgression type",
+      blurb: "Same scratch sheets, envelope, and private decision. The paper varies whether the partner’s harm is framed as accidental with remorse or intentional without remorse—then measures how many tickets children return.",
+      mode: "levels",
+      levels: [
+        {
+          value: "accidental",
+          title: "Accidental + remorse",
+          detail: "Partner knocks tickets by accident and apologizes. Children typically return more (illustrative 4/5)."
+        },
+        {
+          value: "intentional",
+          title: "Intentional + no remorse",
+          detail: "Partner takes tickets on purpose without apology. Children typically return fewer (illustrative 2/5)."
+        }
+      ]
+    },
     playLabel: "Watch private decision",
     clickTip: "Click the 5 scratch sheets, envelope, trash can, or bell to inspect",
     steps: steps,
@@ -762,16 +785,22 @@ export function buildRiskTimeProcedure() {
     tabTag: "Amir et al. (2020 · JEP:G)",
     tabName: "Marble-Draw Risk & Intertemporal Choice",
     eyebrow: "Tasks · Amir, Jordan, McAuliffe, … & Dunham (2020)",
-    studyTitle: "The Developmental Origins of Risk and Time Preferences Across Diverse Societies",
+    studyTitle: "The developmental origins of risk and time preferences across diverse societies",
     studyHref: "../studies/risk-time-preferences/",
     dataHref: "../studies/risk-time-preferences/data/",
     paperHref: null,
-    condLabel: "Socioecological context",
+    condLabel: "Market integration",
     conditions: [
       { value: "market", label: "Higher Market (USA / India / Upano Shuar)" },
       { value: "forager", label: "Lower Market (Cross-Cutucú Shuar)" }
     ],
     defaultCondition: "market",
+    iv: {
+      name: "Market integration (between societies)",
+      blurb: "The marble-draw risk task and delay-of-gratification plates are identical across sites. The paper compares children living in higher- versus lower-market communities—not alternate apparatuses.",
+      mode: "note",
+      note: "<strong>Independent variable:</strong> socioecological market integration. <strong>Higher-market:</strong> USA, India, Argentina, and market-integrated Upano Valley Shuar. <strong>Lower-market:</strong> remote Cross-Cutucú Shuar. Comparing two Shuar regions within one Indigenous culture helps isolate market exposure from language and heritage. The jar and candy plates you see do not change."
+    },
     playLabel: "Draw marble & compare",
     clickTip: "Click the 50/50 marble jar, candy plates, or tomorrow bag to inspect",
     steps: steps,
@@ -1036,16 +1065,33 @@ export function buildLadderProcedure() {
     tabTag: "Amir et al. (2019 · PLOS ONE)",
     tabName: "MacArthur Ladder",
     eyebrow: "Tasks · Amir, Valeggia, Srinivasan, Sugiyama, & Dunham (2019)",
-    studyTitle: "Measuring Subjective Social Status in Children of Diverse Societies",
+    studyTitle: "Measuring subjective social status in children of diverse societies",
     studyHref: "../studies/subjective-social-status/",
     dataHref: "../studies/subjective-social-status/data/",
     paperHref: "../studies/subjective-social-status/files/Amir-et-al-2019-subjective-social-status.pdf",
-    condLabel: "Developmental cohort",
+    condLabel: "Age group",
     conditions: [
       { value: "young", label: "Early Childhood (Ages 4–8 · High Rung)" },
       { value: "adol", label: "Adolescence (Ages 12–18 · Calibrated)" }
     ],
     defaultCondition: "young",
+    iv: {
+      name: "Age group",
+      blurb: "Same 10-rung MacArthur ladder and comparison board. Age is the developmental factor—younger children tend to place their family higher; adolescents calibrate downward. Switch to see an illustrative placement pattern.",
+      mode: "levels",
+      levels: [
+        {
+          value: "young",
+          title: "Early childhood (4–8)",
+          detail: "Illustrative high-rung placement—younger children often rate their family near the top."
+        },
+        {
+          value: "adol",
+          title: "Adolescence (12–18)",
+          detail: "Illustrative mid-ladder placement—older youth calibrate status closer to middle rungs."
+        }
+      ]
+    },
     playLabel: "Place family on ladder",
     clickTip: "Click the 10-rung ladder or 4-item comparison board to inspect",
     steps: steps,

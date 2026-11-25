@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Data — Mind &amp; Culture Lab</title>
+    <title>Explore our data — Mind &amp; Culture Lab</title>
     <meta name="description" content="Find Mind &amp; Culture Lab data by researcher, topic, or study." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://mindandculturelab.github.io/data/" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Data — Mind &amp; Culture Lab" />
+    <meta property="og:title" content="Explore our data — Mind &amp; Culture Lab" />
     <meta property="og:description" content="Choose a researcher, a topic, or a study." />
     <meta property="og:url" content="https://mindandculturelab.github.io/data/" />
     <meta property="og:image" content="https://mindandculturelab.github.io/assets/images/og-image.svg" />
@@ -57,13 +57,28 @@
         <section class="hero wrap" id="top">
           <div>
             <p class="eyebrow">Open data</p>
-            <h1>Data</h1>
+            <h1>Explore our data</h1>
           </div>
           <p class="lede">Search by researcher, topic, or study.</p>
         </section>
       </div>
 
       <section class="wrap section" aria-label="Ways to look">
+        <form class="filters filters-search data-hub-search" role="search" data-data-search-form>
+          <label>
+            Search
+            <input
+              type="search"
+              data-data-search
+              placeholder="Study, researcher, or topic"
+              autocomplete="off"
+              enterkeyhint="search"
+            />
+          </label>
+        </form>
+        <p class="result-count" data-data-search-count aria-live="polite" hidden></p>
+        <div class="data-search-results" data-data-search-results hidden></div>
+
         <ul class="choices">
           <li>
             <a class="choice-card" href="researchers/">
@@ -131,5 +146,6 @@
       </div>
     </footer>
     <script src="../assets/js/main.js"></script>
+    <script src="search.js"></script>
   </body>
 </html>

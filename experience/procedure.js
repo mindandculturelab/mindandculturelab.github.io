@@ -26,6 +26,9 @@ const stepsNav = document.querySelector("[data-steps]");
 const studyTabsHost = document.querySelector("[data-study-tabs]");
 const condLabelEl = document.querySelector("[data-cond-label]");
 const condButtonsHost = document.querySelector("[data-cond-buttons]");
+const ivBlurbEl = document.querySelector("[data-iv-blurb]");
+const ivNoteEl = document.querySelector("[data-iv-note]");
+const ivPanelEl = document.querySelector("[data-iv-panel]");
 const playAnimBtn = document.querySelector("[data-play-anim]");
 const resetAnimBtn = document.querySelector("[data-reset-anim]");
 const playLabelEl = document.querySelector("[data-play-label]");
@@ -393,6 +396,87 @@ function applyStep(idx) {
   renderFrame(true);
 }
 
+function getIvConfig(proc) {
+  if (proc.iv) return proc.iv;
+  // Backward-compatible fallback for any procedure still using flat conditions
+  if (proc.conditions && proc.conditions.length) {
+    return {
+      name: proc.condLabel || "Independent variable",
+      blurb: "",
+      mode: "levels",
+      levels: proc.conditions.map(function (c) {
+        return {
+          value: c.value,
+          title: c.label,
+          detail: ""
+        };
+      })
+    };
+  }
+  return {
+    name: "Independent variable",
+    blurb: "",
+    mode: "note",
+    note: "This walkthrough holds the published apparatus fixed."
+  };
+}
+
+function renderIndependentVariable(proc) {
+  const iv = getIvConfig(proc);
+  if (condLabelEl) condLabelEl.textContent = iv.name || "Independent variable";
+  if (ivBlurbEl) {
+    ivBlurbEl.textContent = iv.blurb || "";
+    ivBlurbEl.hidden = !iv.blurb;
+  }
+  if (condButtonsHost) condButtonsHost.replaceChildren();
+  if (ivNoteEl) {
+    ivNoteEl.hidden = true;
+    ivNoteEl.textContent = "";
+  }
+  if (ivPanelEl) {
+    ivPanelEl.dataset.mode = iv.mode || "levels";
+  }
+
+  if (iv.mode === "note") {
+    if (ivNoteEl) {
+      ivNoteEl.hidden = false;
+      ivNoteEl.innerHTML = iv.note || "";
+    }
+    return;
+  }
+
+  const levels = iv.levels || [];
+  const current = proc.defaultCondition || (levels[0] && levels[0].value);
+  levels.forEach(function (level) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "experience-iv-level";
+    b.setAttribute("aria-pressed", level.value === current ? "true" : "false");
+
+    const title = document.createElement("span");
+    title.className = "experience-iv-level-title";
+    title.textContent = level.title;
+
+    b.appendChild(title);
+    if (level.detail) {
+      const detail = document.createElement("span");
+      detail.className = "experience-iv-level-detail";
+      detail.textContent = level.detail;
+      b.appendChild(detail);
+    }
+
+    b.addEventListener("click", function () {
+      Array.from(condButtonsHost.children).forEach(function (other) {
+        other.setAttribute("aria-pressed", other === b ? "true" : "false");
+      });
+      if (typeof proc.setCondition === "function") {
+        proc.setCondition(level.value, nowSeconds);
+      }
+    });
+    condButtonsHost.appendChild(b);
+  });
+}
+
 function selectProcedure(studyId, updateUrl) {
   const nextProc = procMap[studyId] || procedures[0];
   activeProc.root.visible = false;
@@ -430,23 +514,11 @@ function selectProcedure(studyId, updateUrl) {
     }
   }
 
-  // Update Condition buttons
-  condLabelEl.textContent = activeProc.condLabel;
-  condButtonsHost.replaceChildren();
-  activeProc.conditions.forEach(function (c) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = c.label;
-    b.setAttribute("aria-pressed", c.value === activeProc.defaultCondition ? "true" : "false");
-    b.addEventListener("click", function () {
-      Array.from(condButtonsHost.children).forEach(function (other) {
-        other.setAttribute("aria-pressed", other === b ? "true" : "false");
-      });
-      activeProc.setCondition(c.value, nowSeconds);
-    });
-    condButtonsHost.appendChild(b);
-  });
-  activeProc.setCondition(activeProc.defaultCondition, nowSeconds);
+  // Independent-variable panel (paper-faithful; no lookalike toggles)
+  renderIndependentVariable(activeProc);
+  if (typeof activeProc.setCondition === "function" && activeProc.defaultCondition) {
+    activeProc.setCondition(activeProc.defaultCondition, nowSeconds);
+  }
 
   // Update Play button & click tip
   playLabelEl.textContent = activeProc.playLabel;
