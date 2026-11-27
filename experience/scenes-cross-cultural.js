@@ -230,8 +230,8 @@ export function buildCoopBatteryProcedure() {
       short: "1. Battery Overview",
       title: "Four-task cross-cultural cooperation battery (Figure 1)",
       badge: "N = 413 children · Ecuador, Peru, Uganda, Canada & USA",
-      body: "Every child completed all four behavioral tasks in counterbalanced order—Fairness (front-left), Trustworthiness (back-left), Forgiveness (back-right), and Honesty (front-right)—alongside community peer (N = 163) and adult (N = 86) norm surveys.",
-      why: "Measuring four cooperative domains within the same children tests whether prosociality develops as a single trait or distinct norm-guided strategies.",
+      body: "The finding: fairness, trustworthiness, forgiveness, and honesty vary across five societies yet converge toward local norms in middle childhood—with three strategy profiles. Each child completed all four tasks (counterbalanced) plus peer and adult norm surveys so those patterns can be measured within the same individuals.",
+      why: "Leading with norm convergence and strategy profiles frames why a multi-domain battery beats treating prosociality as one trait.",
       camera: childPov.overview,
       station: 0
     },
@@ -493,8 +493,8 @@ export function buildForgivenessProcedure() {
       short: "1. Transgression",
       title: "Ruined drawing: accidental vs. intentional harm",
       badge: "N = 257 children (ages 5–10) · 5 conditions",
-      body: "The child learns another peer ruined their scratch-art drawing—either accidentally or intentionally, and with or without remorse (compared against a no-harm Baseline).",
-      why: "Crossing 2 (Intent) × 2 (Remorse) + Baseline tests whether mental-state reasoning drives costly interpersonal forgiveness across development.",
+      body: "The finding: forgiveness rises with age more for accidental than intentional harms—intent outweighs remorse. The vignette starts when a peer ruins the child’s scratch-art drawing, varying accident vs. intent and remorse (plus a no-harm baseline).",
+      why: "Stating the intent-over-remorse developmental pattern first motivates the 2×2 design before privacy and sorting steps.",
       camera: childPov.overview,
       expTurned: false
     },
@@ -757,8 +757,8 @@ export function buildRiskTimeProcedure() {
       short: "1. Practice Draws",
       title: "50/50 marble jar & three practice draws",
       badge: "USA, India, Argentina & 2 Shuar regions (N = 400)",
-      body: "On the Risk task (left), children inspect a jar holding 1 green winning marble and 1 red losing marble, complete 3 practice draws, and then make 5 choices between 1 safe candy and 2–6 risky candies.",
-      why: "Physical 1-green/1-red draws communicate 50% probability transparently without requiring fractions or literacy.",
+      body: "The finding: market-integrated children are more future-oriented and risk-seeking than forager-horticulturalist peers—and the within-Shuar market gradient shows the same pattern. Risk trials begin with a 1-green/1-red marble jar, three practice draws, then choices between 1 safe candy and 2–6 risky candies.",
+      why: "Opening with the market-integration claim ties the marble jar to socioecology, not just probability pedagogy.",
       camera: childPov.left
     },
     {
@@ -1031,8 +1031,8 @@ export function buildLadderProcedure() {
       short: "1. 10-Rung Ladder",
       title: "Picturing society as a 10-rung ladder (Figure 1)",
       badge: "N = 1,028 assessments · USA, India, Argentina & Ecuador",
-      body: "Experimenters walk each child through the 10-rung ladder illustration—explaining who stands at the top (rung 1) and bottom (rung 10)—and ask where their own family stands.",
-      why: "A concrete visual ladder lets children as young as 4 represent social hierarchy across both urban schools and Amazonian villages.",
+      body: "The finding: children’s ladder placements track material social comparisons in most communities, decline with age, and retest reliably in India (with remote Cross-Cutucú as the notable exception). Experimenters introduce the 10-rung ladder—top and bottom—and ask where the child’s family stands.",
+      why: "Leading with convergent validity and age calibration explains why the ladder must work for both urban schools and Amazonian villages.",
       camera: { pos: [-0.06, 1.14, 0.55], look: [-0.22, 0.86, -0.02] }
     },
     {

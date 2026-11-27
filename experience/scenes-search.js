@@ -38,8 +38,8 @@ export function buildSearchProcedure() {
       short: "1. Explore",
       title: "Explore: uncover a new square",
       badge: "Click an empty cell · 25 clicks",
-      body: "One square is already revealed. Click any empty cell to explore—you will learn a new rock size (nearby squares tend to be similar). Each click spends one of your 25 clicks and adds that rock to the side panel.",
-      why: "Exploration gathers information about the map, but uses up the limited click horizon.",
+      body: "The open question: do the goals children are given reshape how they explore new squares versus exploit known rocks? This map holds the search problem fixed while later steps change only the goal. Start by exploring—one square is already revealed; click an empty cell to learn a new rock size (nearby squares tend to be similar).",
+      why: "Framing SEARCH as a goals-shape question first keeps the walkthrough methods-forward until results are published.",
       tip: "Click an empty square to explore",
       camera: { pos: [0, 0, 1], look: [0, 0, 0] }
     },

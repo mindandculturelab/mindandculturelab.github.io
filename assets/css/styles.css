@@ -1118,6 +1118,44 @@ h2 {
   font-weight: 600;
 }
 
+.study-lede {
+  margin: 0 0 1.35rem;
+  max-width: 42rem;
+  font-family: var(--font-sans);
+  font-size: 1.12rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.findings {
+  margin: 0.35rem 0 1.6rem;
+  padding: 0;
+  list-style: none;
+  max-width: 42rem;
+}
+
+.findings li {
+  position: relative;
+  margin-top: 0.7rem;
+  padding-left: 1.05rem;
+  font-family: var(--font-sans);
+  font-size: 1.02rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.findings li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--sage-ink);
+  opacity: 0.7;
+}
+
 /* Directory & Subpage Cards */
 .questions {
   margin: 0.2rem 0 0;

@@ -404,8 +404,8 @@ export function buildTsaProcedure() {
       short: "1. Apparatus",
       title: "Compact table & Pure Coordination Task box",
       badge: "40 × 40 cm box · 2 coins per child",
-      body: "Same-aged 2- or 3-year-olds sit right around a child-sized square table—across from each other in dyads, or on three sides in triads. A square wooden box is velcroed to the center with a clear hinged glass lid showing two brass coins per partner, and the music box stands nearby.",
-      why: "Keeping the table compact lets toddlers comfortably reach both their keys and their own vertical side of the square box, while Velcro prevents rotating the box to peek.",
+      body: "The paper’s claim: by about age three, children coordinate matching choices in both dyads and triads, and peer key-talk predicts success—while 2-year-olds mainly succeed in pairs. This walkthrough shows the apparatus those results come from: same-aged peers around a child-sized square table with a velcroed wooden box, clear lid, brass coins, and a music box nearby.",
+      why: "Opening with the age-and-group-size finding frames why dyads vs. triads and collaborative talk matter before you inspect the box.",
       camera: { pos: [0.18, 2.35, 2.65], look: [0.08, 0.68, -0.06] },
       mode: "color",
       boxVisible: true,
@@ -1048,8 +1048,8 @@ export function buildEpistemicProcedure() {
       short: "1. Die & Dots",
       title: "Counting dots & open practice rolls",
       badge: "USA (N = 56) · Bolivia Tsimané (N = 54) · Iran (N = 100)",
-      body: "The researcher asks whether the participant has ever seen a die before, counts the dots from 1 to 6 across all six faces together, rolls the die openly twice, and invites the participant to roll twice.",
-      why: "Hands-on familiarization ensures participants with zero prior exposure to dice (100% of Bolivian Tsimané children) understand equiprobable 1–6 outcomes just as clearly as urban peers.",
+      body: "The finding: across Iran, the USA, and Tsimané Bolivia, children and adolescents prefer epistemic over physical uncertainty—with no age shift and no dice-familiarity effect. The procedure begins by asking whether the participant has seen a die, counting dots 1–6 together, and practicing open rolls so every site shares the same starting knowledge.",
+      why: "Leading with the cross-cultural preference frames why familiarization must work equally for dice-naïve Tsimané participants and urban peers.",
       camera: childPov.overview,
       covered: false,
       bubble: false
@@ -1410,8 +1410,8 @@ export function buildTrustProcedure() {
       short: "1. Two Channels",
       title: "Two-channel Plexiglass Trust Apparatus",
       badge: "Yellow dish (2 candies) vs. far Blue dish (6 candies)",
-      body: "The child sits at the open end of the wooden tray (Figure 1). A single short white rod can reach the yellow dish (2 Starbursts) in the short channel, but cannot reach the blue dish (6 Starbursts) at the end of the long channel.",
-      why: "Making multiplication physical (2 vs. 6 visible candies) removes arithmetic demands so 5-to-8-year-olds grasp the exact stakes immediately.",
+      body: "The finding: 5- to 8-year-olds return more after a peer’s costly trust move than in a matched generosity control—trustworthiness is not baseline sharing. The tray makes those stakes concrete: a short white rod reaches the yellow dish (2 Starbursts) but not the far blue dish (6).",
+      why: "Stating the trust-versus-generosity contrast first clarifies why the apparatus must make 2 vs. 6 candies obvious without arithmetic.",
       camera: { pos: [1.35, 2.7, 1.55], look: [0, 0.66, 0] },
       assembled: false
     },
@@ -1804,8 +1804,8 @@ export function buildInequityProcedure() {
       short: "1. Apparatus",
       title: "Inequity Game seesaw trays & three bowls (Figure 2)",
       badge: "7 societies · Ages 4–15 · N = 808 actors",
-      body: "Two peers sit face-to-face across the wooden platform: the Actor (left, yellow bowl) controls the upright Green and Red handles, while the Recipient sits opposite (right, blue bowl), with a red discard bowl in the center.",
-      why: "Face-to-face seating makes social comparison salient while mechanical levers let even 4-year-olds enact or reject allocations cleanly.",
+      body: "The finding: cross-society differences in inequity aversion are driven mainly by drift rate (preference strength), not caution. This walkthrough starts with the seesaw trays—Actor (yellow bowl) and Recipient (blue bowl) face-to-face, with green/red handles and a center discard bowl.",
+      why: "Naming preference strength first sets up why later steps link lever pulls to drift-diffusion evidence accumulation.",
       camera: { pos: [1.25, 2.7, 1.65], look: [0, 0.78, 0] }
     },
     {
